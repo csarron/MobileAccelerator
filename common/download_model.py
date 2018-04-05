@@ -98,7 +98,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("model", choices=models, default="mobilenet_v1",
+    group.add_argument("-m", "--model", choices=models, default="mobilenet_v1",
                        help="download specified model")
     group.add_argument("-a", "--all", action="store_true",
                        help="download all available models")
