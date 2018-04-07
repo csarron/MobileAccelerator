@@ -25,7 +25,8 @@ def convert_to_dlc(script_path, frozen_model_file, snpe_root, input_node='input'
     if os.path.exists(dlc_full_path):
         return dlc_path
 
-    os.makedirs(os.path.dirname(dlc_full_path))
+    if not os.path.exists(os.path.dirname(dlc_full_path)):
+        os.makedirs(os.path.dirname(dlc_full_path))
     cmd = [script_path,
            '--graph', os.path.abspath(frozen_model_file),
            '--input_dim', input_node, '{0},{0},3'.format(image_size),
