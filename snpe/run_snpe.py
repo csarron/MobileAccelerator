@@ -13,22 +13,28 @@ from PIL import Image
 from collections import OrderedDict
 import shutil
 import stat
+import sys
 
 
-def convert_to_dlc(script_path, frozen_model_file, input_node='input', output_node='output', image_size=224):
+def convert_to_dlc(script_path, frozen_model_file, snpe_root, input_node='input', output_node='output', image_size=224):
     print('converting ' + frozen_model_file + ' to snpe dlc format')
-    dlc_path = frozen_model_file.replace('.pb', '.dlc')
-    if os.path.exists(dlc_path):
+    sys.stdout.flush()
+    model_name = os.path.splitext(os.path.split(frozen_model_file)[1])[0]
+    dlc_path = 'models/{}.dlc'.format(model_name)
+    dlc_full_path = os.path.join(snpe_root, 'benchmarks', dlc_path)
+    if os.path.exists(dlc_full_path):
         return dlc_path
-    st = os.stat(script_path)
-    os.chmod(script_path, st.st_mode | stat.S_IEXEC)
+
+    os.makedirs(os.path.dirname(dlc_full_path))
     cmd = [script_path,
-           '--graph', frozen_model_file,
+           '--graph', os.path.abspath(frozen_model_file),
            '--input_dim', input_node, '{0},{0},3'.format(image_size),
            '--out_node', output_node,
            '--allow_unconsumed_nodes',
-           '--dlc', dlc_path]
+           '--dlc', dlc_full_path]
     subprocess.call(cmd)
+    print()
+    sys.stdout.flush()
     return dlc_path
     # print('INFO: Creating ' + DLC_QUANTIZED_FILENAME + ' quantized model')
     # data_cropped_dir = os.path.join(os.path.join(model_dir, 'data'), 'cropped')
@@ -121,7 +127,6 @@ def __resize_square_to_jpg(src, dst, size):
 
 def convert_img(src, dest, size):
     print("converting images...")
-    print("scaling to square: " + src)
     for root, dirs, files in os.walk(src):
         for jpgs in files:
             src_image = os.path.join(root, jpgs)
@@ -130,7 +135,6 @@ def convert_img(src, dest, size):
                 dest_image = os.path.join(dest, jpgs)
                 __resize_square_to_jpg(src_image, dest_image, size)
 
-    print("image mean: " + dest)
     for root, dirs, files in os.walk(dest):
         for jpgs in files:
             src_image = os.path.join(root, jpgs)
@@ -139,7 +143,7 @@ def convert_img(src, dest, size):
             __create_raw_img(src_image, mean_rgb, 128, False, False)
 
 
-def create_file_list(input_dir, output_filename, ext_pattern, print_out=False, rel_path=False):
+def create_file_list(input_dir, output_filename, ext_pattern, print_out=True, rel_path=True):
     input_dir = os.path.abspath(input_dir)
     output_filename = os.path.abspath(output_filename)
     output_dir = os.path.dirname(output_filename)
@@ -166,25 +170,23 @@ def create_file_list(input_dir, output_filename, ext_pattern, print_out=False, r
                 print('%s created listing %d files.' % (output_filename, len(file_list)))
 
 
-def prepare_data_images(image_size, snpe_root, data_dir_):
-    # make a copy of the image files from the alexnet model data dir
-    src_img_files = os.path.join(snpe_root, 'models', 'alexnet', 'data', '*.jpg')
-    image_dir = os.path.join(data_dir_, 'images')
+def prepare_data_images(image_size, snpe_root):
+    # make a copy of the image files from the alex net model data dir
+    image_dir_relative_path = 'models/alexnet/data'
+    image_dir = os.path.join(snpe_root, image_dir_relative_path)
+
     data_cropped_dir = os.path.join(image_dir, 'cropped')
     raw_list = os.path.join(image_dir, 'target_raw_list_%s.txt' % image_size)
 
-    if not os.path.isdir(data_cropped_dir):
+    if not os.path.exists(raw_list):
         os.makedirs(data_cropped_dir)
-
-        for image in glob.glob(src_img_files):
-            shutil.copy(image, image_dir)
         print('creating inception style raw image data')
         convert_img(image_dir, data_cropped_dir, image_size)
 
         print('Create file lists')
-        if not os.path.exists(raw_list):
-            create_file_list(data_cropped_dir, raw_list, '*.raw', print_out=True, rel_path=False)
-
+        create_file_list(data_cropped_dir, raw_list, '*.raw')
+    print()
+    sys.stdout.flush()
     return data_cropped_dir, raw_list
 
 
@@ -207,7 +209,7 @@ def gen_config(dlc_path, input_list_file, input_data):
     config['Model'] = model
 
     config['Runtimes'] = ['GPU', 'CPU']
-    config['Measurements'] = ['timing', 'mem']
+    config['Measurements'] = ['timing']  # ['timing', 'mem']
 
     return config
 
@@ -222,6 +224,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-sdk", "--snpe_sdk", type=str, default="data/snpe-1.13.0.zip",
                         help="path to snpe sdk zip file")
+    parser.add_argument("-ndk", "--android_ndk", type=str,
+                        help="path to android ndk")
     parser.add_argument("-m", "--model", type=str, default="data/mobilenet_v1/mobilenet_v1_1.0_224.frozen.pb",
                         help="frozen tensorflow model")
     parser.add_argument("-s", "--image_size", type=int, default=224,
@@ -255,7 +259,25 @@ if __name__ == '__main__':
         print("snpe sdk extraction done.")
     else:
         print("found snpe sdk at:", snpe_sdk_path)
+        sys.stdout.flush()
     print()
+    sys.stdout.flush()
+
+    ndk_path = os.environ["ANDROID_NDK"] or args.android_ndk
+    if not ndk_path:
+        print("please set ndk path either by specify -ndk or set 'export ANDROID_NDK=path/to/android-ndk'")
+        exit(-1)
+    else:
+        print("copying libs from ndk to snpe sdk...")
+
+        shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/libgnustl_shared.so'.format(ndk_path),
+                    '{}/lib/aarch64-linux-gcc4.9'.format(snpe_sdk_path))
+
+        shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/libgnustl_shared.so'.format(ndk_path),
+                    '{}/lib/arm-android-gcc4.9'.format(snpe_sdk_path))
+        print("gcc libs copied.")
+    print()
+    sys.stdout.flush()
 
     os.environ["SNPE_ROOT"] = snpe_sdk_path
     py_path = os.environ.get("PYTHONPATH", "")
@@ -270,15 +292,38 @@ if __name__ == '__main__':
         print(model_file, "not exist!")
         exit(-1)
 
-    # print(os.environ["PATH"])
-    convert_dlc_script = "{}/bin/x86_64-linux-clang/snpe-tensorflow-to-dlc".format(snpe_sdk_path)
-    dlc_file = convert_to_dlc(convert_dlc_script, model_file, args.input_node, args.output_node, args.image_size)
+    for os_type in ["arm-android-gcc4.9", "x86_64-linux-clang"]:
+        for bin_file in os.listdir("{}/bin/{}".format(snpe_sdk_path, os_type)):
+            script_file_path = os.path.join("{}/bin/{}".format(snpe_sdk_path, os_type), bin_file)
+            print('set script:', script_file_path, ' to executable')
+            sys.stdout.flush()
+            st = os.stat(script_file_path)
+            os.chmod(script_file_path, st.st_mode | stat.S_IEXEC)
 
-    data_dir, raw_file_list = prepare_data_images(args.image_size, snpe_sdk_path, "data")
+    convert_dlc_script = "{}/bin/x86_64-linux-clang/snpe-tensorflow-to-dlc".format(snpe_sdk_path)
+
+    dlc_file = convert_to_dlc(convert_dlc_script, model_file, snpe_sdk_path,
+                              args.input_node, args.output_node, args.image_size)
+
+    data_dir, raw_file_list = prepare_data_images(args.image_size, snpe_sdk_path)
+
+    print('generating benchmark configuration generated.')
+    sys.stdout.flush()
 
     config = gen_config(dlc_file, raw_file_list, data_dir)
-    config_path = "{}.json".format(model_file)
-    write_config(config, config_path)
 
-    bench_cmd = ['python', 'snpe_bench.py', '-c', os.path.abspath(config_path), '-a']
+    model_name = os.path.splitext(os.path.split(model_file)[1])[0]
+
+    config_path = os.path.join('{}/benchmarks'.format(snpe_sdk_path), "{}.json".format(model_name))
+    write_config(config, config_path)
+    print('benchmark configuration generated.')
+    print()
+    sys.stdout.flush()
+
+    print('running benchmark...')
+    print()
+    sys.stdout.flush()
+
+    bench_cmd = ['python', 'snpe_bench.py', '-c', config_path, '-a']
     subprocess.call(bench_cmd, cwd='{}/benchmarks'.format(snpe_sdk_path))
+    print('all done.')
