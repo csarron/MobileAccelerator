@@ -5,13 +5,14 @@
 - ***NOTE*** that SNPE only supports Python 2, 
 it's better to run the code in a Python 2 environment although other scripts support Python 3.
 - install TensorFlow, either CPU or GPU version. (tested for version 1.7.0)
-- install Python dependencies by `pip install -r requirements`
+- install Python dependencies by `pip install -r requirements.txt`
 
 ## Usage
 
 ### Model Preparation
 
 Download model: `python common/download_model.py --model mobilenet_v2`
+
 Export model inference graph: `python common/slim/export_inference_graph.py --model_name=mobilenet_v2 --image_size=224 --output_file=data/mobilenet_v2/mobilenet_v2_inf.pb`
 
 Freeze model: `python common/freeze_model.py --checkpoint_file data/mobilenet_v2/mobilenet_v2_1.4_224.ckpt --inference_graph data/mobilenet_v2/mobilenet_v2_inf.pb`

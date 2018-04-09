@@ -264,7 +264,7 @@ if __name__ == '__main__':
     print()
     sys.stdout.flush()
 
-    ndk_path = os.environ["ANDROID_NDK"] or args.android_ndk
+    ndk_path = os.environ.get("ANDROID_NDK", None) or args.android_ndk
     if not ndk_path:
         print("please set ndk path either by specify -ndk or set 'export ANDROID_NDK=path/to/android-ndk'")
         exit(-1)
@@ -279,6 +279,15 @@ if __name__ == '__main__':
         print("gcc libs copied.")
     print()
     sys.stdout.flush()
+
+    # may install pkg deps
+    print("checking package dependencies...")
+    check_cmd = 'yes | bash {}/bin/dependencies.sh'.format(snpe_sdk_path)
+    subprocess.call(check_cmd,  shell=True)
+
+    print("checking python dependencies...")
+    check_cmd = 'yes | bash {}/bin/check_python_depends.sh'.format(snpe_sdk_path)
+    subprocess.call(check_cmd,  shell=True)
 
     os.environ["SNPE_ROOT"] = snpe_sdk_path
     py_path = os.environ.get("PYTHONPATH", "")
@@ -327,6 +336,6 @@ if __name__ == '__main__':
 
     bench_cmd = ['python', 'snpe_bench.py', '-c', config_path, '-a']
     subprocess.call(bench_cmd, cwd='{}/benchmarks'.format(snpe_sdk_path))
-    print('benchmark results saved to:', 
+    print('benchmark results saved to:',
           '{0}/benchmarks/{1}/results/latest_results/benchmark_stats_{1}.csv'.format(snpe_sdk_path, model_name))
     print('all done.')
