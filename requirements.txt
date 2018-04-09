@@ -1,0 +1,8 @@
+Pillow
+numpy
+sphinx
+scipy
+matplotlib
+scikit-image
+protobuf
+pyyaml
