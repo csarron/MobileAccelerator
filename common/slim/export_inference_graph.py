@@ -114,8 +114,8 @@ def main(_):
         placeholder = tf.placeholder(name='input', dtype=tf.float32,
                                      shape=[FLAGS.batch_size, image_size,
                                             image_size, 3])
-        _, end_points = network_fn(placeholder)
-        tf.identity(end_points['Predictions'], name='output')
+        logits, _ = network_fn(placeholder)
+        tf.nn.softmax(logits, name='output')
         graph_def = graph.as_graph_def()
         with gfile.GFile(FLAGS.output_file, 'wb') as f:
             f.write(graph_def.SerializeToString())
