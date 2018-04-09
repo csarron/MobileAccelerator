@@ -46,7 +46,7 @@ def save_html(graph_def, html_file=None, max_const_size=32):
     if html_file:
         with open("{}.html".format(html_file), 'w') as f:
             f.write(h.data)
-        print("graph vis file saved to {}.html".format(html_file))
+        print("graph vis file saved to {}.html".format(os.path.abspath(html_file)))
 
 
 if __name__ == '__main__':

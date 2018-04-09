@@ -175,7 +175,7 @@ if __name__ == '__main__':
         format_str = "text"
         output_frozen_file += ".txt"
     save_graph(opt_graph_def, output_frozen_file, as_text=args.text)
-    print("frozen graph {} saved to: {}".format(format_str, output_frozen_file))
+    print("frozen graph {} saved to: {}".format(format_str, os.path.abspath(output_frozen_file)))
     if args.save_weights:
         save_weights(opt_graph_def, output_file_name)
-        print("model weights saved to: {}.npz".format(output_file_name))
+        print("model weights saved to: {}.npz".format(os.path.abspath(output_file_name)))
