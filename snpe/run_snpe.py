@@ -176,7 +176,7 @@ def prepare_data_images(image_size, snpe_root):
     image_dir_relative_path = 'models/alexnet/data'
     image_dir = os.path.join(snpe_root, image_dir_relative_path)
 
-    data_cropped_dir = os.path.join(image_dir, 'cropped')
+    data_cropped_dir = os.path.join(image_dir, 'cropped_%s' % image_size)
     raw_list = os.path.join(image_dir, 'target_raw_list_%s.txt' % image_size)
 
     if not os.path.exists(raw_list):
@@ -327,4 +327,6 @@ if __name__ == '__main__':
 
     bench_cmd = ['python', 'snpe_bench.py', '-c', config_path, '-a']
     subprocess.call(bench_cmd, cwd='{}/benchmarks'.format(snpe_sdk_path))
+    print('benchmark results saved to:', 
+          '{0}/benchmarks/{1}/results/latest_results/benchmark_stats_{1}.csv'.format(snpe_sdk_path, model_name))
     print('all done.')
