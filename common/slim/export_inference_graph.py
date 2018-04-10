@@ -96,7 +96,7 @@ if __name__ == '__main__':
                                                  is_training=False)
         image_size = args.image_size or network_fn.default_image_size
         placeholder = tf.placeholder(name='input', dtype=tf.float32,
-                                     shape=[1, image_size, image_size, 3])
+                                     shape=[None, image_size, image_size, 3])
         logits, _ = network_fn(placeholder)
         tf.nn.softmax(logits, name='output')
         graph_def = graph.as_graph_def()
