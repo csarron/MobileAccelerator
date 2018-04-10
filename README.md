@@ -13,7 +13,7 @@ it's better to run the code in a Python 2 environment although other scripts sup
 
 - (required) Download model: `python common/download_model.py --model mobilenet_v2`
 
-- (required for SNPE) Export model inference graph: `python common/slim/export_inference_graph.py --model_name=mobilenet_v2 --image_size=224 --output_file=data/mobilenet_v2/mobilenet_v2_inf.pb`
+- (required for SNPE) Export model inference graph: `python common/slim/export_inference_graph.py --model_name mobilenet_v2 --image_size 224 --output_file data/mobilenet_v2/mobilenet_v2_inf.pb`
 
 - (required for SNPE) Freeze model: `python common/freeze_model.py --checkpoint_file data/mobilenet_v2/mobilenet_v2_1.4_224.ckpt --inference_graph data/mobilenet_v2/mobilenet_v2_inf.pb`
 
@@ -38,9 +38,22 @@ Then you can either `export ANDROID_NDK=path/to/android-ndk` for the `snpe/run_s
 
 2. Run profiling on ncs: `python ncs/run_ncs.py --model data/mobilenet_v2/ncs_mobilenet_v2.meta`
 
+### TensorRT for Nvidia Jetson TX2
+
+
+## Common commands
+
+
 Useful commands:
 
-- convert model for inception_v3, `python ncs/convert_model.py -c data/inception_v3/inception_v3.ckpt -s 299 -m inception_v3`
-- profile inception_v3, `python ncs/run_ncs.py -m data/inception_v3/ncs_inception_v3.meta`
+- export inception_v3 inference graph: `python common/slim/export_inference_graph.py -m inception_v3 -s 299 -o data/inception_v3/inception_v3_inf.pb`
+- freeze inception_v3: `python common/freeze_model.py -c data/inception_v3/inception_v3.ckpt -g data/inception_v3/inception_v3_inf.pb`
+- benchmark inception_v3 using snpe: `python snpe/run_snpe.py -m data/inception_v3/inception_v3.frozen.pb -s 299`
+- convert inception_v3 for ncs: `python ncs/convert_model.py -c data/inception_v3/inception_v3.ckpt -s 299 -m inception_v3`
+- profile inception_v3 on ncs: `python ncs/run_ncs.py -m data/inception_v3/ncs_inception_v3.meta`
 
-### TensorRT for Nvidia Jetson TX2
+- freeze resnet_v1_50: `python common/freeze_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50_inf.pb`
+- (this command will ***fail*** since snpe-1.13.0 does not support resnet!) benchmark resnet_v1_50 using snpe: `python snpe/run_snpe.py -m data/resnet_v1_50/resnet_v1_50.frozen.pb`
+- convert resnet_v1_50 for ncs: `python ncs/convert_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -m resnet_v1_50 -l 1`
+- profile resnet_v1_50 on ncs: `python ncs/run_ncs.py -m data/resnet_v1_50/ncs_resnet_v1_50.meta`
+
