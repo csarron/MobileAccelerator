@@ -34,5 +34,9 @@ Then just run `python snpe/run_snpe.py --snpe_sdk data/snpe-1.13.0.zip --model d
 
 ### NCSDK for Movidius NCS
 
+Convert model to ncs compatible format: `python ncs/convert_model.py --checkpoint_file data/mobilenet_v2/mobilenet_v2_1.4_224.ckpt --model mobilenet_v2 --image_size 224`
+(for inception_v3, you can do `python ncs/convert_model.py -c data/inception_v3/inception_v3.ckpt -s 299 -m inception_v3`)
+
+Run profiling on ncs: `python ncs/run_ncs.py --model data/mobilenet_v2/ncs_mobilenet_v2.meta`
 
 ### TensorRT for Nvidia Jetson TX2
