@@ -117,7 +117,8 @@ if __name__ == '__main__':
 
     print('begin profiling', model_file, '...')
 
-    bench_cmd = ['python', 'mvNCProfile.py', '-s', str(args.shave_cores),
+    bench_cmd = ['python3', 'mvNCProfile.py', '-s', str(args.shave_cores),
                  os.path.abspath(model_file), '-in', args.input_node, '-on', args.output_node]
     subprocess.call(bench_cmd, cwd='{}/ncsdk-x86_64/tk'.format(sdk_path))
+    print('profiling report is at', '{}/ncsdk-x86_64/tk/output_report.html'.format(os.path.abspath(sdk_path)))
     print('all done.')
