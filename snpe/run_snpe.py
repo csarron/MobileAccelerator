@@ -268,7 +268,9 @@ if __name__ == '__main__':
     if not ndk_path:
         print("please set ndk path either by specify -ndk or set 'export ANDROID_NDK=path/to/android-ndk'")
         exit(-1)
-    else:
+
+    # may install pkg deps
+    if not os.path.exists('/tmp/snpe_deps_checked'):
         print("copying libs from ndk to snpe sdk...")
 
         shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/libgnustl_shared.so'.format(ndk_path),
@@ -277,11 +279,9 @@ if __name__ == '__main__':
         shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/libgnustl_shared.so'.format(ndk_path),
                     '{}/lib/arm-android-gcc4.9'.format(snpe_sdk_path))
         print("gcc libs copied.")
-    print()
-    sys.stdout.flush()
+        print()
+        sys.stdout.flush()
 
-    # may install pkg deps
-    if not os.path.exists('/tmp/snpe_deps_checked'):
         print("checking package dependencies...")
         check_cmd = 'yes | bash {}/bin/dependencies.sh'.format(snpe_sdk_path)
         subprocess.call(check_cmd,  shell=True)
@@ -289,6 +289,15 @@ if __name__ == '__main__':
         print("checking python dependencies...")
         check_cmd = 'yes | bash {}/bin/check_python_depends.sh'.format(snpe_sdk_path)
         subprocess.call(check_cmd,  shell=True)
+
+        for os_type in ["arm-android-gcc4.9", "x86_64-linux-clang"]:
+            for bin_file in os.listdir("{}/bin/{}".format(snpe_sdk_path, os_type)):
+                script_file_path = os.path.join("{}/bin/{}".format(snpe_sdk_path, os_type), bin_file)
+                print('set script:', script_file_path, ' to executable')
+                sys.stdout.flush()
+                st = os.stat(script_file_path)
+                os.chmod(script_file_path, st.st_mode | stat.S_IEXEC)
+
         open('/tmp/snpe_deps_checked', 'a').close()
 
     os.environ["SNPE_ROOT"] = snpe_sdk_path
@@ -303,14 +312,6 @@ if __name__ == '__main__':
     if not os.path.exists(model_file):
         print(model_file, "not exist!")
         exit(-1)
-
-    for os_type in ["arm-android-gcc4.9", "x86_64-linux-clang"]:
-        for bin_file in os.listdir("{}/bin/{}".format(snpe_sdk_path, os_type)):
-            script_file_path = os.path.join("{}/bin/{}".format(snpe_sdk_path, os_type), bin_file)
-            print('set script:', script_file_path, ' to executable')
-            sys.stdout.flush()
-            st = os.stat(script_file_path)
-            os.chmod(script_file_path, st.st_mode | stat.S_IEXEC)
 
     convert_dlc_script = "{}/bin/x86_64-linux-clang/snpe-tensorflow-to-dlc".format(snpe_sdk_path)
 
