@@ -55,6 +55,7 @@ bazel-bin/tensorflow/examples/label_image/label_image \
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import argparse
 
 import tensorflow as tf
 
@@ -64,63 +65,41 @@ from nets import nets_factory
 
 slim = tf.contrib.slim
 
-tf.app.flags.DEFINE_string(
-    'model_name', 'inception_v3', 'The name of the architecture to save.')
 
-tf.app.flags.DEFINE_boolean(
-    'is_training', False,
-    'Whether to save out a training-focused version of the model.')
-
-tf.app.flags.DEFINE_integer(
-    'image_size', None,
-    'The image size to use, otherwise use the model default_image_size.')
-
-tf.app.flags.DEFINE_integer(
-    'batch_size', None,
-    'Batch size for the exported model. Defaulted to "None" so batch size can '
-    'be specified at model runtime.')
-
-tf.app.flags.DEFINE_string('dataset_name', 'imagenet',
-                           'The name of the dataset to use with the model.')
-
-tf.app.flags.DEFINE_integer(
-    'labels_offset', 0,
-    'An offset for the labels in the dataset. This flag is primarily used to '
-    'evaluate the VGG and ResNet architectures which do not use a background '
-    'class for the ImageNet dataset.')
-
-tf.app.flags.DEFINE_string(
-    'output_file', '', 'Where to save the resulting file to.')
-
-tf.app.flags.DEFINE_string(
-    'dataset_dir', '', 'Directory to save intermediate dataset files to')
-
-FLAGS = tf.app.flags.FLAGS
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--model_name", type=str, required=True,
+                        help="network type")
+    parser.add_argument("-o", "--output_file", type=str, required=True,
+                        help="network type")
+    parser.add_argument("-s", "--image_size", type=int, default=224,
+                        help="input image size")
+    parser.add_argument("-n", "--num_classes", type=int, default=1001,
+                        help="number of classification classes")
+    parser.add_argument("-l", "--labels_offset", type=int, default=0,
+                        help="An offset for the labels in the dataset. This flag is primarily used "
+                             "to  evaluate the VGG and ResNet architectures which do not use a"
+                             " background class for the ImageNet dataset.")
+    return parser.parse_args()
 
 
-def main(_):
-    if not FLAGS.output_file:
+if __name__ == '__main__':
+    args = get_args()
+    if not args.output_file:
         raise ValueError('You must supply the path to save to with --output_file')
     # tf.logging.set_verbosity(tf.logging.INFO)
     print("generating inference graph...")
     with tf.Graph().as_default() as graph:
-        dataset = dataset_factory.get_dataset(FLAGS.dataset_name, 'train',
-                                              FLAGS.dataset_dir)
-        network_fn = nets_factory.get_network_fn(
-            FLAGS.model_name,
-            num_classes=(dataset.num_classes - FLAGS.labels_offset),
-            is_training=FLAGS.is_training)
-        image_size = FLAGS.image_size or network_fn.default_image_size
+
+        network_fn = nets_factory.get_network_fn(args.model_name,
+                                                 num_classes=(args.num_classes - args.labels_offset),
+                                                 is_training=False)
+        image_size = args.image_size or network_fn.default_image_size
         placeholder = tf.placeholder(name='input', dtype=tf.float32,
-                                     shape=[FLAGS.batch_size, image_size,
-                                            image_size, 3])
+                                     shape=[1, image_size, image_size, 3])
         logits, _ = network_fn(placeholder)
         tf.nn.softmax(logits, name='output')
         graph_def = graph.as_graph_def()
-        with gfile.GFile(FLAGS.output_file, 'wb') as f:
+        with gfile.GFile(args.output_file, 'wb') as f:
             f.write(graph_def.SerializeToString())
-        print("inference graph saved to: ", FLAGS.output_file)
-
-
-if __name__ == '__main__':
-    tf.app.run()
+        print("inference graph saved to: ", args.output_file)
