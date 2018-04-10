@@ -1,19 +1,11 @@
 #! /usr/bin/env python3
 from __future__ import absolute_import
-from __future__ import division
 from __future__ import print_function
 import argparse
-import numpy as np
 import os
-import tensorflow as tf
 import zipfile as zp
 import subprocess
-import glob
-import json
-from PIL import Image
-from collections import OrderedDict
 import shutil
-import stat
 import sys
 import tarfile
 
@@ -137,5 +129,9 @@ if __name__ == '__main__':
     bench_cmd = ['python3', 'mvNCProfile.py', '-s', str(args.shave_cores),
                  os.path.abspath(model_file), '-in', args.input_node, '-on', args.output_node]
     subprocess.call(bench_cmd, cwd='{}/ncsdk-x86_64/tk'.format(sdk_path))
-    print('profiling report is at', '{}/ncsdk-x86_64/tk/output_report.html'.format(os.path.abspath(sdk_path)))
+
+    report_file = model_file.replace('.meta', '_report.html')
+    shutil.copy('{}/ncsdk-x86_64/tk/output_report.html'.format(sdk_path), report_file)
+
+    print('profiling report is at\033[32m', os.path.abspath(report_file), '\033[0m')
     print('all done.')
