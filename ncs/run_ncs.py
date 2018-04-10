@@ -54,7 +54,7 @@ def parse_args():
 
 
 if __name__ == '__main__':
-    sdk_info_url = "https://raw.githubusercontent.com/movidius/ncsdk/master/install.sh"
+    sdk_info_url = "https://github.com/movidius/ncsdk/archive/master.zip"
 
     args = parse_args()
 
@@ -69,9 +69,18 @@ if __name__ == '__main__':
         if not os.path.exists(data_dir):
             os.makedirs(data_dir)
 
-        install_file_name = os.path.basename(sdk_info_url)
-        install_file = os.path.join(data_dir, install_file_name)
-        download_file(sdk_info_url, install_file)
+        api_zip_file_name = os.path.basename(sdk_info_url)
+        api_zip_file = os.path.join(data_dir, api_zip_file_name)
+
+        if not os.path.exists(api_zip_file):
+            download_file(sdk_info_url, api_zip_file)
+
+        print("extracting NCSDK api zip to:", data_dir, "...")
+        zp_ref = zp.ZipFile(api_zip_file, 'r')
+        zp_ref.extractall(data_dir)
+        zp_ref.close()
+        print("NCSDK api extraction done.")
+        install_file = os.path.join(data_dir, 'ncsdk-master', 'install.sh')
         for line in open(install_file):
             if line.startswith('ncsdk_link'):
                 sdk_url = line.split('=')[1].strip()
@@ -79,10 +88,17 @@ if __name__ == '__main__':
         if sdk_url is None:
             print("automatically finding sdk failed, please manually download sdk")
             print("by finding ncsdk file link in file:", sdk_info_url)
+            exit(-1)
         else:
             sdk_file_name = os.path.basename(sdk_url)
             sdk_file = os.path.join(data_dir, sdk_file_name)
             download_file(sdk_url, sdk_file)
+
+            # install api
+            print("checking package dependencies...")
+            sys.stdout.flush()
+            check_cmd = "sudo apt install libusb-1.0-0-dev && sudo make install"
+            subprocess.call(check_cmd, shell=True, cwd='{}/ncsdk-master/api/src'.format(data_dir))
     else:
         print("found NCSDK file at:", sdk_file)
         sys.stdout.flush()
@@ -99,12 +115,13 @@ if __name__ == '__main__':
     # may install pkg deps
     if not os.path.exists('/tmp/ncs_deps_checked'):
         print("checking package dependencies...")
+        sys.stdout.flush()
         check_cmd = "sudo apt install -qq $(cat '{}/requirements_apt.txt') > /dev/null".format(sdk_path)
         subprocess.call(check_cmd, shell=True)
-        sys.stdout.flush()
 
         print("checking python dependencies...")
-        check_cmd = 'pip install -q -r {}/requirements.txt && pip install -q --upgrade -r requirements.txt'.format(sdk_path)
+        check_cmd = 'pip install -q -r {}/requirements.txt && pip install -q --upgrade -r requirements.txt'.format(
+            sdk_path)
         subprocess.call(check_cmd, shell=True)
         print()
         sys.stdout.flush()
