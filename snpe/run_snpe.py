@@ -281,13 +281,15 @@ if __name__ == '__main__':
     sys.stdout.flush()
 
     # may install pkg deps
-    print("checking package dependencies...")
-    check_cmd = 'yes | bash {}/bin/dependencies.sh'.format(snpe_sdk_path)
-    subprocess.call(check_cmd,  shell=True)
+    if not os.path.exists('/tmp/snpe_deps_checked'):
+        print("checking package dependencies...")
+        check_cmd = 'yes | bash {}/bin/dependencies.sh'.format(snpe_sdk_path)
+        subprocess.call(check_cmd,  shell=True)
 
-    print("checking python dependencies...")
-    check_cmd = 'yes | bash {}/bin/check_python_depends.sh'.format(snpe_sdk_path)
-    subprocess.call(check_cmd,  shell=True)
+        print("checking python dependencies...")
+        check_cmd = 'yes | bash {}/bin/check_python_depends.sh'.format(snpe_sdk_path)
+        subprocess.call(check_cmd,  shell=True)
+        open('/tmp/snpe_deps_checked', 'a').close()
 
     os.environ["SNPE_ROOT"] = snpe_sdk_path
     py_path = os.environ.get("PYTHONPATH", "")
