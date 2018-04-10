@@ -111,6 +111,7 @@ if __name__ == "__main__":
     if args.output_layer:
         output_layer = args.output_layer
 
+    print("loading model:", model_file)
     graph = load_graph(model_file)
     t = read_tensor_from_image_file(
         file_name,
@@ -124,6 +125,7 @@ if __name__ == "__main__":
     input_operation = graph.get_operation_by_name(input_name)
     output_operation = graph.get_operation_by_name(output_name)
 
+    print("begin predicting...")
     with tf.Session(graph=graph) as sess:
         results = sess.run(output_operation.outputs[0], {
             input_operation.outputs[0]: t
