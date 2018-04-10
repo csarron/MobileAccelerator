@@ -30,6 +30,11 @@ model_url_map = {
         "filename": "mobilenet_v2_1.4_224.tgz",
         "name": "mobilenet_v2"
     },
+    "resnet_v1_50": {
+        "url": "http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz",
+        "filename": "resnet_v1_50_2016_08_28.tar.gz",
+        "name": "resnet_v1_50"
+    }
 }
 
 
@@ -94,7 +99,7 @@ def check_dir(dir_name):
 
 
 if __name__ == '__main__':
-    models = ["inception_v3", "mobilenet_v1", "mobilenet_v2"]  # add alexnet, squeezenet_v1.1, vgg_16
+    models = ["inception_v3", "mobilenet_v1", "mobilenet_v2", "resnet_v1_50"]  # add alexnet, squeezenet_v1.1, vgg_16
 
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
