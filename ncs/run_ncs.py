@@ -133,5 +133,9 @@ if __name__ == '__main__':
     report_file = model_file.replace('.meta', '_report.html')
     shutil.copy('{}/ncsdk-x86_64/tk/output_report.html'.format(sdk_path), report_file)
 
-    print('profiling report is at\033[32m', os.path.abspath(report_file), '\033[0m')
+    graph_file = model_file.replace('.meta', '.graph')
+    shutil.copy('{}/ncsdk-x86_64/tk/graph'.format(sdk_path), graph_file)
+
+    print('ncs graph copied to\033[32m', os.path.abspath(graph_file), '\033[0m')
+    print('profiling report copied to\033[32m', os.path.abspath(report_file), '\033[0m')
     print('all done.')
