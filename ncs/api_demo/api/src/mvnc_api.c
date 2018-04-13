@@ -55,7 +55,7 @@
 static int initialized = 0;
 static pthread_mutex_t mm = PTHREAD_MUTEX_INITIALIZER;
 
-int mvnc_loglevel = 2;
+int mvnc_loglevel = 1;
 
 /////////////////////////// Structs /////////////////////////////
 struct Graph;

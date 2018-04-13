@@ -205,7 +205,6 @@ static libusb_device_handle *usb_open_device(libusb_device *dev, uint8_t *endpoi
 		libusb_close(h);
 		return 0;
 	}
-    PRINT_INFO(stderr, "after libusb_get_config_descriptor\n");
 
 	ifdesc = cdesc->interface->altsetting;
 	for (i = 0; i < ifdesc->bNumEndpoints; i++) {
