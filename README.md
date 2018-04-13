@@ -38,6 +38,10 @@ Then you can either `export ANDROID_NDK=path/to/android-ndk` for the `snpe/run_s
 
 2. Run profiling on ncs: `python ncs/run_ncs.py --model data/mobilenet_v2/ncs_mobilenet_v2.meta`
 
+### NCS API Demo on the Android Phone, macOS
+
+see [ncs/api_demo/README.md](ncs/api_demo/README.md)
+
 ### TensorRT for Nvidia Jetson TX2
 
 See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_image_classification/)
