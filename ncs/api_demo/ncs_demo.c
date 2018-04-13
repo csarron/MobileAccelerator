@@ -46,7 +46,7 @@ void *LoadGraphFile(const char *path, unsigned int *length) {
     if (fp == NULL)
         return 0;
     fseek(fp, 0, SEEK_END);
-    *length = ftell(fp);
+    *length = (unsigned int) ftell(fp);
     rewind(fp);
     if (!(buf = (char *) malloc(*length))) {
         fclose(fp);
@@ -77,7 +77,7 @@ void *LoadGraphFile(const char *path, unsigned int *length) {
 // Returns a pointer to a buffer that is allocated internally via malloc.  this buffer contains
 //         the 16 bit float values that can be passed to mvncLoadTensor().  The returned buffer
 //         will contain reqSize*reqSize*3 half floats.
-half *LoadImage(const char *path, int reqSize, float *mean, float std) {
+half *LoadImage(const char *path, const unsigned int reqSize, const float *mean, float std) {
     int width, height, cp, i;
     unsigned char *img, *imgresized;
     float *imgfp32;
@@ -199,8 +199,8 @@ bool LoadGraphToNCS(void *deviceHandle, const char *graphFilename, void **graphH
 //                   for each color channel, blue, green, and red in that order.
 // Returns tru if works or false if doesn't
 bool
-DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, int networkDim, float *imageSMean, float imageStd,
-                       int labelOffset) {
+DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, unsigned int networkDim, float *imageSMean, float imageStd,
+                       unsigned int labelOffset) {
     mvncStatus retCode;
 
     // LoadImage will read image from disk, convert channels to floats
@@ -241,7 +241,7 @@ DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, int network
     //printf("resultData is %d bytes which is %d 16-bit floats.\n", lenResultData, lenResultData/(int)sizeof(half));
 
     // convert half precision floats to full floats
-    int numResults = lenResultData / sizeof(half);
+    unsigned int numResults = lenResultData / sizeof(half);
     float *resultData32;
     resultData32 = (float *) malloc(numResults * sizeof(*resultData32));
     fp16tofloat(resultData32, (unsigned char *) resultData16, numResults);
@@ -265,8 +265,8 @@ DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, int network
 
 
 int main(int argc, char **argv) {
-    int image_size = 224;
-    int label_offset = 0;
+    unsigned int image_size = 224;
+    unsigned int label_offset = 0;
     if (argc <= 2) {
         printf(ANSI_COLOR_YELLOW"example usage: ./ncs_demo mobilenet_v1.graph keyboard.jpg 224\n");
         printf(ANSI_COLOR_CYAN"example usage 2: ./ncs_demo inception_v3.graph keyboard.jpg 299\n");
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
     printf(ANSI_COLOR_BOLD"test image: "ANSI_COLOR_GREEN"%s"ANSI_COLOR_RESET"\n", image_file);
 
     if (argc >= 4) {
-        image_size = (int) strtol(argv[3], &argv[3], 10);
+        image_size = (unsigned int) strtol(argv[3], &argv[3], 10);
     }
     printf(ANSI_COLOR_BOLD"image size: "ANSI_COLOR_GREEN"%d"ANSI_COLOR_RESET"\n", image_size);
 
