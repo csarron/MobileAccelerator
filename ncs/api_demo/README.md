@@ -53,6 +53,8 @@ change `CMakeLists.txt` compiler and linker flags such as adding `pkg-config --l
 
 (A non rooted version should be a normal Android application that will use standard Android API to access USB devices, the demo may be added later.)
  
+- prepare ndk: download ndk from [here](https://developer.android.com/ndk/downloads/index.html), and `export ANDROID_NDK=/path/to/your/ndk/`, e.g. `export ANDROID_NDK=/opt/android-ndk-r16b`
+
 - build: `mkdir build_arm && cd build_arm && cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI="armeabi-v7a" -DANDROID_PLATFORM=android-17 ..  && make`
 
 - push to the phone (it's better to use wireless adb since NCS is attached to the phone):
