@@ -40,6 +40,7 @@ Then you can either `export ANDROID_NDK=path/to/android-ndk` for the `snpe/run_s
 
 ### TensorRT for Nvidia Jetson TX2
 
+See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_image_classification/)
 
 ## Common commands
 
