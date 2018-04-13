@@ -60,3 +60,27 @@ change `CMakeLists.txt` compiler and linker flags such as adding `pkg-config --l
 
 
 - run demo: `adb shell`, `su`, `cd /data/local/tmp && export LD_LIBRARY_PATH=armeabi-v7a && ./ncs_demo mobilenet_v1.graph keyboard.jpg`
+
+example output:
+```text
+hammerhead:/ $ su
+hammerhead:/ # cd /data/local/tmp && export LD_LIBRARY_PATH=armeabi-v7a && ./ncs_demo mobilenet_v1.graph keyboard.jpg
+inference graph: mobilenet_v1.graph
+test image: keyboard.jpg
+image size: 224
+Booted 1 -> VSC
+Successfully opened NCS device at index 0!
+Successfully allocated graph for mobilenet_v1.graph
+
+---doing inference now ---
+Successfully loaded the tensor for image keyboard.jpg
+Successfully got the inference result for image keyboard.jpg
+Top1 result is: 509, computer keyboard, 0.817871
+-----------------------
+ncs reported layers: 31
+ncs reported inference time: 49.192039 ms
+time elapsed: 196.473999 ms
+-----------------------
+NCS work done.
+hammerhead:/data/local/tmp #
+```
