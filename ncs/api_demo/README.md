@@ -6,8 +6,10 @@ With this demo, you can use NCS on macOS, Ubuntu, Android phones.
 # Usage
 
 ## Requirements
+**Hardware**: 
+You need a USB Type C to Type A converter to plug in the NCS for newer MacBooks. You also need an OTG cable if you want to use the NCS on Android Phones.
 
-No requirements need for the C version. For the Python version, you need to install pillow by `pip install pillow`.
+**Software**: No requirements need for the C version. For the Python version, `Pillow` package is used to process the images, you can install by `pip install pillow`.
 
 ## macOS and Ubuntu
 
