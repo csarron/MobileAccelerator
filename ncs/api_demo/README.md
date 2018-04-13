@@ -57,7 +57,7 @@ change `CMakeLists.txt` compiler and linker flags such as adding `pkg-config --l
 
 - build: `mkdir build_arm && cd build_arm && cmake -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake -DANDROID_ABI="armeabi-v7a" -DANDROID_PLATFORM=android-17 ..  && make`
 
-- push to the phone (it's better to use wireless adb since NCS is attached to the phone):
+- push to the phone (it's better to use wireless adb since NCS is attached to the phone, see the debugging considerations [here](https://developer.android.com/guide/topics/connectivity/usb/index.html)):
 `adb push armeabi-v7a ncs_demo keyboard.jpg mobilenet_v1.graph /data/local/tmp && adb push mvnc /data/local/tmp/armeabi-v7a`
 
 
