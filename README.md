@@ -32,11 +32,14 @@ Then you can either `export ANDROID_NDK=path/to/android-ndk` for the `snpe/run_s
 3. Then just run `python snpe/run_snpe.py --snpe_sdk data/snpe-1.13.0.zip --model data/mobilenet_v2/mobilenet_v2_1.4_224.frozen.pb --android_ndk path/to/android-ndk `
 
 
-### NCSDK for Movidius NCS
+### NCSDK for Movidius NCS on Ubuntu and macOS
 
 1. Convert model to ncs compatible format: `python ncs/convert_model.py --checkpoint_file data/mobilenet_v2/mobilenet_v2_1.4_224.ckpt --model mobilenet_v2 --image_size 224`
 
 2. Run profiling on ncs: `python ncs/run_ncs.py --model data/mobilenet_v2/ncs_mobilenet_v2.meta`
+
+**NOTE**: you can specify a separated Python 3 environment by `-p3 /path/to/python3` instead of the `python3` on your system , e.g. 
+`python ncs/run_ncs.py -m data/mobilenet_v2/ncs_mobilenet_v2.meta -p3 /opt/p3dl/bin/python`
 
 ### NCS API Demo on the Android Phone, macOS
 
