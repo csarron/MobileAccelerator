@@ -192,7 +192,7 @@ def prepare_data_images(image_size, snpe_root):
 
 
 # generate bench config json file
-def gen_config(dlc_path, input_list_file, input_data):
+def gen_config(dlc_path, input_list_file, input_data, processors_):
     name = os.path.splitext(os.path.basename(dlc_path))[0]
     config = OrderedDict()
     config['Name'] = name
@@ -209,7 +209,7 @@ def gen_config(dlc_path, input_list_file, input_data):
     model['Data'] = [input_data]
     config['Model'] = model
 
-    config['Runtimes'] = ['GPU', 'CPU']
+    config['Runtimes'] = processors_
     config['Measurements'] = ['timing']  # ['timing', 'mem']
 
     return config
@@ -220,11 +220,28 @@ def write_config(config, save_path):
         json.dump(config, f, indent=4)
 
 
-# run snpe bench script
+def check_processor_arg(processor_str):
+    default = "GPU,DSP,CPU"
+    processor_list = default.split(',')
+
+    parsed_processors = []
+    for p in processor_str.split(','):
+        if p not in processor_list:
+            print("please use either GPU, DSP or CPU or any combination of them, seperated by comma(',')")
+            print("e.g. -p GPU,DSP means running on GPU and DSP; -p CPU means only running on CPU")
+            exit(-1)
+        else:
+            parsed_processors.append(p)
+
+    return parsed_processors
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("-sdk", "--snpe_sdk", type=str, default="data/snpe-1.13.0.zip",
                         help="path to snpe sdk zip file")
+    parser.add_argument("-p", "--processors", type=check_processor_arg, default="GPU,DSP,CPU",
+                        help="processor to use, use GPU,DSP,CPU or any combination of them (separated by comma)")
     parser.add_argument("-ndk", "--android_ndk", type=str,
                         help="path to android ndk")
     parser.add_argument("-m", "--model", type=str, default="data/mobilenet_v1/mobilenet_v1_1.0_224.frozen.pb",
@@ -284,11 +301,11 @@ if __name__ == '__main__':
 
         print("checking package dependencies...")
         check_cmd = 'yes | bash {}/bin/dependencies.sh'.format(snpe_sdk_path)
-        subprocess.call(check_cmd,  shell=True)
+        subprocess.call(check_cmd, shell=True)
 
         print("checking python dependencies...")
         check_cmd = 'yes | bash {}/bin/check_python_depends.sh'.format(snpe_sdk_path)
-        subprocess.call(check_cmd,  shell=True)
+        subprocess.call(check_cmd, shell=True)
 
         for os_type in ["arm-android-gcc4.9", "x86_64-linux-clang"]:
             for bin_file in os.listdir("{}/bin/{}".format(snpe_sdk_path, os_type)):
@@ -320,10 +337,9 @@ if __name__ == '__main__':
 
     data_dir, raw_file_list = prepare_data_images(args.image_size, snpe_sdk_path)
 
-    print('generating benchmark configuration generated.')
+    print('generating benchmark configuration...')
     sys.stdout.flush()
-
-    config = gen_config(dlc_file, raw_file_list, data_dir)
+    config = gen_config(dlc_file, raw_file_list, data_dir, args.processors)
 
     model_name = os.path.splitext(os.path.split(model_file)[1])[0]
 
@@ -333,7 +349,7 @@ if __name__ == '__main__':
     print()
     sys.stdout.flush()
 
-    print('running benchmark...')
+    print('running benchmark on {}...'.format(' '.join(args.processors)))
     print()
     sys.stdout.flush()
 
