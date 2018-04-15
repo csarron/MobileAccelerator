@@ -119,12 +119,12 @@ if __name__ == '__main__':
             print("building ncs api for macOS...")
             sys.stdout.flush()
             # install_usb_cmd = "brew install libusb"  # optional, since the api bundled prebuilt usb libraries
-            build_dir = "ncs/api_demo/build_mac"
+            build_dir = "ncs/api_demo/mac_build"
             if not os.path.exists(build_dir):
                 os.makedirs(build_dir)
 
             build_mac_api_cmd = "cmake .. && make ".format(build_dir)
-            subprocess.call(build_mac_api_cmd, shell=True, cwd="ncs/api_demo/build_mac")
+            subprocess.call(build_mac_api_cmd, shell=True, cwd=build_dir)
 
             copy_api_cmd = "cp {0}/mvncapi.py {0}/mvnc".format(build_dir)
             subprocess.call(copy_api_cmd, shell=True)
