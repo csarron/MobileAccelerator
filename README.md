@@ -73,16 +73,10 @@ See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_im
 
 
 Useful commands:
-
-- export inception_v3 inference graph: `python common/slim/export_inference_graph.py -m inception_v3 -s 299 -o data/inception_v3/inception_v3_inf.pb`
-- freeze inception_v3: `python common/freeze_model.py -c data/inception_v3/inception_v3.ckpt -g data/inception_v3/inception_v3_inf.pb`
-- benchmark inception_v3 using snpe: `python snpe/run_snpe.py -m data/inception_v3/inception_v3.frozen.pb -s 299`
-- convert inception_v3 for ncs: `python ncs/convert_model.py -c data/inception_v3/inception_v3.ckpt -s 299 -m inception_v3`
-- profile inception_v3 on ncs: `python ncs/run_ncs.py -m data/inception_v3/ncs_inception_v3.meta`
-
+- export inference graph for resnet_v1_50: `python common/slim/export_inference_graph.py -m resnet_v1_50 -o data/resnet_v1_50/resnet_v1_50_inf.pb -l 1`
 - freeze resnet_v1_50: `python common/freeze_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50_inf.pb`
-- (this command will ***fail*** since snpe-1.13.0 does not support resnet!) benchmark resnet_v1_50 using snpe: `python snpe/run_snpe.py -m data/resnet_v1_50/resnet_v1_50.frozen.pb`
-- convert resnet_v1_50 for ncs: `python ncs/convert_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -m resnet_v1_50 -l 1`
+- (this command will ***fail*** since snpe-1.14.1 does not support resnet!) benchmark resnet_v1_50 using snpe: `python snpe/run_snpe.py -m data/resnet_v1_50/resnet_v1_50.frozen.pb`
+- convert resnet_v1_50 for ncs: `python ncs/convert_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50_inf.pb`
 - profile resnet_v1_50 on ncs: `python ncs/run_ncs.py -m data/resnet_v1_50/ncs_resnet_v1_50.meta`
 
 ## Useful papers
