@@ -9,7 +9,8 @@ With this demo, you can use NCS on macOS, Ubuntu, Android phones.
 **Hardware**: 
 You need a USB Type C to Type A converter to plug in the NCS for newer MacBooks. You also need an OTG cable if you want to use the NCS on Android Phones.
 
-**Software**: No requirements need for the C version. For the Python version, `Pillow` package is used to process the images, you can install by `pip install pillow`.
+**Software**: Only libusb is need for the C version. Install the libusb by `brew install libusb` on macOS or by `sudo apt install libusb-1.0-0-dev` on Ubuntu.
+For the Python version, `Pillow` package is used to process the images, you can install by `pip install pillow`.
 
 ## macOS and Ubuntu
 
@@ -21,31 +22,27 @@ You need a USB Type C to Type A converter to plug in the NCS for newer MacBooks.
 
 example output:
 ```bash
-inference graph: mobilenet_v1.graph
-test image: keyboard.jpg
-image size: 224
-Booted 1.3.3 -> VSC
-Successfully opened NCS device at index 0!
-Successfully allocated graph for mobilenet_v1.graph
+Inference graph: mobilenet_v1.graph
+Test image: keyboard.jpg
+Image size: 224
+Successfully opened NCS device: 0
+Read graph file: mobilenet_v1.graph, size: 8451592 bytes
+Allocated graph for: mobilenet_v1.graph
 
----doing inference now ---
-Successfully loaded the tensor for image keyboard.jpg
-Successfully got the inference result for image keyboard.jpg
+---Doing inference now ---
+Successfully loaded the tensor for image: keyboard.jpg
+Got the inference result for image: keyboard.jpg
 Top1 result is: 509, computer keyboard, 0.817871
 -----------------------
-ncs reported layers: 31
-ncs reported inference time: 48.797756 ms
-time elapsed: 81.182999 ms
+NCS reported layers: 31
+NCS reported inference time: 49.049 ms
+Time elapsed: 79.623 ms
 -----------------------
 NCS work done.
 
 ```
 
 ***Note***: macOS tested on High Sierra 10.13.4, Ubuntu tested on 16.04.
-
-In case the prebuilt `libusb` library does not work, 
-you can install the libusb by `brew install libusb` on macOS or by `sudo apt install libusb-1.0-0-dev` on Ubuntu, and 
-change `CMakeLists.txt` compiler and linker flags such as adding `pkg-config --libs --cflags libusb-1.0`
 
 ## Android
 

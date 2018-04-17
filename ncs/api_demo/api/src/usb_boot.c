@@ -108,8 +108,7 @@ int usb_find_device(unsigned idx, char *addr, unsigned addr_size, void **device,
 	int res;
 
 	if (!initialized) {
-		PRINT_INFO(stderr,
-			   "Library has not been initialized when loaded\n");
+		LOGD("Library has not been initialized when loaded\n");
 		return MVNC_ERROR;
 	}
 	if (!devs || idx == 0) {
@@ -118,9 +117,7 @@ int usb_find_device(unsigned idx, char *addr, unsigned addr_size, void **device,
 			devs = 0;
 		}
 		if ((res = libusb_get_device_list(NULL, &devs)) < 0) {
-			PRINT_INFO(stderr,
-				   "Unable to get USB device list: %s\n",
-				   libusb_strerror(res));
+			LOGE("Unable to get USB device list: %s\n", libusb_strerror(res));
 			return MVNC_ERROR;
 		}
 	}
@@ -129,8 +126,7 @@ int usb_find_device(unsigned idx, char *addr, unsigned addr_size, void **device,
 	while ((dev = devs[i++]) != NULL) {
 		if ((res = libusb_get_device_descriptor(dev, &desc)) < 0) {
 
-			PRINT_INFO(stderr, "inside usb_find_device, Unable to get USB device descriptor: %s\n",
-				   libusb_strerror(res));
+			LOGE("inside usb_find_device, Unable to get USB device descriptor: %s\n", libusb_strerror(res));
 			continue;
 		}
 		if ((desc.idVendor == vid && desc.idProduct == pid) ||
@@ -143,8 +139,7 @@ int usb_find_device(unsigned idx, char *addr, unsigned addr_size, void **device,
 			if (device) {
 				const char *caddr = gen_addr(dev);
 				if (!strcmp(caddr, addr)) {
-					PRINT_DEBUG(stderr,
-						    "Found Address: %s - VID/PID %04x:%04x\n",
+					LOGD("Found Address: %s - VID/PID %04x:%04x\n",
 						    addr, desc.idVendor, desc.idProduct);
 					libusb_ref_device(dev);
 					libusb_free_device_list(devs, 1);
@@ -154,8 +149,7 @@ int usb_find_device(unsigned idx, char *addr, unsigned addr_size, void **device,
 				}
 			} else if (idx == count) {
 				const char *caddr = gen_addr(dev);
-				PRINT_DEBUG(stderr,
-					    "Device %d Address: %s - VID/PID %04x:%04x\n",
+				LOGD("Device %d Address: %s - VID/PID %04x:%04x\n",
 					    idx, caddr, desc.idVendor, desc.idProduct);
 				strncpy(addr, caddr, addr_size);
 				return 0;
@@ -208,8 +202,7 @@ static libusb_device_handle *usb_open_device(libusb_device *dev, uint8_t *endpoi
 
 	ifdesc = cdesc->interface->altsetting;
 	for (i = 0; i < ifdesc->bNumEndpoints; i++) {
-		PRINT_DEBUG(stderr,
-			    "Found EP 0x%02x : max packet size is %u bytes\n",
+		LOGD("Found EP 0x%02x : max packet size is %u bytes\n",
 			    ifdesc->endpoint[i].bEndpointAddress,
 			    ifdesc->endpoint[i].wMaxPacketSize);
 		if ((ifdesc->endpoint[i].bmAttributes & LIBUSB_TRANSFER_TYPE_MASK) !=
@@ -240,12 +233,15 @@ static int wait_findopen(const char *device_address, int timeout,
 	usleep(100000);
 	if (mvnc_loglevel > 1) {
 		// I know about switch(), but for some reason -1 is picked up correctly
-		if (timeout == -1)
-			PRINT("Starting wait for connect, no timeout\n");
-		else if (timeout == 0)
-			PRINT("Trying to connect\n");
-		else
-			PRINT("Starting wait for connect with %ums timeout\n", timeout * 100);
+		if (timeout == -1){
+            LOGD("Starting wait for connect, no timeout\n");
+        }
+		else if (timeout == 0){
+            LOGD("Trying to connect\n");
+        }
+		else{
+            LOGD("Starting wait for connect with %ums timeout\n", timeout * 100);
+        }
 	}
 
 	last_open_dev_err[0] = 0;
@@ -257,15 +253,14 @@ static int wait_findopen(const char *device_address, int timeout,
 			return MVNC_ERROR;
 		if (!rc) {
             if ((*devh = usb_open_device(*dev, endpoint, last_open_dev_err, 128))) {
-				PRINT_DEBUG(stderr, "Found and opened device\n");
+                LOGD("Found and opened device\n");
 				return 0;
 			}
 			libusb_unref_device(*dev);
 		}
 
 		if (timeout != -1 && i == timeout) {
-			PRINT_INFO(stderr, "%serror: device not found!\n",
-				   last_open_dev_err[0] ? last_open_dev_err : "");
+            LOGW("%serror: device not found!\n", last_open_dev_err[0] ? last_open_dev_err : "");
 			return rc ? MVNC_DEVICE_NOT_FOUND : MVNC_TIMEOUT;
 		}
 		i++;
@@ -285,8 +280,7 @@ static int send_file(libusb_device_handle * h, uint8_t endpoint,
 	elapsed_time = 0;
 	twb = 0;
 	p = tx_buf;
-	PRINT_DEBUG(stderr, "Performing bulk write of %u bytes...\n",
-		    file_size);
+    LOGD("Performing bulk write of %u bytes...\n", file_size);
 
 	while (twb < file_size) {
 		highres_gettime(&t1);
@@ -301,9 +295,7 @@ static int send_file(libusb_device_handle * h, uint8_t endpoint,
 			if (rc == LIBUSB_ERROR_NO_DEVICE)
 				break;
 
-			PRINT_INFO(stderr,
-				   "bulk write: %s (%d bytes written, %d bytes to write)\n",
-				   libusb_strerror(rc), wbr, wb);
+            LOGD("bulk write: %s (%d bytes written, %d bytes to write)\n", libusb_strerror(rc), wbr, wb);
 			if (rc == LIBUSB_ERROR_TIMEOUT)
 				return MVNC_TIMEOUT;
 			else
@@ -314,10 +306,8 @@ static int send_file(libusb_device_handle * h, uint8_t endpoint,
 		twb += wbr;
 		p += wbr;
 	}
-	PRINT_DEBUG(stderr,
-		    "Successfully sent %u bytes of test_resources in %lf ms (%lf MB/s)\n",
-		    file_size, elapsed_time,
-		    ((double) file_size / 1048576.) / (elapsed_time * 0.001));
+    LOGD("Successfully sent %u bytes of test_resources in %lf ms (%lf MB/s)\n",
+		    file_size, elapsed_time, ((double) file_size / 1048576.) / (elapsed_time * 0.001));
 	return 0;
 }
 
