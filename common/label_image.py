@@ -73,10 +73,10 @@ def load_labels(label_file):
 
 
 if __name__ == "__main__":
-    file_name = "data/grace_hopper.jpg"
-    model_file = "data/inception_v3/inception_v3.frozen.pb"
-    label_file = "labels.txt"
-    image_size = 299
+    file_name = "data/keyboard.png"
+    model_file = "data/mobilenet_v2_1.0/mobilenet_v2_1.0_224.frozen.pb"
+    label_file = "data/labels.txt"
+    image_size = 224
     input_mean = 0
     input_std = 255
     input_layer = "input"

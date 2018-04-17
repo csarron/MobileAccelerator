@@ -122,8 +122,8 @@ def convert_weights(inf_graph):
 
 
 def check_inference_graph(inf_graph_file):
-    script = "python slim/export_inference_graph.py"
-    params = " --model_name=mobilenet_v1 --image_size=224 --output_file=data/mobilenet_v1/mobilenet_v1_inf.pb"
+    script = "python common/slim/export_inference_graph.py  --model_name mobilenet_v2_1.0 "
+    params = "--image_size 224 --output_file data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb"
     usage = script + params
 
     if not os.path.exists(inf_graph_file):
@@ -136,10 +136,12 @@ def check_inference_graph(inf_graph_file):
 
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', "--checkpoint_file", type=str, default="data/mobilenet_v1/mobilenet_v1.ckpt",
+    parser.add_argument('-c', "--checkpoint_file", type=str,
+                        default="data/mobilenet_v2_1.0/mobilenet_v2_1.0_224.ckpt",
                         help="model checkpoint file")
     parser.add_argument('-g', "--inference_graph", type=check_inference_graph,
-                        help="Input node names, comma separated")
+                        default="data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb",
+                        help="model inference graph")
     parser.add_argument('-i', "--input_names", type=str, default="input",
                         help="Input node names, comma separated")
     parser.add_argument('-o', "--output_names", type=str, default="output",

@@ -20,15 +20,25 @@ model_url_map = {
         "filename": "inception_v3_2016_08_28.tar.gz",
         "name": "inception_v3"
     },
-    "mobilenet_v1": {
+    "mobilenet_v1_1.0": {
         "url": "http://download.tensorflow.org/models/mobilenet_v1_2018_02_22/mobilenet_v1_1.0_224.tgz",
         "filename": "mobilenet_v1_1.0_224.tgz",
-        "name": "mobilenet_v1"
+        "name": "mobilenet_v1_1.0"
     },
-    "mobilenet_v2": {
+    "mobilenet_v2_1.4": {
         "url": "https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.4_224.tgz",
         "filename": "mobilenet_v2_1.4_224.tgz",
-        "name": "mobilenet_v2"
+        "name": "mobilenet_v2_1.4"
+    },
+    "mobilenet_v2_1.3": {
+        "url": "https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.3_224.tgz",
+        "filename": "mobilenet_v2_1.3_224.tgz",
+        "name": "mobilenet_v2_1.3"
+    },
+    "mobilenet_v2_1.0": {
+        "url": "https://storage.googleapis.com/mobilenet_v2/checkpoints/mobilenet_v2_1.0_224.tgz",
+        "filename": "mobilenet_v2_1.0_224.tgz",
+        "name": "mobilenet_v2_1.0"
     },
     "resnet_v1_50": {
         "url": "http://download.tensorflow.org/models/resnet_v1_50_2016_08_28.tar.gz",
@@ -99,11 +109,12 @@ def check_dir(dir_name):
 
 
 if __name__ == '__main__':
-    models = ["inception_v3", "mobilenet_v1", "mobilenet_v2", "resnet_v1_50"]  # add alexnet, squeezenet_v1.1, vgg_16
+    models = ["inception_v3", "mobilenet_v1_1.0", "mobilenet_v2_1.0",
+              "mobilenet_v2_1.3", "mobilenet_v2_1.4", "resnet_v1_50"]  # add alexnet, squeezenet_v1.1, vgg_16
 
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("-m", "--model", choices=models, default="mobilenet_v1",
+    group.add_argument("-m", "--model", choices=models, default="mobilenet_v2_1.0",
                        help="download specified model")
     group.add_argument("-a", "--all", action="store_true",
                        help="download all available models")

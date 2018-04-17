@@ -84,7 +84,7 @@ V2_DEF = dict(
 @slim.add_arg_scope
 def mobilenet(input_tensor,
               num_classes=1001,
-              depth_multiplier=1.4,
+              depth_multiplier=1.0,
               scope='MobilenetV2',
               conv_defs=None,
               finegrain_classification_mode=False,

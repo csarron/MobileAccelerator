@@ -88,18 +88,26 @@ if __name__ == '__main__':
     if not args.output_file:
         raise ValueError('You must supply the path to save to with --output_file')
     # tf.logging.set_verbosity(tf.logging.INFO)
-    print("generating inference graph...")
+    model_name = args.model_name
+    depth = 1.0
     with tf.Graph().as_default() as graph:
-
-        network_fn = nets_factory.get_network_fn(args.model_name,
+        # handle mobilenet depth multiplier from model name
+        if model_name.startswith('mobilenet'):
+            name_parts = model_name.split('_')
+            depth = float(name_parts[-1])
+            model_name = '_'.join(name_parts[:-1])
+        print("generating inference graph for model:", model_name, "depth_multiplier:", depth)
+        network_fn = nets_factory.get_network_fn(model_name,
                                                  num_classes=(args.num_classes - args.labels_offset),
                                                  is_training=False)
         image_size = args.image_size or network_fn.default_image_size
         placeholder = tf.placeholder(name='input', dtype=tf.float32,
                                      shape=[None, image_size, image_size, 3])
-        logits, _ = network_fn(placeholder)
+
+        logits, _ = network_fn(placeholder, depth_multiplier=depth)
         tf.nn.softmax(logits, name='output')
         graph_def = graph.as_graph_def()
+        inf_graph_def = tf.graph_util.extract_sub_graph(graph_def, ['output'])
         with gfile.GFile(args.output_file, 'wb') as f:
-            f.write(graph_def.SerializeToString())
+            f.write(inf_graph_def.SerializeToString())
         print("inference graph saved to: ", args.output_file)
