@@ -1,0 +1,92 @@
+apply plugin: 'com.android.application'
+
+def keystorePropertiesFile = rootProject.file("local.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode rootProject.ext.android.versionCode
+        versionName rootProject.ext.android.versionName
+        testInstrumentationRunner rootProject.ext.android.testInstRunner
+        externalNativeBuild {
+            cmake {
+                cppFlags rootProject.ext.android.cppFlags
+                abiFilters rootProject.ext.android.abiFilters
+            }
+        }
+
+        ndk {
+            abiFilters rootProject.ext.android.abiFilters
+        }
+    }
+
+    signingConfigs {
+        config {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile rootProject.file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+
+    buildTypes {
+
+        release {
+            signingConfig signingConfigs.config
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "../../api_demo/CMakeLists.txt"
+        }
+    }
+
+    defaultConfig {
+        multiDexEnabled true
+    }
+
+    lintOptions {
+        //lint rules of conduct
+        abortOnError true
+        htmlReport true
+    }
+
+}
+
+configurations {
+    lol
+}
+
+dependencies {
+    testImplementation rootProject.ext.testDeps["junit"]
+
+    androidTestImplementation rootProject.ext.androidTestDeps["testrunner"]
+    androidTestImplementation rootProject.ext.androidTestDeps["espresso"]
+
+    implementation fileTree(dir: 'libs', include: ['*.jar', '*.class'])
+
+    // use all lol dependencies
+    for (d in rootProject.ext.lolDeps) {
+        lol d.value
+    }
+
+    // use all normal dependencies
+    for (d in rootProject.ext.deps) {
+        implementation d.value
+    }
+
+}

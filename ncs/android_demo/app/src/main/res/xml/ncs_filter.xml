@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <usb-device
+        product-id="0x2150"
+        vendor-id="0x03e7" />
+    <usb-device
+        product-id="0xf63b"
+        vendor-id="0x03e7" />
+</resources><!--<resources>--><!--Accept all device VID/PID combinations --><!--<usb-device />--><!--</resources>-->

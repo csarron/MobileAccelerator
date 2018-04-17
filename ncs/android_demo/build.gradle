@@ -1,0 +1,116 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.1.1'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+
+    repositories {
+
+        google()
+        jcenter()
+
+        maven {
+            url "https://jitpack.io"
+        }
+
+        ivy {
+            url "https://github.com"
+            layout "pattern", {
+                artifact "/[organisation]/[module]/archive/[revision].[ext]"
+            }
+        }
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+ext {
+    //version
+    sdk = 27
+    minApi = 26
+    targetApi = 27
+    versionName = "1.0"
+
+    // ui
+    constraint = "1.0.2"
+    recyclerview = "27.1.0"
+    viewhelper = "2.9.34"
+
+    // test
+    junit = "4.12"
+    testrunner = "1.0.1"
+    espresso = "3.0.1"
+
+    // utility
+    logger = "2.1.1"
+    rxjava = "2.1.9"
+    rxandroid = "2.0.1"
+    npy = "0.3.3"
+    paldb = "1.1.0"
+    fastjson = "1.1.68.android"
+
+    // compute
+    tensorflow = "1.7.0"
+    eigen = "3.3.4"
+
+    // app flags
+    id = "com.cscao.apps.ncsdemo"
+    abi = "armeabi-v7a" //,arm64-v8a
+    cppFlags = "-std=c++11 -frtti -fexceptions"
+    testInst = "android.support.test.runner.AndroidJUnitRunner"
+
+    android = [
+            compileSdkVersion: sdk,
+            applicationId    : id,
+            minSdkVersion    : minApi,
+            targetSdkVersion : targetApi,
+            versionCode      : versionName.split("\\.")[0].toInteger() + 1,
+            versionName      : versionName,
+            testInstRunner   : testInst,
+            cppFlags         : cppFlags,
+            abiFilters       : abi.split(",")
+    ]
+
+    testDeps = [
+            "junit": "junit:junit:${junit}",
+    ]
+
+    androidTestDeps = [
+            "testrunner": "com.android.support.test:runner:${testrunner}",
+            "espresso"  : "com.android.support.test.espresso:espresso-core:${espresso}"
+    ]
+
+    lolDeps = [
+            "eigen" : "eigenteam:eigen-git-mirror:${eigen}@zip",
+    ]
+
+    deps = [
+            "constraint"   : "com.android.support.constraint:constraint-layout:${constraint}",
+            "recyclerview" : "com.android.support:recyclerview-v7:${recyclerview}",
+            "viewhelper"   : "com.github.CymChad:BaseRecyclerViewAdapterHelper:${viewhelper}",
+
+            "logger"       : "com.orhanobut:logger:${logger}",
+            "rxjava"       : "io.reactivex.rxjava2:rxjava:${rxjava}",
+            "rxandroid"    : "io.reactivex.rxjava2:rxandroid:${rxandroid}",
+//            "npy"          : "org.jetbrains.bio:npy:${npy}",
+            "paldb"        : "com.linkedin.paldb:paldb:1.1.0",
+            "fastjson"     : "com.alibaba:fastjson:1.1.68.android",
+
+//            "tensorflow"   : "org.tensorflow:tensorflow-android:${tensorflow}",
+    ]
+}

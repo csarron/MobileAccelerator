@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">NCSDemo</string>
+    <string name="status_list">Device List</string>
+    <string name="status_removed">Device Detached</string>
+    <string name="status_added">Device Attached</string>
+    <string name="run_ncs">Run NCS</string>
+    <string name="detached">NCS Detached</string>
+    <string name="not_found">NCS Not Found</string>
+    <string name="attached">NCS Attached</string>
+    <string name="device_status">Device Status:</string>
+</resources>
