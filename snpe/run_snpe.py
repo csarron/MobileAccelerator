@@ -19,8 +19,8 @@ import sys
 def convert_to_dlc(script_path, frozen_model_file, snpe_root, input_node='input', output_node='output', image_size=224):
     print('converting ' + frozen_model_file + ' to snpe dlc format')
     sys.stdout.flush()
-    model_name = os.path.splitext(os.path.split(frozen_model_file)[1])[0]
-    dlc_path = 'models/{}.dlc'.format(model_name)
+    model_name_ = os.path.splitext(os.path.split(frozen_model_file)[1])[0]
+    dlc_path = 'models/{}.dlc'.format(model_name_)
     dlc_full_path = os.path.join(snpe_root, 'benchmarks', dlc_path)
     if os.path.exists(dlc_full_path):
         return dlc_path
@@ -238,7 +238,7 @@ def check_processor_arg(processor_str):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-sdk", "--snpe_sdk", type=str, default="data/snpe-1.13.0.zip",
+    parser.add_argument("-sdk", "--snpe_sdk", type=str, default="data/snpe-1.14.1.zip",
                         help="path to snpe sdk zip file")
     parser.add_argument("-p", "--processors", type=check_processor_arg, default="GPU,DSP,CPU",
                         help="processor to use, use GPU,DSP,CPU or any combination of them (separated by comma)")
@@ -265,6 +265,7 @@ if __name__ == '__main__':
 
     snpe_dir = os.path.dirname(snpe_sdk_file)
     snpe_sdk_path = os.path.abspath(os.path.splitext(snpe_sdk_file)[0])
+    snpe_name = os.path.basename(snpe_sdk_path)
 
     if not os.path.exists(snpe_sdk_file):
         print("please download SNPE SDK from:", web_url)
@@ -287,7 +288,7 @@ if __name__ == '__main__':
         exit(-1)
 
     # may install pkg deps
-    if not os.path.exists('/tmp/snpe_deps_checked'):
+    if not os.path.exists('/tmp/{}_deps_checked'.format(snpe_name)):
         print("copying libs from ndk to snpe sdk...")
 
         shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/libgnustl_shared.so'.format(ndk_path),
@@ -315,7 +316,7 @@ if __name__ == '__main__':
                 st = os.stat(script_file_path)
                 os.chmod(script_file_path, st.st_mode | stat.S_IEXEC)
 
-        open('/tmp/snpe_deps_checked', 'a').close()
+        open('/tmp/{}_deps_checked'.format(snpe_name), 'a').close()
 
     os.environ["SNPE_ROOT"] = snpe_sdk_path
     py_path = os.environ.get("PYTHONPATH", "")

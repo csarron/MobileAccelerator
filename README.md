@@ -24,12 +24,12 @@ it's better to run the code in a Python 2 environment although other scripts sup
 ### SNPE for Phone GPU
 
 1. No more hassles of setting up SNPE now, just download the SNPE SDK from [Qualcomm website](https://developer.qualcomm.com/software/snapdragon-neural-processing-engine-ai).
-Suppose the SDK is saved to `data/snpe-1.13.0.zip`.
+Suppose the SDK is saved to `data/snpe-1.14.1.zip`.
 
 2. Download the Android NDK from [Android NDK website](https://developer.android.com/ndk/downloads/index.html) if you don't have it, unzip the NDK. 
 Then you can either `export ANDROID_NDK=path/to/android-ndk` for the `snpe/run_snpe.py` script or pass the NDK path as argument to the script.
 
-3. Then just run `python snpe/run_snpe.py --snpe_sdk data/snpe-1.13.0.zip --model data/mobilenet_v2/mobilenet_v2_1.4_224.frozen.pb --android_ndk path/to/android-ndk `
+3. Then just run `python snpe/run_snpe.py --snpe_sdk data/snpe-1.14.1.zip --model data/mobilenet_v2/mobilenet_v2_1.4_224.frozen.pb --android_ndk path/to/android-ndk `
 
 
 ### NCSDK for Movidius NCS on Ubuntu and macOS
