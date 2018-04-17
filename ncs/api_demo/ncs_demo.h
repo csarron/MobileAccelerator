@@ -6,7 +6,6 @@
 #define NCSDEMO_NCS_DEMO_H
 
 
-#include <mvnc.h>
 #include <stdbool.h>
 #include <sys/time.h>
 
@@ -23,6 +22,7 @@
 
 #include "fp16.h"
 #include "image_classes.h"
+#include "api/include/mvnc.h"
 #include "api/src/common.h"
 #include "api/src/usb_boot.h"
 

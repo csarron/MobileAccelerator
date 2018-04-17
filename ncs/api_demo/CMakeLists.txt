@@ -42,10 +42,3 @@ add_executable(ncs_demo ${CMAKE_CURRENT_SOURCE_DIR}/ncs_demo.c)
 
 target_include_directories(ncs_demo PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/api/include)
 target_link_libraries(ncs_demo mvnc m)
-
-
-if (ANDROID)
-    add_library(ncs_jni SHARED ncs_jni.c)
-    target_include_directories(ncs_jni PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/api/include)
-    target_link_libraries(ncs_jni mvnc)
-endif ()

@@ -312,4 +312,5 @@ public class MainActivity extends Activity {
     public native void setImageFile(String imageFile);
 
     public native String doInference(String graphFile, String imageFile, int labelOffset);
+
 }

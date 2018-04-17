@@ -18,6 +18,8 @@
 
 // Common logging macros
 
+#ifndef _COMMON_H_
+#define _COMMON_H_
 
 #       ifdef ANDROID
 #           define ANSI_BOLD   ""
@@ -62,3 +64,4 @@
 #define DEFAULT_PID                0x2150    // Myriad2v2 ROM
 #define DEFAULT_OPEN_VID            DEFAULT_VID
 #define DEFAULT_OPEN_PID            0xf63b    // Once opened in VSC mode, VID/PID change
+#endif

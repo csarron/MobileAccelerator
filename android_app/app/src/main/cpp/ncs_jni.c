@@ -1,7 +1,12 @@
 #include <jni.h>
+#include <stdio.h>
+#include <string.h>
 //#include <string>
-#include <mvnc.h>
-#include "ncs_demo.h"
+#include "../../../../../ncs/api_demo/api/src/usb_boot.h"
+#include "../../../../../ncs/api_demo/api/src/common.h"
+#include "../../../../../ncs/api_demo/api/include/mvnc.h"
+#include "../../../../../ncs/api_demo/ncs_demo.h"
+
 
 #ifdef __cplusplus
 extern "C"
