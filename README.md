@@ -2,24 +2,38 @@
 
 ## Requirements
 
-- ***NOTE*** that SNPE only supports Python 2, 
-it's better to run the code in a Python 2 environment although other scripts support Python 3.
-- install TensorFlow, either CPU or GPU version. (tested for version 1.7.0)
-- install Python dependencies by `pip install -r requirements.txt`
+- ***NOTE*** that SNPE only supports Python 2, and NCS profiling only supports Python 3.
+
+it's better to run the code in a Python 2 environment but also prepare a Python 3 environment.
+You can do it via virualenv: `virtualenv -p python3 ~/p3dl`; `virtualenv -p python2 ~/p2dl`; `source ~/p2dl/bin/activate`).
+
+Then install Python dependencies by `pip install -r requirements.txt` (TensorFlow tested for version 1.7.0)
 
 ## Usage
 
 ### Model Preparation
 
-- (required) Download model: `python common/download_model.py --model mobilenet_v2`
+#### Step by step
+- (required) Download model: `python common/download_model.py --model mobilenet_v2_1.0` 
+or download all supported models by `python common/download_model.py -a` 
 
-- (required for SNPE) Export model inference graph: `python common/slim/export_inference_graph.py --model_name mobilenet_v2 --image_size 224 --output_file data/mobilenet_v2/mobilenet_v2_inf.pb`
+- (required ) Export model inference graph: `python common/slim/export_inference_graph.py  --model_name mobilenet_v2_1.0 --image_size 224 --output_file data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb`
 
-- (required for SNPE) Freeze model: `python common/freeze_model.py --checkpoint_file data/mobilenet_v2/mobilenet_v2_1.4_224.ckpt --inference_graph data/mobilenet_v2/mobilenet_v2_inf.pb`
+- (required for SNPE) Freeze model: `python common/freeze_model.py --checkpoint_file data/mobilenet_v2_1.0/mobilenet_v2_1.0_224.ckpt --inference_graph data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb`
+- (required for NCS) Convert model: `python ncs/convert_model.py --checkpoint_file data/mobilenet_v2_1.0/mobilenet_v2_1.0_224.ckpt --inference_graph data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb`
 
-- (optional) Visualizing model: `python common/visualize_model.py data/mobilenet_v2/mobilenet_v2_1.4_224.frozen.pb`
+- (optional) Visualizing model: `python common/visualize_model.py data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb`
 
-(Another awesome visualization tool is [Netron](https://lutzroeder.github.io/Netron/), just upload `mobilenet_v2_1.4_224.frozen.pb` in your browser)
+(Another awesome visualization tool is [Netron](https://lutzroeder.github.io/Netron/), just upload `mobilenet_v2_1.0_224.frozen.pb` in your browser)
+
+#### All in one
+
+Just run `common/prepare_all.sh`
+
+**Known SDK Issues**: 
+- `mobilenet_v2_1.3` and `mobilenet_v2_1.4` although can be profiled on the NCS, 
+but the inference results are always the same and not correct. Maybe the NCS sdk is not parsing the models correctly.
+- `resnet_v1_50` for SNPE is not working correctly, the DLC conversion may not handle ResNet correctly.
 
 ### SNPE for Phone GPU
 
@@ -29,17 +43,15 @@ Suppose the SDK is saved to `data/snpe-1.14.1.zip`.
 2. Download the Android NDK from [Android NDK website](https://developer.android.com/ndk/downloads/index.html) if you don't have it, unzip the NDK. 
 Then you can either `export ANDROID_NDK=path/to/android-ndk` for the `snpe/run_snpe.py` script or pass the NDK path as argument to the script.
 
-3. Then just run `python snpe/run_snpe.py --snpe_sdk data/snpe-1.14.1.zip --model data/mobilenet_v2/mobilenet_v2_1.4_224.frozen.pb --android_ndk path/to/android-ndk `
+3. Then just run `python snpe/run_snpe.py --model data/mobilenet_v2_1.0/mobilenet_v2_1.0_224.frozen.pb --snpe_sdk data/snpe-1.14.1.zip --android_ndk path/to/android-ndk `
 
 
 ### NCSDK for Movidius NCS on Ubuntu and macOS
 
-1. Convert model to ncs compatible format: `python ncs/convert_model.py --checkpoint_file data/mobilenet_v2/mobilenet_v2_1.4_224.ckpt --model mobilenet_v2 --image_size 224`
-
-2. Run profiling on ncs: `python ncs/run_ncs.py --model data/mobilenet_v2/ncs_mobilenet_v2.meta`
+Just run profiling on ncs: `python ncs/run_ncs.py --model data/mobilenet_v2_1.0/ncs_mobilenet_v2_1.0_224.meta`
 
 **NOTE**: you can specify a separated Python 3 environment by `-p3 /path/to/python3` instead of the `python3` on your system , e.g. 
-`python ncs/run_ncs.py -m data/mobilenet_v2/ncs_mobilenet_v2.meta -p3 /opt/p3dl/bin/python`
+`python ncs/run_ncs.py --model data/mobilenet_v2_1.0/ncs_mobilenet_v2_1.0_224.meta -p ~/p3dl/bin/python`
 
 ### NCS API Demo on the Android Phone, macOS
 
