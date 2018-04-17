@@ -37,7 +37,7 @@ def parse_args():
                         help="path to snpe sdk zip file")
     parser.add_argument("-p3", "--python3", type=str, default="python3",
                         help="Python 3 path, better to use virtualenv python3")
-    parser.add_argument("-m", "--model", type=str, default="data/mobilenet_v2/ncs_mobilenet_v2.meta",
+    parser.add_argument("-m", "--model", type=str, default="data/mobilenet_v2_1.0/ncs_mobilenet_v2_1.0.meta",
                         help="frozen tensorflow model")
     parser.add_argument("-s", "--shave_cores", type=int, default=12,
                         help="input image size")
@@ -58,7 +58,7 @@ if __name__ == '__main__':
 
     sdk_url = None
     if not os.path.exists(sdk_file):
-        print("not found NCSDK file:", sdk_file, "trying to download...")
+        print("Not found NCSDK file:", sdk_file, "trying to download...")
         sys.stdout.flush()
         data_dir = 'data'
 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         if not os.path.exists(api_zip_file):
             download_file(sdk_info_url, api_zip_file)
 
-        print("extracting NCSDK api zip to:", data_dir, "...")
+        print("Extracting NCSDK api zip to:", data_dir, "...")
         zp_ref = zp.ZipFile(api_zip_file, 'r')
         zp_ref.extractall(data_dir)
         zp_ref.close()
@@ -82,7 +82,7 @@ if __name__ == '__main__':
                 sdk_url = line.split('=')[1].strip()
                 break
         if sdk_url is None:
-            print("automatically finding sdk failed, please manually download sdk")
+            print("Automatically finding sdk failed, please manually download sdk")
             print("by finding ncsdk file link in file:", sdk_info_url)
             exit(-1)
         else:
@@ -90,7 +90,7 @@ if __name__ == '__main__':
             sdk_file = os.path.join(data_dir, sdk_file_name)
             download_file(sdk_url, sdk_file)
     else:
-        print("found NCSDK file at:", sdk_file)
+        print("Found NCSDK file at:", sdk_file)
         sys.stdout.flush()
         data_dir = os.path.dirname(sdk_file)
 
@@ -98,58 +98,84 @@ if __name__ == '__main__':
         tarfile.open(sdk_file, "r:gz").extractall(data_dir)
         print("Successfully extracted NCSDK {} to {}".format(sdk_file, data_dir))
     else:
-        print("found NCSDK path at:", sdk_path)
+        print("Found NCSDK path at:", sdk_path)
     sys.stdout.flush()
 
     # may install api and package dependencies
-    if not os.path.exists('/tmp/ncs_deps_checked'):
-
-        if platform.system() == "Linux":
-            print("installing package dependencies for Linux...")
+    sdk_name = os.path.basename(sdk_path)
+    if not os.path.exists('/tmp/{}_api_checked'.format(sdk_name)):
+        os_name = platform.system()
+        api_dir = "ncs/api_demo"
+        if os_name == "Linux":
+            print("Installing package dependencies for Linux...")
             sys.stdout.flush()
+
             check_cmd = "sudo apt install -qq $(cat '{}/requirements_apt.txt') > /dev/null".format(sdk_path)
             subprocess.call(check_cmd, shell=True)
 
-            print("building ncs api for Linux...")
+            check_cmd = "sudo apt install libusb-1.0-0-dev"
+            subprocess.call(check_cmd, shell=True)
+
+            # need to set usb permission
+            check_cmd = "sudo mkdir -p /etc/udev/rules.d/ && "
+            check_cmd += "sudo cp {}/api/97-usbboot.rules /etc/udev/rules.d/".format(api_dir)
+            subprocess.call(check_cmd, shell=True)
+
+            check_cmd = "sudo udevadm control --reload-rules && sudo udevadm trigger"
+            subprocess.call(check_cmd, shell=True)
+
+        elif os_name == "Darwin":
+            print("Installing package dependencies (libusb) for macOS through Homebrew...")
             sys.stdout.flush()
-            check_cmd = "sudo apt install libusb-1.0-0-dev && sudo make install"
-            subprocess.call(check_cmd, shell=True, cwd='{}/ncsdk-master/api/src'.format(data_dir))
 
-        elif platform.system() == "Darwin":
-            print("building ncs api for macOS...")
-            sys.stdout.flush()
-            # install_usb_cmd = "brew install libusb"  # optional, since the api bundled prebuilt usb libraries
-            build_dir = "ncs/api_demo/mac_build"
-            if not os.path.exists(build_dir):
-                os.makedirs(build_dir)
+            check_cmd = "brew install libusb".format(sdk_path)
+            subprocess.call(check_cmd, shell=True)
 
-            build_mac_api_cmd = "cmake .. && make ".format(build_dir)
-            subprocess.call(build_mac_api_cmd, shell=True, cwd=build_dir)
-
-            copy_api_cmd = "cp {0}/mvncapi.py {0}/mvnc".format(build_dir)
-            subprocess.call(copy_api_cmd, shell=True)
-
-            copy_cmd = "cp -r {0}/mvnc {0}/libmvnc.dylib {0}/libusb-1.0.0.dylib {1}/ncsdk-x86_64/tk".format(build_dir,
-                                                                                                         sdk_path)
-            subprocess.call(copy_cmd, shell=True)
         else:
             print("Only Linux and macOS are supported yet!")
+            exit(-1)
 
-        print("installing python dependencies...")
+        print("Building ncs api for {}...".format(os_name))
         sys.stdout.flush()
-        check_cmd = 'pip install -q -r {}/requirements.txt && pip install -q --upgrade -r requirements.txt'.format(
-            sdk_path)
-        subprocess.call(check_cmd, shell=True)
-        print()
-        sys.stdout.flush()
-        open('/tmp/ncs_deps_checked', 'a').close()
+
+        build_dir = os.path.join(api_dir, "{}_build".format(os_name))
+        if not os.path.exists(build_dir):
+            os.makedirs(build_dir)
+
+        build_api_cmd = "cmake .. && make ".format(build_dir)
+        subprocess.call(build_api_cmd, shell=True, cwd=build_dir)
+
+        copy_api_cmd = "cp {0}/mvncapi.py {0}/mvnc".format(build_dir)
+        subprocess.call(copy_api_cmd, shell=True)
+
+        mvnc_lib_name = "libmvnc.dylib" if os_name == "Darwin" else "libmvnc.so"
+        copy_cmd = "cp -rf {0}/mvnc {0}/{1} {2}/ncsdk-x86_64/tk".format(build_dir, mvnc_lib_name, sdk_path)
+        subprocess.call(copy_cmd, shell=True)
+
+        if not os.path.exists('/tmp/{}_py_checked'.format(sdk_name)):
+            print("Installing python dependencies...")
+            sys.stdout.flush()
+            pip_path = os.path.join(os.path.dirname(args.python3), 'pip')
+            if not os.path.exists(pip_path):
+                pip_path = 'pip3'
+
+            check_cmd = '{0} install -r {1}/requirements.txt && {0} install --upgrade -r requirements.txt'.format(
+                pip_path,
+                sdk_path)
+
+            subprocess.call(check_cmd, shell=True)
+            print()
+            sys.stdout.flush()
+            open('/tmp/{}_py_checked'.format(sdk_name), 'a').close()
+
+        open('/tmp/{}_api_checked'.format(sdk_name), 'a').close()
 
     model_file = args.model
     if not os.path.exists(model_file):
         print(model_file, "not exist!")
         exit(-1)
 
-    print('begin profiling', model_file, '...')
+    print('Begin profiling', model_file, '...')
 
     bench_cmd = [args.python3, 'mvNCProfile.py', '-s', str(args.shave_cores),
                  os.path.abspath(model_file), '-in', args.input_node, '-on', args.output_node]
@@ -161,6 +187,6 @@ if __name__ == '__main__':
     graph_file = model_file.replace('.meta', '.graph')
     shutil.copy('{}/ncsdk-x86_64/tk/graph'.format(sdk_path), graph_file)
 
-    print('ncs graph copied to\033[32m', os.path.abspath(graph_file), '\033[0m')
-    print('profiling report copied to\033[32m', os.path.abspath(report_file), '\033[0m')
-    print('all done.')
+    print('Model graph copied to\033[32m', os.path.abspath(graph_file), '\033[0m')
+    print('Profiling report copied to\033[32m', os.path.abspath(report_file), '\033[0m')
+    print('All done.')
