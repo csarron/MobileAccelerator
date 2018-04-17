@@ -17,6 +17,6 @@
 */
 
 extern int mvnc_loglevel;
-extern char* mv_cmd_file;
+extern char mv_cmd_file[FILENAME_MAX];
 int usb_find_device(unsigned idx, char *addr, unsigned addrsize, void **device, int vid, int pid);
 int usb_boot(const char *addr, const void *mvcmd, unsigned size);

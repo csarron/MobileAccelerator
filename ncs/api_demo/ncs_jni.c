@@ -13,26 +13,26 @@ char image_file[FILENAME_MAX];
 
 JNIEXPORT void JNICALL
 Java_com_cscao_apps_ncsdemo_MainActivity_setCmdFile(JNIEnv *env, jobject instance,
-        jstring cmdFilePath_) {
-const char *cmdFilePath = (*env)->GetStringUTFChars(env, cmdFilePath_, 0);
-strcpy(mv_cmd_file, cmdFilePath);
-(*env)->ReleaseStringUTFChars(env, cmdFilePath_, cmdFilePath);
+                                                    jstring cmdFilePath_) {
+    const char *cmdFilePath = (*env)->GetStringUTFChars(env, cmdFilePath_, 0);
+    strcpy(mv_cmd_file, cmdFilePath);
+    (*env)->ReleaseStringUTFChars(env, cmdFilePath_, cmdFilePath);
 }
 
 JNIEXPORT void JNICALL
 Java_com_cscao_apps_ncsdemo_MainActivity_setGraphFile(JNIEnv *env, jobject instance,
-        jstring graphFile_) {
-const char *graphFile = (*env)->GetStringUTFChars(env, graphFile_, 0);
-strcpy(graph_file, graphFile);
-(*env)->ReleaseStringUTFChars(env, graphFile_, graphFile);
+                                                      jstring graphFile_) {
+    const char *graphFile = (*env)->GetStringUTFChars(env, graphFile_, 0);
+    strcpy(graph_file, graphFile);
+    (*env)->ReleaseStringUTFChars(env, graphFile_, graphFile);
 }
 
 JNIEXPORT void JNICALL
 Java_com_cscao_apps_ncsdemo_MainActivity_setImageFile(JNIEnv *env, jobject instance,
-        jstring imageFile_) {
-const char *imageFile = (*env)->GetStringUTFChars(env, imageFile_, 0);
-strcpy(image_file, imageFile);
-(*env)->ReleaseStringUTFChars(env, imageFile_, imageFile);
+                                                      jstring imageFile_) {
+    const char *imageFile = (*env)->GetStringUTFChars(env, imageFile_, 0);
+    strcpy(image_file, imageFile);
+    (*env)->ReleaseStringUTFChars(env, imageFile_, imageFile);
 }
 
 JNIEXPORT jstring JNICALL

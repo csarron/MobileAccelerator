@@ -57,7 +57,7 @@ static int initialized = 0;
 static pthread_mutex_t mm = PTHREAD_MUTEX_INITIALIZER;
 
 int mvnc_loglevel = 1;
-char* mv_cmd_file= "";
+char mv_cmd_file[FILENAME_MAX] = "";
 
 /////////////////////////// Structs /////////////////////////////
 struct Graph;
@@ -143,7 +143,7 @@ static mvncStatus load_fw_file(const char *name) {
     char *p;
 
     if (strlen(mv_cmd_file) > 0) {
-        LOGI("mvnc/MvNCAPI.mvcmd is set to: %s\n", mv_cmd_file)
+        LOGD("MvNCAPI cmd is set to: %s\n", mv_cmd_file)
     } else {
         // Search the mvnc executable in the same directory of this library, under mvnc
         Dl_info info;
@@ -154,6 +154,7 @@ static mvncStatus load_fw_file(const char *name) {
             strcpy(p + 1, "mvnc/MvNCAPI.mvcmd");
         else
             strcpy(mv_cmd_file, "mvnc/MvNCAPI.mvcmd");
+        LOGD("loading cmd from: %s\n", mv_cmd_file)
     }
 
     // Load the mvnc executable
