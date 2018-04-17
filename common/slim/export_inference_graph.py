@@ -89,14 +89,15 @@ if __name__ == '__main__':
         raise ValueError('You must supply the path to save to with --output_file')
     # tf.logging.set_verbosity(tf.logging.INFO)
     model_name = args.model_name
-    depth = 1.0
+    depth_multiplier_dict = {}
     with tf.Graph().as_default() as graph:
         # handle mobilenet depth multiplier from model name
         if model_name.startswith('mobilenet'):
             name_parts = model_name.split('_')
             depth = float(name_parts[-1])
+            depth_multiplier_dict = {'depth_multiplier': depth}
             model_name = '_'.join(name_parts[:-1])
-        print("generating inference graph for model:", model_name, "depth_multiplier:", depth)
+        print("generating inference graph for model:", model_name, "depth_multiplier:", depth_multiplier_dict)
         network_fn = nets_factory.get_network_fn(model_name,
                                                  num_classes=(args.num_classes - args.labels_offset),
                                                  is_training=False)
@@ -104,7 +105,7 @@ if __name__ == '__main__':
         placeholder = tf.placeholder(name='input', dtype=tf.float32,
                                      shape=[None, image_size, image_size, 3])
 
-        logits, _ = network_fn(placeholder, depth_multiplier=depth)
+        logits, _ = network_fn(placeholder, **depth_multiplier_dict)
         tf.nn.softmax(logits, name='output')
         graph_def = graph.as_graph_def()
         inf_graph_def = tf.graph_util.extract_sub_graph(graph_def, ['output'])
