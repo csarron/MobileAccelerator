@@ -272,22 +272,28 @@ public class MainActivity extends Activity {
 
         UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
         if (device != null) {
-            String productID = String.format("0x%04X", device.getProductId() & 0xFFFFF);
-            String vendorID = String.format("0x%04X", device.getVendorId() & 0xFFFFF);
+            int productID = device.getProductId();
+            int vendorID = device.getVendorId();
+            String productIDStr = String.format("0x%04X", productID & 0xFFFFF);
+            String vendorIDStr = String.format("0x%04X", vendorID & 0xFFFFF);
 
             String action = intent.getAction();
             if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-                mRunButton.setEnabled(false);
+                if (vendorID == VENDOR_ID && productID == PRODUCT_ID) {
+                    mRunButton.setEnabled(false);
+                }
                 mDeviceTextView.setText(R.string.detached);
                 addStatus(device.getProductName(), " detached");
-                addStatus("VendorId:", vendorID, ", ProductId:", productID);
+                addStatus("VendorId:", vendorIDStr, ", ProductId:", productIDStr);
 
             } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-                mRunButton.setEnabled(true);
+                if (vendorID == VENDOR_ID && productID == PRODUCT_ID) {
+                    mRunButton.setEnabled(true);
+                }
                 mDeviceTextView.setText(R.string.attached);
 //                addStatus("Manufacturer: ", device.getManufacturerName());
                 addStatus(device.getProductName(), " attached");
-                addStatus("VendorId:", vendorID, ", ProductId:", productID);
+                addStatus("VendorId:", vendorIDStr, ", ProductId:", productIDStr);
 
             } else {
                 Logger.w("unknown device action: " + action);
