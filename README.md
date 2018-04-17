@@ -45,6 +45,14 @@ Then you can either `export ANDROID_NDK=path/to/android-ndk` for the `snpe/run_s
 
 see [ncs/api_demo/README.md](ncs/api_demo/README.md)
 
+
+### Android App
+
+**NOTE**: current version needs root access, although non-root version can be developed later (using Androi USB API instead of native libusb).
+
+Tested on Nexus 6P and OnePlus3, both works for NCS.
+
+
 ### TensorRT for Nvidia Jetson TX2
 
 See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_image_classification/)
