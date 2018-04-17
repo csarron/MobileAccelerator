@@ -57,6 +57,7 @@ ext {
     espresso = "3.0.1"
 
     // utility
+    libsupersu = '1.0.0.+'
     logger = "2.1.1"
     rxjava = "2.1.9"
     rxandroid = "2.0.1"
@@ -96,21 +97,22 @@ ext {
     ]
 
     lolDeps = [
-            "eigen" : "eigenteam:eigen-git-mirror:${eigen}@zip",
+            "eigen": "eigenteam:eigen-git-mirror:${eigen}@zip",
     ]
 
     deps = [
-            "constraint"   : "com.android.support.constraint:constraint-layout:${constraint}",
-            "recyclerview" : "com.android.support:recyclerview-v7:${recyclerview}",
-            "viewhelper"   : "com.github.CymChad:BaseRecyclerViewAdapterHelper:${viewhelper}",
+            "constraint"  : "com.android.support.constraint:constraint-layout:${constraint}",
+            "recyclerview": "com.android.support:recyclerview-v7:${recyclerview}",
+            "viewhelper"  : "com.github.CymChad:BaseRecyclerViewAdapterHelper:${viewhelper}",
 
-            "logger"       : "com.orhanobut:logger:${logger}",
-            "rxjava"       : "io.reactivex.rxjava2:rxjava:${rxjava}",
-            "rxandroid"    : "io.reactivex.rxjava2:rxandroid:${rxandroid}",
+            "logger"      : "com.orhanobut:logger:${logger}",
+            "rxjava"      : "io.reactivex.rxjava2:rxjava:${rxjava}",
+            "rxandroid"   : "io.reactivex.rxjava2:rxandroid:${rxandroid}",
 //            "npy"          : "org.jetbrains.bio:npy:${npy}",
-            "paldb"        : "com.linkedin.paldb:paldb:1.1.0",
-            "fastjson"     : "com.alibaba:fastjson:1.1.68.android",
+            "paldb"       : "com.linkedin.paldb:paldb:1.1.0",
+            "fastjson"    : "com.alibaba:fastjson:1.1.68.android",
 
+            "supersu"     : "eu.chainfire:libsuperuser:${libsupersu}",
 //            "tensorflow"   : "org.tensorflow:tensorflow-android:${tensorflow}",
     ]
 }

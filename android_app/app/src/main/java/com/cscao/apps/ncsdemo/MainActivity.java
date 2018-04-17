@@ -4,6 +4,7 @@ import static com.cscao.apps.ncsdemo.Helper.OPENED_PRODUCT_ID;
 import static com.cscao.apps.ncsdemo.Helper.PRODUCT_ID;
 import static com.cscao.apps.ncsdemo.Helper.VENDOR_ID;
 import static com.cscao.apps.ncsdemo.Helper.getNcsPath;
+import static com.cscao.apps.ncsdemo.Helper.getSdcardPath;
 import static com.cscao.apps.ncsdemo.Helper.getStatus;
 
 import android.Manifest;
@@ -37,9 +38,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.List;
 
+import eu.chainfire.libsuperuser.Shell;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -117,6 +121,7 @@ public class MainActivity extends Activity {
                     PERMISSIONS_REQUEST_CODE);
         } else {
             mayCopyAsset();
+            mayChangePermission();
         }
 
     }
@@ -130,6 +135,7 @@ public class MainActivity extends Activity {
                         "sdcard permission granted",
                         Toast.LENGTH_SHORT).show();
                 mayCopyAsset();
+                mayChangePermission();
             } else {
                 Toast.makeText(this, "Please grant write permission", Toast.LENGTH_LONG).show();
             }
@@ -165,7 +171,7 @@ public class MainActivity extends Activity {
                         String fileRel = Paths.get(getNcsPath())
                                 .relativize(Paths.get(filePath))
                                 .toString();
-                        addStatus( "created /sdcard/ncs/", fileRel);
+                        addStatus("created /sdcard/ncs/", fileRel);
                     }
                 });
         mDisposable.add(copyDisposable);
@@ -174,7 +180,6 @@ public class MainActivity extends Activity {
 
     private String copyAssetFileToSdcardNcsDir(final String filename) {
         try {
-            InputStream in = getAssets().open(filename);
             File destFile = Paths.get(getNcsPath(), filename).toFile();
             String destFilePath = destFile.getPath();
             if (destFile.exists()) {
@@ -187,6 +192,8 @@ public class MainActivity extends Activity {
                 boolean status = parentDir.mkdirs();
                 System.out.println("created " + parentDir + (status ? " successfully" : " failed"));
             }
+
+            InputStream in = getAssets().open(filename);
             Files.copy(in, Paths.get(destFilePath));
             System.out.println(String.join("copied ", filename, " to ", destFilePath));
             return destFilePath;
@@ -206,7 +213,6 @@ public class MainActivity extends Activity {
     }
 
     public void runInference(View view) {
-        mRunButton.setEnabled(false);
         addStatus("preparing device...");
 
         addStatus("using graph:", mGraphFile, " image:", mImageFile);
@@ -215,19 +221,18 @@ public class MainActivity extends Activity {
 
         Observable<String> copyAssetObservable = Observable.create(
                 emitter -> {
-                    String results;
-                    results = doInference(mGraphFile, mImageFile, 0);
+                    String results = doInference(mGraphFile, mImageFile, 0);
                     emitter.onNext(results);
                     emitter.onComplete();
                 });
 
-        Disposable subscribe = copyAssetObservable.subscribeOn(Schedulers.computation())
+        Disposable copyAssetDisposable = copyAssetObservable.subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     addStatus(result);
                     mRunButton.setEnabled(true);
                 });
-        mDisposable.add(subscribe);
+        mDisposable.add(copyAssetDisposable);
 
     }
 
@@ -308,6 +313,120 @@ public class MainActivity extends Activity {
         unregisterReceiver(mUsbReceiver);
         if (!mDisposable.isDisposed()) {
             mDisposable.dispose();
+        }
+    }
+
+    private void mayChangePermission() {
+        Observable<Boolean> copyAssetObservable = Observable.create(
+                emitter -> {
+                    emitter.onNext(initPermission());
+                    emitter.onComplete();
+                });
+
+        Disposable copyAssetDisposable = copyAssetObservable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    addStatus("init usb permission: " + (result ? "success!" : "failed!"));
+                });
+        mDisposable.add(copyAssetDisposable);
+
+    }
+
+    /**
+     * 1. mount rootfs to read/write
+     * 2. change /dev/bus/usb/* permission to 777 in file /ueventd.rc
+     * 3. pkill ueventd (will automatically restart)
+     */
+    public boolean initPermission() {
+        List<String> out;
+        //check permission without requesting root
+
+        String CHECK_USB_CMD = "cat /ueventd.rc | grep /dev/bus/usb/";
+        boolean isUSB777 = false;
+        out = Shell.SH.run(CHECK_USB_CMD);
+        for (String str : out) {
+            if (str.contains("0777")) {
+                isUSB777 = true;
+                break;
+            }
+        }
+        Logger.d(out);
+
+        String CHECK_SE_CMD = "getenforce";
+        out = Shell.SH.run(CHECK_SE_CMD);
+        boolean isPermissive = false;
+        for (String str : out) {
+            if ("Permissive".equals(str)) {
+                isPermissive = true;
+                break;
+            }
+        }
+        Logger.d(out);
+
+        if (isUSB777 && isPermissive) {
+            return true;
+        }else {
+            Logger.w("permission not ok, begin setting...");
+        }
+
+        // set permission
+        if (Shell.SU.available()) {
+            String MOUNT_CMD = "mount -o rw,remount -t rootfs rootfs /";
+            out = Shell.SU.run(MOUNT_CMD);
+            if (out == null) {
+                Logger.w("cannot execute:" + MOUNT_CMD);
+                return false;
+            }
+
+            String COPY_CMD = "cp /ueventd.rc /sdcard/";
+            out = Shell.SU.run(COPY_CMD);
+            if (out == null) {
+                Logger.w("cannot execute:" + COPY_CMD);
+                return false;
+            }
+
+            try {
+                Path eventPath = Paths.get(getSdcardPath(), "ueventd.rc");
+                List<String> lines = Files.readAllLines(eventPath);
+                for (int i = 0; i < lines.size(); i++) {
+                    String line = lines.get(i);
+                    if (line.startsWith("/dev/bus/usb/*")) {
+                        Logger.d("found usb permission line:" + line);
+                        line = line.replace("660", "777");
+                        lines.set(i, line);
+                        Logger.d("new usb permission line:" + line);
+                        break;
+                    }
+                }
+                Files.write(eventPath, lines);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            String COPY_BACK_CMD = "cp /sdcard/ueventd.rc /";
+            out = Shell.SU.run(COPY_BACK_CMD);
+            if (out == null) {
+                Logger.w("cannot execute:" + COPY_BACK_CMD);
+                return false;
+            }
+
+            String KILL_CMD = "pkill ueventd";
+            out = Shell.SU.run(KILL_CMD);
+            if (out == null) {
+                Logger.w("cannot execute:" + KILL_CMD);
+                return false;
+            }
+
+            String ENFORCE_CMD = "/system/bin/setenforce 0";
+            out = Shell.SU.run(ENFORCE_CMD);
+            if (out == null) {
+                Logger.w("cannot execute:" + ENFORCE_CMD);
+                return false;
+            }
+
+            return true;
+        } else {
+            return false;
         }
     }
 
