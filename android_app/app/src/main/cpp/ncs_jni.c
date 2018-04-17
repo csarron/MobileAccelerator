@@ -140,6 +140,13 @@ Java_com_cscao_apps_ncsdemo_MainActivity_doInference(JNIEnv *env, jobject instan
     return (*env)->NewStringUTF(env, result_str);
 }
 
+JNIEXPORT void JNICALL
+Java_com_cscao_apps_ncsdemo_MainActivity_setLogLevel(JNIEnv *env, jobject instance, jint level) {
+
+    mvnc_loglevel = level;
+
+}
+
 #ifdef __cplusplus
 }
 #endif

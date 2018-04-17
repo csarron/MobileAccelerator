@@ -87,6 +87,12 @@ public class MainActivity extends Activity {
             }
         });
 
+        if (BuildConfig.DEBUG) {
+            setLogLevel(2);
+        } else {
+            setLogLevel(1);
+        }
+        
         FormatStrategy csvFormatStrategy = CsvFormatStrategy.newBuilder()
                 .tag(getString(R.string.app_name)).build();
         Logger.addLogAdapter(new DiskLogAdapter(csvFormatStrategy));
@@ -313,4 +319,5 @@ public class MainActivity extends Activity {
 
     public native String doInference(String graphFile, String imageFile, int labelOffset);
 
+    public native void setLogLevel(int level);
 }
