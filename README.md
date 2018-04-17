@@ -69,10 +69,8 @@ Tested on Nexus 6P and OnePlus3, both works for NCS.
 
 See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_image_classification/)
 
-## Common commands
+## Useful commands for ResNet
 
-
-Useful commands:
 - export inference graph for resnet_v1_50: `python common/slim/export_inference_graph.py -m resnet_v1_50 -o data/resnet_v1_50/resnet_v1_50_inf.pb -l 1`
 - freeze resnet_v1_50: `python common/freeze_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50_inf.pb`
 - (this command will ***fail*** since snpe-1.14.1 does not support resnet!) benchmark resnet_v1_50 using snpe: `python snpe/run_snpe.py -m data/resnet_v1_50/resnet_v1_50.frozen.pb`
