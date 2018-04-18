@@ -181,11 +181,11 @@ public class MainActivity extends Activity {
                     setCmdFile(mCmdFile);
                     emitter.onNext(mCmdFile);
 
-                    mModelFile = copyAssetFileToSdcardNcsDir("mobilenet_v1.graph");
+                    mModelFile = copyAssetFileToSdcardNcsDir("mobilenet_v2_1.0_224.graph");
 //                    setModelFile(mModelFile);
                     emitter.onNext(mModelFile);
 
-                    mModelFile = copyAssetFileToSdcardNcsDir("mobilenet_v1.dlc");
+                    mModelFile = copyAssetFileToSdcardNcsDir("mobilenet_v2_1.0_224.dlc");
                     setModelFile(mModelFile);
                     emitter.onNext(mModelFile);
 
