@@ -18,10 +18,10 @@ do
     else
         suffix=""
     fi
+
     python common/freeze_model.py -c data/${model}/${model}${suffix}.ckpt -g data/${model}/${model}_inf.pb
     python ncs/convert_model.py -c data/${model}/${model}${suffix}.ckpt -g data/${model}/${model}_inf.pb
 
-    #python ncs/run_ncs.py -m data/mobilenet_v2_1.4/ncs_mobilenet_v2_1.4_224.meta -p ~/p3dl/bin/python
 done
 
 echo -e "\033[1mAll done"
