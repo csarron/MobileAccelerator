@@ -165,12 +165,14 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void updateNcsButtonState() {
-        mRunNcsButton.setEnabled(mIsNcsAttached);
+    private void updateButtonState() {
+        mRunNcsButton.setEnabled(mIsNcsAttached && mModelFile.endsWith(".graph"));
+        mRunSnpeButton.setEnabled(mModelFile.endsWith(".dlc"));
     }
 
     public void mayCopyAsset() {
         mRunNcsButton.setEnabled(false);
+        mRunSnpeButton.setEnabled(false);
         addStatus("initializing...");
 
         Observable<String> copyAssetObservable = Observable.create(
@@ -203,7 +205,7 @@ public class MainActivity extends Activity {
                                 .relativize(Paths.get(filePath))
                                 .toString();
                         addStatus("created /sdcard/ncs/", fileRel);
-                        mRunSnpeButton.setEnabled(true);
+                        updateButtonState();
                     }
                 });
         mDisposable.add(copyDisposable);
@@ -260,7 +262,7 @@ public class MainActivity extends Activity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     addStatus(result);
-                    updateNcsButtonState();
+                    updateButtonState();
                 });
         mDisposable.add(ncsDisposable);
 
@@ -285,7 +287,7 @@ public class MainActivity extends Activity {
                             || productID == OPENED_PRODUCT_ID)) {
 
                         mIsNcsAttached = true;
-                        updateNcsButtonState();
+                        updateButtonState();
                         mDeviceTextView.setText(R.string.attached);
 
                         addStatus("Manufacturer: ", device.getManufacturerName());
@@ -313,7 +315,7 @@ public class MainActivity extends Activity {
             if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
                 if (vendorID == VENDOR_ID && productID == PRODUCT_ID) {
                     mIsNcsAttached = false;
-                    mRunNcsButton.setEnabled(false);
+                    updateButtonState();
                 }
                 mDeviceTextView.setText(R.string.detached);
                 addStatus(device.getProductName(), " detached");
@@ -322,7 +324,7 @@ public class MainActivity extends Activity {
             } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
                 if (vendorID == VENDOR_ID && productID == PRODUCT_ID) {
                     mIsNcsAttached = true;
-                    updateNcsButtonState();
+                    updateButtonState();
                 }
                 mDeviceTextView.setText(R.string.attached);
 //                addStatus("Manufacturer: ", device.getManufacturerName());
@@ -516,15 +518,10 @@ public class MainActivity extends Activity {
                         mRunNcsButton.setEnabled(false);
                         mRunSnpeButton.setEnabled(false);
 
-                        if (modelFile.endsWith(".graph")) {
+                        if (modelFile.endsWith(".graph") || modelFile.endsWith(".dlc")) {
                             mModelFile = modelFile;
-                            addStatus("selected ncs model: ", modelFile);
-                            updateNcsButtonState();
-
-                        } else if (modelFile.endsWith(".dlc")) {
-                            mModelFile = modelFile;
-                            addStatus("selected snpe model: ", modelFile);
-                            mRunSnpeButton.setEnabled(true);
+                            addStatus("selected model: ", modelFile);
+                            updateButtonState();
                         } else {
                             addStatus("selected invalid model: ", modelFile);
                             addStatus("model should end with either .graph or .dlc !");
@@ -574,7 +571,7 @@ public class MainActivity extends Activity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     addStatus(result);
-                    mRunSnpeButton.setEnabled(true);
+                    updateButtonState();
                 });
         mDisposable.add(snpeDisposable);
     }
