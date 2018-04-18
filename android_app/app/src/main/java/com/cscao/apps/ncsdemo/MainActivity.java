@@ -189,7 +189,7 @@ public class MainActivity extends Activity {
                     setModelFile(mModelFile);
                     emitter.onNext(mModelFile);
 
-                    mImageFile = copyAssetFileToSdcardNcsDir("keyboard.jpg");
+                    mImageFile = copyAssetFileToSdcardNcsDir("chairs.jpg");
                     setImageFile(mImageFile);
                     emitter.onNext(mImageFile);
 
