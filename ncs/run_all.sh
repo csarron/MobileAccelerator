@@ -15,7 +15,7 @@ do
         suffix=""
     fi
 
-    python ncs/run_ncs.py -m data/${model}/ncs_${model}/${model}${suffix}.meta -p ~/p3dl/bin/python
+    python ncs/run_ncs.py -m data/${model}/ncs_${model}${suffix}.meta -p ~/p3dl/bin/python
 
 done
 
