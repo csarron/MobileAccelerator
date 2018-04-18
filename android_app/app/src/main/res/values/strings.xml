@@ -4,10 +4,12 @@
     <string name="status_removed">Device Detached</string>
     <string name="status_added">Device Attached</string>
     <string name="run_ncs">Run NCS</string>
+    <string name="run_snpe">Run SNPE</string>
     <string name="select_model">Select Model</string>
     <string name="select_image">Select Image</string>
     <string name="detached">NCS Detached</string>
     <string name="not_found">NCS Not Found</string>
     <string name="attached">NCS Attached</string>
     <string name="device_status">Device Status:</string>
+    <string name="run_offload">Run Offload</string>
 </resources>

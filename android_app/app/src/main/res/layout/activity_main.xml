@@ -34,6 +34,15 @@
             android:text="@string/select_image"
             android:textAllCaps="false" />
 
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/option_lr2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/option_lr">
+
         <Button
             android:id="@+id/run_ncs_btn"
             android:layout_width="0dp"
@@ -41,9 +50,33 @@
             android:layout_weight="1"
             android:enabled="false"
             android:gravity="center"
-            android:onClick="runInference"
+            android:onClick="runNcsInference"
             android:padding="10dp"
             android:text="@string/run_ncs"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/run_snpe_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:gravity="center"
+            android:onClick="runSnpeInference"
+            android:padding="10dp"
+            android:text="@string/run_snpe"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/run_offload_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:gravity="center"
+            android:onClick="selectImage"
+            android:padding="10dp"
+            android:text="@string/run_offload"
             android:textAllCaps="false" />
 
     </LinearLayout>
@@ -52,7 +85,7 @@
         android:id="@+id/device_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/option_lr"
+        android:layout_below="@+id/option_lr2"
         android:gravity="start"
         android:paddingBottom="10dp"
         android:paddingEnd="10dp"
@@ -64,7 +97,7 @@
         android:id="@+id/device_status_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/option_lr"
+        android:layout_below="@+id/option_lr2"
         android:layout_toEndOf="@+id/device_tv"
         android:paddingBottom="10dp"
         android:textAppearance="?android:textAppearanceMedium" />

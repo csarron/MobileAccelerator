@@ -71,6 +71,14 @@ configurations {
     lol
 }
 
+allprojects {
+    repositories {
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
+
 dependencies {
     testImplementation rootProject.ext.testDeps["junit"]
 
@@ -78,6 +86,7 @@ dependencies {
     androidTestImplementation rootProject.ext.androidTestDeps["espresso"]
 
     implementation fileTree(dir: 'libs', include: ['*.jar', '*.class'])
+    implementation(name: 'snpe-release', ext:'aar')
 
     // use all lol dependencies
     for (d in rootProject.ext.lolDeps) {

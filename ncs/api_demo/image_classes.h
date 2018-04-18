@@ -1,4 +1,4 @@
-char * imagenet_classes[] ={"background",
+const char * imagenet_classes[] ={"background",
 "tench",
 "goldfish",
 "great white shark",

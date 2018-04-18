@@ -25,7 +25,7 @@ Java_com_cscao_apps_ncsdemo_MainActivity_setCmdFile(JNIEnv *env, jobject instanc
 }
 
 JNIEXPORT void JNICALL
-Java_com_cscao_apps_ncsdemo_MainActivity_setGraphFile(JNIEnv *env, jobject instance,
+Java_com_cscao_apps_ncsdemo_MainActivity_setModelFile(JNIEnv *env, jobject instance,
                                                       jstring graphFile_) {
     const char *graphFile = (*env)->GetStringUTFChars(env, graphFile_, 0);
     strcpy(graph_file, graphFile);
@@ -41,7 +41,7 @@ Java_com_cscao_apps_ncsdemo_MainActivity_setImageFile(JNIEnv *env, jobject insta
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_cscao_apps_ncsdemo_MainActivity_doInference(JNIEnv *env, jobject instance,
+Java_com_cscao_apps_ncsdemo_MainActivity_doNcsInference(JNIEnv *env, jobject instance,
                                                      jstring graphFile_, jstring imageFile_,
                                                      jint labelOffset_) {
     const char *graphFile = (*env)->GetStringUTFChars(env, graphFile_, 0);
@@ -146,6 +146,52 @@ Java_com_cscao_apps_ncsdemo_MainActivity_setLogLevel(JNIEnv *env, jobject instan
     mvnc_loglevel = level;
 
 }
+
+JNIEXPORT jfloatArray JNICALL
+Java_com_cscao_apps_ncsdemo_MainActivity_getImageFloats(JNIEnv *env, jobject instance,
+                                                        jstring imageFile_, jint width,
+                                                        jint height) {
+    const char *imageFile = (*env)->GetStringUTFChars(env, imageFile_, 0);
+
+    float* imageData = getImageFloats(imageFile, width, height);
+
+    jsize imageLen = width * height * 3;
+    jfloatArray imageArray = (*env)->NewFloatArray(env, imageLen);
+
+    if (NULL == imageArray) {
+        return NULL;
+    }
+    (*env)->SetFloatArrayRegion(env, imageArray, 0 , imageLen, imageData);
+
+    (*env)->ReleaseStringUTFChars(env, imageFile_, imageFile);
+    return imageArray;
+}
+
+JNIEXPORT jstring JNICALL
+Java_com_cscao_apps_ncsdemo_MainActivity_decodePredictions(JNIEnv *env, jobject instance,
+                                                           jfloatArray predictions_,
+                                                           jint labelOffset){
+    jfloat *predictions = (*env)->GetFloatArrayElements(env, predictions_, NULL);
+    jsize len = (*env)->GetArrayLength(env, predictions_);
+
+    float maxResult = 0.0;
+    int maxIndex = -1;
+    for (int index = 0; index < len; index++) {
+        if (predictions[index] > maxResult) {
+            maxResult = predictions[index];
+            maxIndex = index;
+        }
+    }
+
+    (*env)->ReleaseFloatArrayElements(env, predictions_, predictions, 0);
+
+    char result_str[100];
+    sprintf(result_str, "Top1 result is: %d, %s, %.03f", maxIndex + labelOffset,
+            imagenet_classes[maxIndex + labelOffset], predictions[maxIndex]);
+
+    return (*env)->NewStringUTF(env, result_str);
+}
+
 
 #ifdef __cplusplus
 }

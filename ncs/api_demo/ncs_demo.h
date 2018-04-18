@@ -64,8 +64,17 @@ void *LoadGraphFile(const char *path, unsigned int *length) {
     }
 
     fclose(fp);
-    LOGI("Read graph file: " ANSI_BOLD "%s" ANSI_RESET ANSI_CYAN ", size: " ANSI_BOLD "%d"
-                 ANSI_RESET ANSI_CYAN" bytes\n", path, *length);
+    LOGI("Read graph file: "
+                 ANSI_BOLD
+                 "%s"
+                 ANSI_RESET
+                         ANSI_CYAN
+                 ", size: "
+                 ANSI_BOLD
+                 "%d"
+                 ANSI_RESET
+                         ANSI_CYAN
+                 " bytes\n", path, *length);
     return buf;
 }
 
@@ -137,6 +146,52 @@ half *LoadImage(const char *path, const unsigned int reqSize, const float *mean,
     return imgfp16;
 }
 
+float *getImageFloats(const char *path, int width, int height) {
+    int cp, i;
+    unsigned char *img, *imgresized;
+    float *imageFloats;
+
+    img = stbi_load(path, &width, &height, &cp, 3);
+    if (!img) {
+        LOGE("Image: %s could not be loaded\n", path);
+        return NULL;
+    }
+    imgresized = (unsigned char *) malloc((size_t) (3 * width * height));
+    if (!imgresized) {
+        free(img);
+        perror("malloc");
+        return NULL;
+    }
+    stbir_resize_uint8(img, width, height, 0, imgresized, width, height, 0, 3);
+    free(img);
+    imageFloats = (float *) malloc(sizeof(*imageFloats) * width * height * 3);
+    if (!imageFloats) {
+        free(imgresized);
+        perror("malloc");
+        return NULL;
+    }
+    for (i = 0; i < width * height * 3; i++)
+        imageFloats[i] = imgresized[i];
+    free(imgresized);
+
+    float mean[] = {128, 128, 128};
+    float std = 1 / 128.0f;
+
+    for (i = 0; i < width * height; i++) {
+        float blue, green, red;
+        blue = imageFloats[3 * i + 2];
+        green = imageFloats[3 * i + 1];
+        red = imageFloats[3 * i + 0];
+
+        imageFloats[3 * i + 0] = (blue - mean[0]) * std;
+        imageFloats[3 * i + 1] = (green - mean[1]) * std;
+        imageFloats[3 * i + 2] = (red - mean[2]) * std;
+
+//LOGI("Blue: %f, Grean: %f,  Red: %f \n", imageFloats[3*i+0], imageFloats[3*i+1], imageFloats[3*i+2]);
+    }
+    return imageFloats;
+}
+
 // Opens one NCS device.
 // Param deviceIndex is the zero-based index of the device to open
 // Param deviceHandle is the address of a device handle that will be set
@@ -193,7 +248,9 @@ bool LoadGraphToNCS(void *deviceHandle, const char *graphFilename, void **graphH
     // successfully allocated graph.  Now graphHandle is ready to go.
     // use graphHandle for other API calls and call mvncDeallocateGraph
     // when done with it.
-    LOGI("Allocated graph for: " ANSI_BOLD "%s\n", graphFilename);
+    LOGI("Allocated graph for: "
+                 ANSI_BOLD
+                 "%s\n", graphFilename);
 
     return true;
 }
@@ -210,7 +267,8 @@ bool LoadGraphToNCS(void *deviceHandle, const char *graphFilename, void **graphH
 //                   for each color channel, blue, green, and red in that order.
 // Returns tru if works or false if doesn't
 bool
-DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, unsigned int networkDim, float *imageSMean,
+DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, unsigned int networkDim,
+                       float *imageSMean,
                        float imageStd,
                        unsigned int labelOffset, char *results) {
     mvncStatus retCode;
@@ -236,7 +294,9 @@ DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, unsigned in
 
     // the inference has been started, now call mvncGetResult() for the
     // inference result
-    LOGI("Successfully loaded the tensor for image: " ANSI_BOLD "%s\n", imageFileName);
+    LOGI("Successfully loaded the tensor for image: "
+                 ANSI_BOLD
+                 "%s\n", imageFileName);
 
     void *resultData16;
     void *userParam;
@@ -249,8 +309,11 @@ DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, unsigned in
     }
 
     // Successfully got the result.  The inference result is in the buffer pointed to by resultData
-    LOGI("Got the inference result for image: " ANSI_BOLD "%s\n", imageFileName);
-    LOGI("resultData is %d bytes which is %d 16-bit floats.\n", lenResultData, lenResultData/(int)sizeof(half));
+    LOGI("Got the inference result for image: "
+                 ANSI_BOLD
+                 "%s\n", imageFileName);
+    LOGI("resultData is %d bytes which is %d 16-bit floats.\n", lenResultData,
+         lenResultData / (int) sizeof(half));
 
     // convert half precision floats to full floats
     unsigned int numResults = lenResultData / sizeof(half);
@@ -268,9 +331,19 @@ DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, unsigned in
         }
     }
 
-    LOGI(ANSI_BOLD ANSI_GREEN "Top1 result is: " ANSI_YELLOW "%d, " ANSI_BLUE "%s, " ANSI_MAGENTA "%f" ANSI_RESET,
+    LOGI(ANSI_BOLD
+                 ANSI_GREEN
+                 "Top1 result is: "
+                 ANSI_YELLOW
+                 "%d, "
+                 ANSI_BLUE
+                 "%s, "
+                 ANSI_MAGENTA
+                 "%f"
+                 ANSI_RESET,
          maxIndex + labelOffset, imagenet_classes[maxIndex + labelOffset], resultData32[maxIndex]);
-    sprintf(results, "Top1 result is: %d, %s, %.03f", maxIndex + labelOffset, imagenet_classes[maxIndex + labelOffset], resultData32[maxIndex]);
+    sprintf(results, "Top1 result is: %d, %s, %.03f", maxIndex + labelOffset,
+            imagenet_classes[maxIndex + labelOffset], resultData32[maxIndex]);
     return true;
 }
 

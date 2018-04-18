@@ -7,6 +7,9 @@ import static com.cscao.apps.ncsdemo.Helper.getNcsPath;
 import static com.cscao.apps.ncsdemo.Helper.getPath;
 import static com.cscao.apps.ncsdemo.Helper.getSdcardPath;
 import static com.cscao.apps.ncsdemo.Helper.getStatus;
+import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.CPU;
+import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.DSP;
+import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.GPU;
 
 import android.Manifest;
 import android.app.Activity;
@@ -35,6 +38,9 @@ import com.orhanobut.logger.DiskLogAdapter;
 import com.orhanobut.logger.FormatStrategy;
 import com.orhanobut.logger.Logger;
 import com.orhanobut.logger.PrettyFormatStrategy;
+import com.qualcomm.qti.snpe.FloatTensor;
+import com.qualcomm.qti.snpe.NeuralNetwork;
+import com.qualcomm.qti.snpe.SNPE;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,8 +48,10 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import eu.chainfire.libsuperuser.Shell;
 import io.reactivex.Observable;
@@ -60,22 +68,29 @@ public class MainActivity extends Activity {
         System.loadLibrary("ncs_jni");
     }
 
-    private String mGraphFile;
+    private String mModelFile;
     private String mImageFile;
     private String mCmdFile;
 
-    private Button mRunButton;
+    private Button mRunNcsButton;
+    private Button mRunSnpeButton;
+    private Button mRunOffloadButton;
+
     private TextView mStatusTextView;
     private TextView mDeviceTextView;
 
     CompositeDisposable mDisposable = new CompositeDisposable();
+    private boolean mIsNcsAttached = false;
+    private SNPE.NeuralNetworkBuilder mSnpeNetworkBuilder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRunButton = findViewById(R.id.run_ncs_btn);
+        mRunNcsButton = findViewById(R.id.run_ncs_btn);
+        mRunSnpeButton = findViewById(R.id.run_snpe_btn);
+        mRunOffloadButton = findViewById(R.id.run_offload_btn);
 
         mStatusTextView = findViewById(R.id.status_tv);
         mStatusTextView.setMovementMethod(new ScrollingMovementMethod());
@@ -98,7 +113,7 @@ public class MainActivity extends Activity {
         } else {
             setLogLevel(1);
         }
-        
+
         FormatStrategy csvFormatStrategy = CsvFormatStrategy.newBuilder()
                 .tag(getString(R.string.app_name)).build();
         Logger.addLogAdapter(new DiskLogAdapter(csvFormatStrategy));
@@ -110,6 +125,12 @@ public class MainActivity extends Activity {
         registerReceiver(mUsbReceiver, attachFilter);
 
         handleIntent(getIntent());
+
+        mSnpeNetworkBuilder = new SNPE.NeuralNetworkBuilder(getApplication())
+                // Allows selecting a runtime order for the network.
+                // In the example below use DSP and fall back, in order, to GPU then CPU
+                // depending on whether any of the runtime is available.
+                .setRuntimeOrder(DSP, GPU, CPU);
     }
 
     private void checkPermissions() {
@@ -144,8 +165,12 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void updateNcsButtonState() {
+        mRunNcsButton.setEnabled(mIsNcsAttached);
+    }
+
     public void mayCopyAsset() {
-        mRunButton.setEnabled(false);
+        mRunNcsButton.setEnabled(false);
         addStatus("initializing...");
 
         Observable<String> copyAssetObservable = Observable.create(
@@ -154,9 +179,13 @@ public class MainActivity extends Activity {
                     setCmdFile(mCmdFile);
                     emitter.onNext(mCmdFile);
 
-                    mGraphFile = copyAssetFileToSdcardNcsDir("mobilenet_v1.graph");
-                    setGraphFile(mGraphFile);
-                    emitter.onNext(mGraphFile);
+                    mModelFile = copyAssetFileToSdcardNcsDir("mobilenet_v1.graph");
+//                    setModelFile(mModelFile);
+                    emitter.onNext(mModelFile);
+
+                    mModelFile = copyAssetFileToSdcardNcsDir("mobilenet_v1.dlc");
+                    setModelFile(mModelFile);
+                    emitter.onNext(mModelFile);
 
                     mImageFile = copyAssetFileToSdcardNcsDir("keyboard.jpg");
                     setImageFile(mImageFile);
@@ -174,6 +203,7 @@ public class MainActivity extends Activity {
                                 .relativize(Paths.get(filePath))
                                 .toString();
                         addStatus("created /sdcard/ncs/", fileRel);
+                        mRunSnpeButton.setEnabled(true);
                     }
                 });
         mDisposable.add(copyDisposable);
@@ -214,27 +244,25 @@ public class MainActivity extends Activity {
         mStatusTextView.setText(mSpannableBuilder, TextView.BufferType.SPANNABLE);
     }
 
-    public void runInference(View view) {
-        addStatus("preparing device...");
+    public void runNcsInference(View view) {
+        addStatus("using ncs model: ", mModelFile, " image: ", mImageFile);
 
-        addStatus("using graph:", mGraphFile, " image:", mImageFile);
+        addStatus("begin doing ncs inference...");
 
-        addStatus("begin doing inference...");
-
-        Observable<String> copyAssetObservable = Observable.create(
+        Observable<String> ncsObservable = Observable.create(
                 emitter -> {
-                    String results = doInference(mGraphFile, mImageFile, 0);
+                    String results = doNcsInference(mModelFile, mImageFile, 0);
                     emitter.onNext(results);
                     emitter.onComplete();
                 });
 
-        Disposable copyAssetDisposable = copyAssetObservable.subscribeOn(Schedulers.computation())
+        Disposable ncsDisposable = ncsObservable.subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     addStatus(result);
-                    mRunButton.setEnabled(true);
+                    updateNcsButtonState();
                 });
-        mDisposable.add(copyAssetDisposable);
+        mDisposable.add(ncsDisposable);
 
     }
 
@@ -255,7 +283,9 @@ public class MainActivity extends Activity {
                     String vendorIDStr = String.format("0x%04X", vendorID & 0xFFFFF);
                     if (vendorID == VENDOR_ID && (productID == PRODUCT_ID
                             || productID == OPENED_PRODUCT_ID)) {
-                        mRunButton.setEnabled(true);
+
+                        mIsNcsAttached = true;
+                        updateNcsButtonState();
                         mDeviceTextView.setText(R.string.attached);
 
                         addStatus("Manufacturer: ", device.getManufacturerName());
@@ -282,7 +312,8 @@ public class MainActivity extends Activity {
             String action = intent.getAction();
             if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
                 if (vendorID == VENDOR_ID && productID == PRODUCT_ID) {
-                    mRunButton.setEnabled(false);
+                    mIsNcsAttached = false;
+                    mRunNcsButton.setEnabled(false);
                 }
                 mDeviceTextView.setText(R.string.detached);
                 addStatus(device.getProductName(), " detached");
@@ -290,7 +321,8 @@ public class MainActivity extends Activity {
 
             } else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
                 if (vendorID == VENDOR_ID && productID == PRODUCT_ID) {
-                    mRunButton.setEnabled(true);
+                    mIsNcsAttached = true;
+                    updateNcsButtonState();
                 }
                 mDeviceTextView.setText(R.string.attached);
 //                addStatus("Manufacturer: ", device.getManufacturerName());
@@ -333,9 +365,8 @@ public class MainActivity extends Activity {
 
         Disposable copyAssetDisposable = copyAssetObservable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> {
-                    addStatus("init usb permission: " + (result ? "success!" : "failed!"));
-                });
+                .subscribe(result ->
+                        addStatus("init usb permission: " + (result ? "success!" : "failed!")));
         mDisposable.add(copyAssetDisposable);
 
     }
@@ -373,7 +404,7 @@ public class MainActivity extends Activity {
 
         if (isUSB777 && isPermissive) {
             return true;
-        }else {
+        } else {
             Logger.w("permission not ok, begin setting...");
         }
 
@@ -440,11 +471,11 @@ public class MainActivity extends Activity {
 
     public native void setCmdFile(String cmdFile);
 
-    public native void setGraphFile(String graphFile);
+    public native void setModelFile(String modelFile);
 
     public native void setImageFile(String imageFile);
 
-    public native String doInference(String graphFile, String imageFile, int labelOffset);
+    public native String doNcsInference(String graphFile, String imageFile, int labelOffset);
 
     public native void setLogLevel(int level);
 
@@ -481,9 +512,26 @@ public class MainActivity extends Activity {
                 if (uri != null) {
                     Logger.d(uri);
                     String modelFile = getPath(this, uri);
+                    if (modelFile != null) {
+                        mRunNcsButton.setEnabled(false);
+                        mRunSnpeButton.setEnabled(false);
 
-                    mGraphFile = modelFile;
-                    addStatus("selected model: ", modelFile);
+                        if (modelFile.endsWith(".graph")) {
+                            mModelFile = modelFile;
+                            addStatus("selected ncs model: ", modelFile);
+                            updateNcsButtonState();
+
+                        } else if (modelFile.endsWith(".dlc")) {
+                            mModelFile = modelFile;
+                            addStatus("selected snpe model: ", modelFile);
+                            mRunSnpeButton.setEnabled(true);
+                        } else {
+                            addStatus("selected invalid model: ", modelFile);
+                            addStatus("model should end with either .graph or .dlc !");
+                        }
+                    } else {
+                        addStatus("path cannot be resolved, uri is:", uri.toString());
+                    }
                 } else {
                     addStatus("uri is null!");
                 }
@@ -510,4 +558,89 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void runSnpeInference(View view) {
+        addStatus("using snpe model: ", mModelFile, " image: ", mImageFile);
+
+        addStatus("begin doing snpe inference...");
+
+        Observable<String> snpeObservable = Observable.create(
+                emitter -> {
+                    String results = doSnpeInference(mModelFile, mImageFile, 0);
+                    emitter.onNext(results);
+                    emitter.onComplete();
+                });
+
+        Disposable snpeDisposable = snpeObservable.subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    addStatus(result);
+                    mRunSnpeButton.setEnabled(true);
+                });
+        mDisposable.add(snpeDisposable);
+    }
+
+
+    private String doSnpeInference(String modelFile, String imageFile, int labelOffset) {
+        long startTime = System.currentTimeMillis();
+
+        try {
+            NeuralNetwork network = mSnpeNetworkBuilder.setModel(new File(modelFile))
+                    .setCpuFallbackEnabled(false)
+                    .setDebugEnabled(false)
+                    .build();
+
+            FloatTensor inputTensor = network.createFloatTensor(
+                    network.getInputTensorsShapes().get("input:0"));
+
+            int[] dimensions = inputTensor.getShape();
+
+            Logger.d("input names: " + network.getInputTensorsNames()
+                    + " dims: " + Arrays.toString(dimensions));
+
+            if (dimensions[0] != dimensions[1]) {
+                Logger.w("image height and width not equal: " + Arrays.toString(dimensions));
+            }
+
+            float[] pixelFloats = getImageFloats(imageFile, dimensions[0], dimensions[1]);
+            inputTensor.write(pixelFloats, 0, pixelFloats.length);
+
+            final Map<String, FloatTensor> inputs = new HashMap<>();
+            inputs.put("input:0", inputTensor);
+
+            long beginTime = System.currentTimeMillis();
+            final Map<String, FloatTensor> outputsMap = network.execute(inputs);
+
+            FloatTensor outputTensor = outputsMap.get("output:0");
+            long endTime = System.currentTimeMillis();
+
+            final float[] outputValues = new float[outputTensor.getSize()];
+            outputTensor.read(outputValues, 0, outputValues.length);
+
+            network.release();
+
+            long totalEndTime = System.currentTimeMillis();
+
+            String resultStr = decodePredictions(outputValues, labelOffset);
+            String timeStr = " inference: " + (endTime - beginTime) + " ms"
+                    + " total: " + (totalEndTime - startTime) + " ms";
+            return resultStr + timeStr;
+//            final List<String> result = new LinkedList<>();
+//            for (Map.Entry<String, FloatTensor> output : outputsMap.entrySet()) {
+//                final FloatTensor tensor = output.getValue();
+//                final float[] values = new float[tensor.getSize()];
+//                tensor.read(values, 0, values.length);
+//                // Process the output ...
+//            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return "snpe failed";
+    }
+
+    public native float[] getImageFloats(String imageFile, int width, int height);
+
+    public native String decodePredictions(float[] predictions, int labelOffset);
 }
