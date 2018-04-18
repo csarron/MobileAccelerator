@@ -4,6 +4,7 @@ import static com.cscao.apps.ncsdemo.Helper.OPENED_PRODUCT_ID;
 import static com.cscao.apps.ncsdemo.Helper.PRODUCT_ID;
 import static com.cscao.apps.ncsdemo.Helper.VENDOR_ID;
 import static com.cscao.apps.ncsdemo.Helper.getNcsPath;
+import static com.cscao.apps.ncsdemo.Helper.getPath;
 import static com.cscao.apps.ncsdemo.Helper.getSdcardPath;
 import static com.cscao.apps.ncsdemo.Helper.getStatus;
 
@@ -16,6 +17,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -445,4 +447,67 @@ public class MainActivity extends Activity {
     public native String doInference(String graphFile, String imageFile, int labelOffset);
 
     public native void setLogLevel(int level);
+
+    private static final int MODEL_REQUEST_CODE = 1;
+    private static final int IMAGE_REQUEST_CODE = 2;
+
+    public void selectModel(View view) {
+        performFileSelection(MODEL_REQUEST_CODE);
+    }
+
+
+    public void selectImage(View view) {
+        performFileSelection(IMAGE_REQUEST_CODE);
+    }
+
+    /**
+     * Fires an intent to spin up the "file chooser" UI and select an image.
+     */
+    public void performFileSelection(int requstCode) {
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+
+        startActivityForResult(intent, requstCode);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode,
+            Intent resultData) {
+        if (requestCode == MODEL_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+
+            if (resultData != null) {
+                Uri uri = resultData.getData();
+                if (uri != null) {
+                    Logger.d(uri);
+                    String modelFile = getPath(this, uri);
+
+                    mGraphFile = modelFile;
+                    addStatus("selected model: ", modelFile);
+                } else {
+                    addStatus("uri is null!");
+                }
+            } else {
+                Logger.w("request model no result data!");
+            }
+        } else if (requestCode == IMAGE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+
+            if (resultData != null) {
+                Uri uri = resultData.getData();
+                if (uri != null) {
+                    Logger.d(uri);
+                    String imageFile = getPath(this, uri);
+                    mImageFile = imageFile;
+                    addStatus("selected image: ", imageFile);
+                } else {
+                    addStatus("uri is null!");
+                }
+            } else {
+                Logger.w("request image no result data!");
+            }
+        } else {
+            Logger.w("unknown request code: " + requestCode);
+        }
+    }
+
 }

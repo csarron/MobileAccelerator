@@ -5,21 +5,54 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/run_ncs_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:enabled="false"
-        android:gravity="center"
-        android:onClick="runInference"
-        android:text="@string/run_ncs" />
+    <LinearLayout
+        android:id="@+id/option_lr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/select_graph_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="true"
+            android:gravity="center"
+            android:onClick="selectModel"
+            android:padding="10dp"
+            android:text="@string/select_model"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/select_image_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="true"
+            android:gravity="center"
+            android:onClick="selectImage"
+            android:padding="10dp"
+            android:text="@string/select_image"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/run_ncs_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:gravity="center"
+            android:onClick="runInference"
+            android:padding="10dp"
+            android:text="@string/run_ncs"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/device_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/run_ncs_btn"
+        android:layout_below="@+id/option_lr"
         android:gravity="start"
         android:paddingBottom="10dp"
         android:paddingEnd="10dp"
@@ -31,7 +64,7 @@
         android:id="@+id/device_status_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/run_ncs_btn"
+        android:layout_below="@+id/option_lr"
         android:layout_toEndOf="@+id/device_tv"
         android:paddingBottom="10dp"
         android:textAppearance="?android:textAppearanceMedium" />

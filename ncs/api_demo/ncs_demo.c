@@ -52,10 +52,13 @@ int main(int argc, char **argv) {
         image_mean[2] = 0;
         image_std = 1;
     }
+    char result_str[100];
 
     gettimeofday(&tval_before, NULL);
 
-    DoInferenceOnImageFile(graphHandle, image_file, image_size, image_mean, image_std, label_offset);
+    DoInferenceOnImageFile(graphHandle, image_file, image_size,
+                           image_mean, image_std, label_offset,
+                           result_str);
 
     gettimeofday(&tval_after, NULL);
     timersub(&tval_after, &tval_before, &tval_result);

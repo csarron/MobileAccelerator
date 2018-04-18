@@ -212,7 +212,7 @@ bool LoadGraphToNCS(void *deviceHandle, const char *graphFilename, void **graphH
 bool
 DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, unsigned int networkDim, float *imageSMean,
                        float imageStd,
-                       unsigned int labelOffset) {
+                       unsigned int labelOffset, char *results) {
     mvncStatus retCode;
 
     // LoadImage will read image from disk, convert channels to floats
@@ -270,6 +270,7 @@ DoInferenceOnImageFile(void *graphHandle, const char *imageFileName, unsigned in
 
     LOGI(ANSI_BOLD ANSI_GREEN "Top1 result is: " ANSI_YELLOW "%d, " ANSI_BLUE "%s, " ANSI_MAGENTA "%f" ANSI_RESET,
          maxIndex + labelOffset, imagenet_classes[maxIndex + labelOffset], resultData32[maxIndex]);
+    sprintf(results, "Top1 result is: %d, %s, %.03f", maxIndex + labelOffset, imagenet_classes[maxIndex + labelOffset], resultData32[maxIndex]);
     return true;
 }
 

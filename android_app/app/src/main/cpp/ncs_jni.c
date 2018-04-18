@@ -89,9 +89,10 @@ Java_com_cscao_apps_ncsdemo_MainActivity_doInference(JNIEnv *env, jobject instan
     }
 
     gettimeofday(&tval_before, NULL);
+    char result_str[100];
 
     DoInferenceOnImageFile(graphHandle, image_file, image_size, image_mean, image_std,
-                           label_offset);
+                           label_offset, result_str);
 
     gettimeofday(&tval_after, NULL);
     timersub(&tval_after, &tval_before, &tval_result);
@@ -131,8 +132,7 @@ Java_com_cscao_apps_ncsdemo_MainActivity_doInference(JNIEnv *env, jobject instan
     LOGI("-----------------------\n");
     LOGI("NCS work done.\n");
 
-    char result_str[100];
-    sprintf(result_str, "inference: %.02f ms, total: %.02f ms", ncs_inference_time, elapsed_time);
+    sprintf(&result_str[strlen(result_str)], ", inference: %.02f ms, total: %.02f ms", ncs_inference_time, elapsed_time);
 
     (*env)->ReleaseStringUTFChars(env, graphFile_, graphFile);
     (*env)->ReleaseStringUTFChars(env, imageFile_, imageFile);
