@@ -376,10 +376,11 @@ public class MainActivity extends Activity {
         //check permission without requesting root
         String CHECK_USB_CMD = "cat /ueventd.rc | grep /dev/bus/usb/ | grep 777";
         checkCmdResults = Shell.SH.run(CHECK_USB_CMD);
-        boolean isUSBOk = checkCmdResults != null;
+        System.out.println(checkCmdResults);
+        boolean isUsbOk = (checkCmdResults != null && !checkCmdResults.isEmpty());
 
-        if (isUSBOk) {
-            return "USB permission is good, no need to set";
+        if (isUsbOk) {
+            return "USB permission is good";
         } else {
             if (Shell.SU.available()) {
                 return setUsbPermission();
@@ -411,7 +412,9 @@ public class MainActivity extends Activity {
         //check permission without requesting root
         String CHECK_SE_CMD = "getenforce | grep Permissive";
         checkCmdResults = Shell.SH.run(CHECK_SE_CMD);
-        boolean isPermissive = checkCmdResults != null;
+        System.out.println(checkCmdResults);
+
+        boolean isPermissive = (checkCmdResults != null && !checkCmdResults.isEmpty());
 
         if (isPermissive) {
             return "SELinux is permissive (good)";
@@ -431,7 +434,7 @@ public class MainActivity extends Activity {
             Logger.w("Cannot set SELinux to permissive!");
             return "Cannot set SELinux to permissive!";
         }
-        return "SELinux is successfully set to permissive";
+        return "Successfully set SELinux to permissive";
     }
 
     public native void setCmdFile(String cmdFile);
