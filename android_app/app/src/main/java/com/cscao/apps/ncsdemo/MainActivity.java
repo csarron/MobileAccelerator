@@ -5,7 +5,6 @@ import static com.cscao.apps.ncsdemo.Helper.PRODUCT_ID;
 import static com.cscao.apps.ncsdemo.Helper.VENDOR_ID;
 import static com.cscao.apps.ncsdemo.Helper.getNcsPath;
 import static com.cscao.apps.ncsdemo.Helper.getPath;
-import static com.cscao.apps.ncsdemo.Helper.getSdcardPath;
 import static com.cscao.apps.ncsdemo.Helper.getStatus;
 import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.CPU;
 import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.DSP;
@@ -46,7 +45,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -359,116 +357,81 @@ public class MainActivity extends Activity {
     }
 
     private void mayChangePermission() {
-        Observable<Boolean> copyAssetObservable = Observable.create(
+        Observable<String> copyAssetObservable = Observable.create(
                 emitter -> {
-                    emitter.onNext(initPermission());
+                    emitter.onNext(checkUsbPermission());
+                    emitter.onNext(checkSELinuxPermission());
                     emitter.onComplete();
                 });
 
         Disposable copyAssetDisposable = copyAssetObservable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result ->
-                        addStatus("init usb permission: " + (result ? "success!" : "failed!")));
+                .subscribe(this::addStatus);
         mDisposable.add(copyAssetDisposable);
 
     }
 
-    /**
-     * 1. mount rootfs to read/write
-     * 2. change /dev/bus/usb/* permission to 777 in file /ueventd.rc
-     * 3. pkill ueventd (will automatically restart)
-     */
-    public boolean initPermission() {
-        List<String> out;
+    public String checkUsbPermission() {
+        List<String> checkCmdResults;
         //check permission without requesting root
+        String CHECK_USB_CMD = "cat /ueventd.rc | grep /dev/bus/usb/ | grep 777";
+        checkCmdResults = Shell.SH.run(CHECK_USB_CMD);
+        boolean isUSBOk = checkCmdResults != null;
 
-        String CHECK_USB_CMD = "cat /ueventd.rc | grep /dev/bus/usb/";
-        boolean isUSB777 = false;
-        out = Shell.SH.run(CHECK_USB_CMD);
-        for (String str : out) {
-            if (str.contains("0777")) {
-                isUSB777 = true;
-                break;
-            }
-        }
-        Logger.d(out);
-
-        String CHECK_SE_CMD = "getenforce";
-        out = Shell.SH.run(CHECK_SE_CMD);
-        boolean isPermissive = false;
-        for (String str : out) {
-            if ("Permissive".equals(str)) {
-                isPermissive = true;
-                break;
-            }
-        }
-        Logger.d(out);
-
-        if (isUSB777 && isPermissive) {
-            return true;
+        if (isUSBOk) {
+            return "USB permission is good, no need to set";
         } else {
-            Logger.w("permission not ok, begin setting...");
+            if (Shell.SU.available()) {
+                return setUsbPermission();
+            } else {
+                return "Root access is not available or denied";
+            }
         }
+    }
 
-        // set permission
-        if (Shell.SU.available()) {
-            String MOUNT_CMD = "mount -o rw,remount -t rootfs rootfs /";
-            out = Shell.SU.run(MOUNT_CMD);
-            if (out == null) {
-                Logger.w("cannot execute:" + MOUNT_CMD);
-                return false;
+    private String setUsbPermission() {
+        // change permission commands
+        String MOUNT_CMD = "mount -o rw,remount -t rootfs rootfs /";
+        String CHANGE_CMD = "sed -i 's/\\(\\/dev\\/bus\\/usb\\/\\* .*\\)0660/\\10777/g' "
+                + "/ueventd.rc";
+        String KILL_CMD = "pkill ueventd";
+
+        for (String cmd : new String[]{MOUNT_CMD, CHANGE_CMD, KILL_CMD}) {
+            List<String> cmdResults = Shell.SU.run(cmd);
+            if (cmdResults == null) {
+                Logger.w("Cannot execute:" + cmd);
+                return "Cannot execute: " + cmd;
             }
+        }
+        return "Successfully set USB permission";
+    }
 
-            String COPY_CMD = "cp /ueventd.rc /sdcard/";
-            out = Shell.SU.run(COPY_CMD);
-            if (out == null) {
-                Logger.w("cannot execute:" + COPY_CMD);
-                return false;
-            }
+    public String checkSELinuxPermission() {
+        List<String> checkCmdResults;
+        //check permission without requesting root
+        String CHECK_SE_CMD = "getenforce | grep Permissive";
+        checkCmdResults = Shell.SH.run(CHECK_SE_CMD);
+        boolean isPermissive = checkCmdResults != null;
 
-            try {
-                Path eventPath = Paths.get(getSdcardPath(), "ueventd.rc");
-                List<String> lines = Files.readAllLines(eventPath);
-                for (int i = 0; i < lines.size(); i++) {
-                    String line = lines.get(i);
-                    if (line.startsWith("/dev/bus/usb/*")) {
-                        Logger.d("found usb permission line:" + line);
-                        line = line.replace("660", "777");
-                        lines.set(i, line);
-                        Logger.d("new usb permission line:" + line);
-                        break;
-                    }
-                }
-                Files.write(eventPath, lines);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            String COPY_BACK_CMD = "cp /sdcard/ueventd.rc /";
-            out = Shell.SU.run(COPY_BACK_CMD);
-            if (out == null) {
-                Logger.w("cannot execute:" + COPY_BACK_CMD);
-                return false;
-            }
-
-            String KILL_CMD = "pkill ueventd";
-            out = Shell.SU.run(KILL_CMD);
-            if (out == null) {
-                Logger.w("cannot execute:" + KILL_CMD);
-                return false;
-            }
-
-            String ENFORCE_CMD = "/system/bin/setenforce 0";
-            out = Shell.SU.run(ENFORCE_CMD);
-            if (out == null) {
-                Logger.w("cannot execute:" + ENFORCE_CMD);
-                return false;
-            }
-
-            return true;
+        if (isPermissive) {
+            return "SELinux is permissive (good)";
         } else {
-            return false;
+            if (Shell.SU.available()) {
+                return setSELinux();
+            } else {
+                return "Root access is not available or denied";
+            }
         }
+    }
+
+    private String setSELinux() {
+        String ENFORCE_CMD = "/system/bin/setenforce 0";
+        List<String> seResults = Shell.SU.run(ENFORCE_CMD);
+        if (seResults == null) {
+            Logger.w("Cannot set SELinux to permissive!");
+            return "Cannot set SELinux to permissive!";
+        }
+        return "SELinux is successfully set to permissive";
     }
 
     public native void setCmdFile(String cmdFile);
