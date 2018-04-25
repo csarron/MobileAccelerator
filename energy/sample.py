@@ -52,8 +52,8 @@ def samples_callback(samples_):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--number_of_samples", type=int, default=1000,
-                        help="number of power samples per second")
+    parser.add_argument("-n", "--number_of_samples", type=int, default=-1,
+                        help="number of power samples per second, default to -1 meaning sample infinitely")
     parser.add_argument("-t", "--type", choices=("lvpm", "hvpm", "l", "h", "black", "white", "b", "w"), default="w",
                         help="Monsoon type, either white(w,l,lvpm) or black(b,h,hvpm)")
     parser.add_argument("-s", "--save_file", type=str, default='data/power_samples.csv',

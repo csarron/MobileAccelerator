@@ -64,6 +64,13 @@ see [ncs/api_demo/README.md](ncs/api_demo/README.md)
 
 Tested on Nexus 6P and OnePlus3, both works for NCS.
 
+### Monsoon Power Measurements
+
+Tested on macOS
+
+- Just sample and save to csv file: `python energy/measure.py`
+
+- Sample and display: `python energy/sample.py`
 
 ### TensorRT for Nvidia Jetson TX2
 
