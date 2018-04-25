@@ -8,3 +8,5 @@ scikit-image
 protobuf
 pyyaml
 ipython
+pyusb
+libusb1
