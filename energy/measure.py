@@ -18,7 +18,7 @@ if __name__ == "__main__":
     sample_number = args.number_of_samples
     monsoon_type = args.type
     if monsoon_type.startswith('l') or monsoon_type.startswith('w'):
-        monsoon = LVPM.Monsoon() # whilte
+        monsoon = LVPM.Monsoon()  # white
     else:
         monsoon = HVPM.Monsoon()
     monsoon.setup_usb()

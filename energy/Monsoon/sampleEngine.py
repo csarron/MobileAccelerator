@@ -300,7 +300,7 @@ class SampleEngine:
                                        mainCoarseCurrents)
                 self.__addMeasurement(channels.MainCurrent, mainCurrent)
                 # self.__mainCurrent.append(mainCurrent)
-                sDebug = "Main Current: " + repr(round(mainCurrent[0], 2))
+                sDebug = "Main Current: {:6.2f} mA".format(mainCurrent[0])
 
             if (self.__channels[channels.USBCurrent]):
                 # USB Coarse
@@ -332,7 +332,7 @@ class SampleEngine:
                                       usbCoarseCurrents)
                 self.__addMeasurement(channels.USBCurrent, usbCurrent)
                 # self.__usbCurrent.append(usbCurrent)
-                sDebug = sDebug + " USB Current: " + repr(round(usbCurrent[0], 2))
+                sDebug = sDebug + ", USB Current: {:6.2f} mA".format(usbCurrent[0])
 
             if (self.__channels[channels.AuxCurrent]):
                 # Aux Coarse
@@ -364,7 +364,7 @@ class SampleEngine:
                                       auxCoarseCurrents)
                 self.__addMeasurement(channels.AuxCurrent, auxCurrent)
                 # self.__auxCurrent.append(auxCurrent)
-                sDebug = sDebug + " Aux Current: " + repr(round(auxCurrent[0], 2))
+                sDebug = sDebug + ", Aux Current: {:6.2f} mA".format(auxCurrent[0])
 
             # Voltages
             if (self.__channels[channels.MainVoltage]):
@@ -372,18 +372,18 @@ class SampleEngine:
                 self.__addMeasurement(channels.MainVoltage, mainVoltages)
                 # self.__mainVoltage.append(mainVoltages)
 
-                sDebug = sDebug + " Main Voltage: " + repr(round(mainVoltages[0], 2))
+                sDebug = sDebug + ", Main Voltage: {:4.2f} V".format(mainVoltages[0])
 
             if (self.__channels[channels.USBVoltage]):
                 usbVoltages = measurements[:, self.__usbVoltageIndex] * self.__ADCRatio * self.__usbVoltageScale
                 self.__addMeasurement(channels.USBVoltage, usbVoltages)
                 # self.__usbVoltage.append(usbVoltages)
-                sDebug = sDebug + " USB Voltage: " + repr(round(usbVoltages[0], 2))
+                sDebug = sDebug + ", USB Voltage: {:4.2f} V".format(usbVoltages[0])
             timeStamp = measurements[:, self.__timestampIndex]
             self.__addMeasurement(channels.timeStamp, timeStamp)
             # self.__timeStamps.append(timeStamp)
-            sDebug = sDebug + " Dropped: " + repr(self.dropped)
-            sDebug = sDebug + " Total Sample Count: " + repr(self.__sampleCount)
+            sDebug = sDebug + ", Dropped: {:6d}".format(self.dropped)
+            sDebug = sDebug + ", Total Sample Count: " + repr(self.__sampleCount)
             if (self.__outputConsoleMeasurements):
                 print(sDebug)
             if not self.__startTriggerSet:
@@ -459,13 +459,15 @@ class SampleEngine:
         result = self.__arrangeSamples(True)
         return result
 
-    def __outputToCSV(self):
+    def __outputToCSV(self, callback=None):
         """This is intended to be called periodically during sampling.
         The alternative is to store measurements in an array or queue, which will overflow allocated
         memory within a few hours depending on system settings.
         Writes measurements to a CSV file"""
 
         output = self.__arrangeSamples()
+        if callback:
+            callback(output)
         for i in range(len(output[0])):
             sOut = ""
             for j in range(len(output)):
@@ -584,10 +586,9 @@ class SampleEngine:
             while not self.__stopTriggerSet:
                 S = self.__sampleLoop(S, Samples, self.bulkProcessRate, legacy_timestamp)
                 if (S >= csvOutThreshold and self.__CSVOutEnable and self.__startTriggerSet):
-                    self.__outputToCSV()
+                    self.__outputToCSV(output_callback)
                     csvOutRateLimit = False
-                if output_callback:
-                    output_callback(self.__arrangeSamples())
+
                 if (S == 0):
                     csvOutRateLimit = True
                     Samples = [[0 for _ in range(self.__packetSize + 1)] for _ in range(self.bulkProcessRate)]

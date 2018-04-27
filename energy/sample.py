@@ -22,7 +22,7 @@ time_queue = collections.deque(maxlen=display_range)
 
 time_queue.extend([0 for _ in range(display_range)])
 samples_queue.extend([0 for _ in range(display_range)])
-line, = ax.plot(time_queue, samples_queue)
+line, = ax.plot(time_queue, samples_queue, linewidth=0.5)
 
 
 def animate(_):
@@ -36,10 +36,8 @@ def animate(_):
     return line,
 
 
-def sample_generator(sampler, arguments):
-    sampler.enableCSVOutput(arguments.save_file)
-    sampler.ConsoleOutput(True)
-    sampler.startSampling(sample_number, granularity=10, output_callback=samples_callback)
+def sample_generator(sampler, sample_number_):
+    sampler.startSampling(sample_number_, granularity=10, output_callback=samples_callback)
 
 
 def samples_callback(samples_):
@@ -70,18 +68,28 @@ if __name__ == "__main__":
     else:
         monsoon = HVPM.Monsoon()
     monsoon.setup_usb()
+    print("Monsoon Power Monitor Serial number: {}".format(monsoon.getSerialNumber()))
+    engine = sampleEngine.SampleEngine(monsoon)
+    engine.enableCSVOutput(args.save_file)
+    engine.ConsoleOutput(True)
 
 
-    def signal_handler(signal, frame):
+    def signal_handler(_signal, _frame):
         print('You pressed Ctrl+C, clearing monsoon sampling and exit!')
         monsoon.stopSampling()
         sys.exit(0)
 
 
+    def handle_close(_event):
+        print('You cosed figure, clearing monsoon sampling and exit!')
+        monsoon.stopSampling()
+        sys.exit(0)
+
+    fig.canvas.mpl_connect('close_event', handle_close)
+
     signal.signal(signal.SIGINT, signal_handler)
-    print("Monsoon Power Monitor Serial number: {}".format(monsoon.getSerialNumber()))
-    engine = sampleEngine.SampleEngine(monsoon)
-    pt = threading.Thread(target=sample_generator, name='sample_generator', args=(engine, args))
+
+    pt = threading.Thread(target=sample_generator, name='sample_generator', args=(engine, sample_number))
     pt.daemon = True
     pt.start()
 
