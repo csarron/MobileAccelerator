@@ -34,6 +34,16 @@
             android:text="@string/select_image"
             android:textAllCaps="false" />
 
+        <Switch
+            android:id="@+id/bench_sw"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="10dp"
+            android:layout_weight="1"
+            android:checked="false"
+            android:text="@string/bench" />
+
 
     </LinearLayout>
 

@@ -28,6 +28,7 @@ import android.text.SpannableStringBuilder;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -79,6 +80,7 @@ public class MainActivity extends Activity {
 
     CompositeDisposable mDisposable = new CompositeDisposable();
     private boolean mIsNcsAttached = false;
+    private boolean mIsBenchmarking = false;
     private SNPE.NeuralNetworkBuilder mSnpeNetworkBuilder;
 
     @Override
@@ -129,6 +131,18 @@ public class MainActivity extends Activity {
                 // In the example below use DSP and fall back, in order, to GPU then CPU
                 // depending on whether any of the runtime is available.
                 .setRuntimeOrder(DSP, GPU, CPU);
+
+        Switch benchSwitch = findViewById(R.id.bench_sw);
+        benchSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                addStatus("turn benchmarking on");
+                mIsBenchmarking = true;
+            } else {
+                mIsBenchmarking = false;
+                addStatus("turn benchmarking off");
+            }
+
+        });
     }
 
     private void checkPermissions() {
@@ -238,6 +252,9 @@ public class MainActivity extends Activity {
 
 
     public void addStatus(String... statuses) {
+        if (mIsBenchmarking) {
+            return;
+        }
         mSpannableBuilder.clear();
         mSpannableBuilder.append(mStatusTextView.getText());
         mSpannableBuilder.append(getStatus(statuses));
@@ -551,14 +568,15 @@ public class MainActivity extends Activity {
                     .setCpuFallbackEnabled(false)
                     .setDebugEnabled(false)
                     .build();
+            long modelInitTime = System.currentTimeMillis();
 
             FloatTensor inputTensor = network.createFloatTensor(
                     network.getInputTensorsShapes().get("input:0"));
 
             int[] dimensions = inputTensor.getShape();
 
-            Logger.d("input names: " + network.getInputTensorsNames()
-                    + " dims: " + Arrays.toString(dimensions));
+//            Logger.d("input names: " + network.getInputTensorsNames()
+//                    + " dims: " + Arrays.toString(dimensions));
 
             if (dimensions[0] != dimensions[1]) {
                 Logger.w("image height and width not equal: " + Arrays.toString(dimensions));
@@ -574,17 +592,23 @@ public class MainActivity extends Activity {
             final Map<String, FloatTensor> outputsMap = network.execute(inputs);
 
             FloatTensor outputTensor = outputsMap.get("output:0");
-            long endTime = System.currentTimeMillis();
 
             final float[] outputValues = new float[outputTensor.getSize()];
             outputTensor.read(outputValues, 0, outputValues.length);
+            long endTime = System.currentTimeMillis();
 
             network.release();
 
             long totalEndTime = System.currentTimeMillis();
-
+            long initTime = modelInitTime - startTime;
+            long inputTime = beginTime - modelInitTime;
+            long executeTime = endTime - beginTime;
+            long outputTime = totalEndTime - endTime;
             String resultStr = decodePredictions(outputValues, labelOffset);
-            String timeStr = " inference: " + (endTime - beginTime) + " ms"
+            String timeStr = " init: " + initTime + " ms"
+                    + " input: " + inputTime + " ms"
+                    + " infer: " + executeTime + " ms"
+                    + " output: " + outputTime + " ms"
                     + " total: " + (totalEndTime - startTime) + " ms";
             return resultStr + timeStr;
 //            final List<String> result = new LinkedList<>();

@@ -12,4 +12,5 @@
     <string name="attached">Attached</string>
     <string name="device_status">NCS Device Status:</string>
     <string name="run_offload">Run Offload</string>
+    <string name="bench">Bench</string>
 </resources>
