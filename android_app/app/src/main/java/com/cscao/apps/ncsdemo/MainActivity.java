@@ -261,28 +261,6 @@ public class MainActivity extends Activity {
         mStatusTextView.setText(mSpannableBuilder, TextView.BufferType.SPANNABLE);
     }
 
-    public void runNcsInference(View view) {
-        addStatus("using ncs model: ", mModelFile, " image: ", mImageFile);
-
-        addStatus("begin doing ncs inference...");
-
-        Observable<String> ncsObservable = Observable.create(
-                emitter -> {
-                    String results = doNcsInference(mModelFile, mImageFile, 0);
-                    emitter.onNext(results);
-                    emitter.onComplete();
-                });
-
-        Disposable ncsDisposable = ncsObservable.subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> {
-                    addStatus(result);
-                    updateButtonState();
-                });
-        mDisposable.add(ncsDisposable);
-
-    }
-
     private void showUsbDeviceStatus() {
         mDeviceTextView.setText(R.string.not_found);
 
@@ -429,7 +407,6 @@ public class MainActivity extends Activity {
         //check permission without requesting root
         String CHECK_SE_CMD = "getenforce | grep Permissive";
         checkCmdResults = Shell.SH.run(CHECK_SE_CMD);
-        System.out.println(checkCmdResults);
 
         boolean isPermissive = (checkCmdResults != null && !checkCmdResults.isEmpty());
 
@@ -454,16 +431,6 @@ public class MainActivity extends Activity {
         return "Successfully set SELinux to permissive";
     }
 
-    public native void setCmdFile(String cmdFile);
-
-    public native void setModelFile(String modelFile);
-
-    public native void setImageFile(String imageFile);
-
-    public native String doNcsInference(String graphFile, String imageFile, int labelOffset);
-
-    public native void setLogLevel(int level);
-
     private static final int MODEL_REQUEST_CODE = 1;
     private static final int IMAGE_REQUEST_CODE = 2;
 
@@ -471,14 +438,10 @@ public class MainActivity extends Activity {
         performFileSelection(MODEL_REQUEST_CODE);
     }
 
-
     public void selectImage(View view) {
         performFileSelection(IMAGE_REQUEST_CODE);
     }
 
-    /**
-     * Fires an intent to spin up the "file chooser" UI and select an image.
-     */
     public void performFileSelection(int requstCode) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -545,7 +508,7 @@ public class MainActivity extends Activity {
 
         Observable<String> snpeObservable = Observable.create(
                 emitter -> {
-                    String results = doSnpeInference(mModelFile, mImageFile, 0);
+                    String results = doSnpeInference(mModelFile, mImageFile);
                     emitter.onNext(results);
                     emitter.onComplete();
                 });
@@ -559,8 +522,7 @@ public class MainActivity extends Activity {
         mDisposable.add(snpeDisposable);
     }
 
-
-    private String doSnpeInference(String modelFile, String imageFile, int labelOffset) {
+    private String doSnpeInference(String modelFile, String imageFile) {
         long startTime = System.currentTimeMillis();
 
         try {
@@ -597,19 +559,24 @@ public class MainActivity extends Activity {
             outputTensor.read(outputValues, 0, outputValues.length);
             long endTime = System.currentTimeMillis();
 
-            network.release();
+            String resultStr = decodePredictions(outputValues, 0);
+            long cleanTime = System.currentTimeMillis();
 
-            long totalEndTime = System.currentTimeMillis();
+            network.release();
+            long finishTime = System.currentTimeMillis();
+
             long initTime = modelInitTime - startTime;
             long inputTime = beginTime - modelInitTime;
             long executeTime = endTime - beginTime;
-            long outputTime = totalEndTime - endTime;
-            String resultStr = decodePredictions(outputValues, labelOffset);
+            long outputTime = cleanTime - endTime;
+            long cleanUpTime = finishTime - cleanTime;
+
             String timeStr = " init: " + initTime + " ms"
                     + " input: " + inputTime + " ms"
                     + " infer: " + executeTime + " ms"
                     + " output: " + outputTime + " ms"
-                    + " total: " + (totalEndTime - startTime) + " ms";
+                    + " clean: " + cleanUpTime + " ms"
+                    + " total: " + (finishTime - startTime) + " ms";
             return resultStr + timeStr;
 //            final List<String> result = new LinkedList<>();
 //            for (Map.Entry<String, FloatTensor> output : outputsMap.entrySet()) {
@@ -627,7 +594,97 @@ public class MainActivity extends Activity {
         return "snpe failed";
     }
 
+
+    public void runNcsInference(View view) {
+        addStatus("using ncs model: ", mModelFile, " image: ", mImageFile);
+
+        addStatus("begin doing ncs inference...");
+
+        Observable<String> ncsObservable = Observable.create(
+                emitter -> {
+                    String results = doNcsInference(mModelFile, mImageFile);
+                    emitter.onNext(results);
+                    emitter.onComplete();
+                });
+
+        Disposable ncsDisposable = ncsObservable.subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    addStatus(result);
+                    updateButtonState();
+                });
+        mDisposable.add(ncsDisposable);
+
+    }
+
+    public String doNcsInference(String graphFile, String imageFile) {
+        long startTime = System.currentTimeMillis();
+
+        long deviceHandle = openNcsDevice(0);
+        long graphHandle = loadNcsModel(graphFile, deviceHandle);
+
+        long modelInitTime = System.currentTimeMillis();
+
+        float[] imageData = getImageFloats(imageFile, 224, 224);
+
+        long beginTime = System.currentTimeMillis();
+
+        float[] predictions = inferOnNcs(graphHandle, imageData);
+        long endTime = System.currentTimeMillis();
+
+        float[] layerTimes = getNcsLayerTimes(graphHandle, 200);
+        float sum = 0;
+        for (float layerTime : layerTimes) {
+            sum += layerTime;
+        }
+        System.out.println(sum);
+        String resultStr = decodePredictions(predictions, 0);
+
+        long cleanTime = System.currentTimeMillis();
+        cleanUpNcs(graphHandle, deviceHandle);
+        long finishTime = System.currentTimeMillis();
+
+        long initTime = modelInitTime - startTime;
+        long inputTime = beginTime - modelInitTime;
+        long executeTime = endTime - beginTime;
+        long outputTime = cleanTime - endTime;
+        long cleanUpTime = finishTime - cleanTime;
+
+        String timeStr = " init: " + initTime + " ms"
+                + " input: " + inputTime + " ms"
+                + " infer: " + sum + " ms"
+                + " output: " + outputTime + " ms"
+                + " clean: " + cleanUpTime + " ms"
+                + " total: " + (finishTime - startTime) + " ms";
+        return resultStr + timeStr;
+    }
+
+
     public native float[] getImageFloats(String imageFile, int width, int height);
 
     public native String decodePredictions(float[] predictions, int labelOffset);
+
+    public native void setCmdFile(String cmdFile);
+
+    public native void setModelFile(String modelFile);
+
+    public native void setImageFile(String imageFile);
+
+//    public native String doNcsInference(String graphFile, String imageFile, int labelOffset);
+
+    public native void setLogLevel(int level);
+
+    // return device handle
+    public native long openNcsDevice(int index);
+
+    // return model graph handle
+    public native long loadNcsModel(String modelFile, long deviceHandle);
+
+    public native float[] inferOnNcs(long graphHandle, float[] imageData);
+
+    public native float[] getNcsLayerTimes(long graphHandle, int maxLayers);
+
+
+    public native void cleanUpNcs(long graphHandle, long deviceHandle);
+
 }
