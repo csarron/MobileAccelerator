@@ -634,7 +634,7 @@ class SampleEngine:
             if (self.__CSVOutEnable):
                 self.__outputToCSV()
                 self.disableCSVOutput()
-            raise Exception(e.args)
+            raise Exception(e)
 
     def periodicStartSampling(self, calTime=1250):
         """Causes the Power Monitor to enter sample mode, but doesn't actively collect samples.

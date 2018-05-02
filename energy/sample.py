@@ -26,9 +26,12 @@ samples_queue.extend([0 for _ in range(display_range)])
 line, = ax.plot(time_queue, samples_queue, linewidth=0.5)
 
 should_pause = False
+csv_name = None
 csv_writer = None
+trigger_count = 0
 trigger = float("inf")
 triggered = False
+header = ["Time(ms)", "Main(mA)", "Main Voltage(V)"]
 
 
 def animate(_):
@@ -58,12 +61,15 @@ def samples_callback(samples_):
         if avg > trigger:
             global triggered, csv_writer
             triggered = True
-            if csv_writer:
-                records = list(zip(samples_[sampleEngine.channels.timeStamp],
-                                   samples_[sampleEngine.channels.MainCurrent],
-                                   samples_[2]))
-
-                csv_writer.writerows(records)
+            records = list(zip(samples_[sampleEngine.channels.timeStamp],
+                               samples_[sampleEngine.channels.MainCurrent],
+                               samples_[2]))
+            if not csv_writer:
+                global trigger_count
+                csv_writer = csv.writer(open('%s%d%s' % (csv_name, trigger_count, '.csv'), 'w'))
+                csv_writer.writerow(header)
+                trigger_count += 1
+            csv_writer.writerows(records)
         else:
             # global should_pause
             # should_pause = True
@@ -105,10 +111,8 @@ if __name__ == "__main__":
     if args.save_file:
         if trigger < float("inf"):  # set trigger
             engine.disableCSVOutput()
-            csv_writer = csv.writer(open(args.save_file, 'w'))
-            header = ["Time(ms)", "Main(mA)", "Main Voltage(V)"]
-            csv_writer.writerow(header)
-
+            # global csv_name
+            csv_name = os.path.splitext(args.save_file)[0]
         else:
             dir_name = os.path.dirname(args.save_file)
             if not os.path.exists(dir_name):
