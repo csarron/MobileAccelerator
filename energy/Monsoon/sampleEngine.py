@@ -599,9 +599,9 @@ class SampleEngine:
                 self.monsoon.stopSampling()
             while not self.__stopTriggerSet:
                 S = self.__sampleLoop(S, Samples, self.bulkProcessRate, legacy_timestamp)
-                if S >= csvOutThreshold and self.__startTriggerSet:
+                if self.__startTriggerSet:
                     output = self.__arrangeSamples()
-                    if self.__CSVOutEnable:
+                    if S >= csvOutThreshold and self.__CSVOutEnable:
                         self.__outputToCSV2(output)
                     output_callback(output)
 

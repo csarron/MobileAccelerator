@@ -3,6 +3,7 @@ import Monsoon.LVPM as LVPM
 import Monsoon.HVPM as HVPM
 from Monsoon import sampleEngine
 import argparse
+import csv
 import os
 import matplotlib
 
@@ -24,8 +25,15 @@ time_queue.extend([0 for _ in range(display_range)])
 samples_queue.extend([0 for _ in range(display_range)])
 line, = ax.plot(time_queue, samples_queue, linewidth=0.5)
 
+should_pause = False
+csv_writer = None
+trigger = float("inf")
+triggered = False
+
 
 def animate(_):
+    if should_pause:
+        return line,
     # print("samples: {}".format(latest_current_values))
     line.set_xdata(time_queue)
     line.set_ydata(samples_queue)  # update the data
@@ -43,10 +51,30 @@ def sample_generator(sampler, sample_number_):
 def samples_callback(samples_):
     last_values = samples_[sampleEngine.channels.MainCurrent]
     if last_values:
-        # print(len(last_values))
-        # sys.stdout.flush()
         time_queue.extend(samples_[sampleEngine.channels.timeStamp])
         samples_queue.extend(last_values)
+        avg = sum(last_values) / len(last_values)
+
+        if avg > trigger:
+            global triggered, csv_writer
+            triggered = True
+            if csv_writer:
+                records = list(zip(samples_[sampleEngine.channels.timeStamp],
+                                   samples_[sampleEngine.channels.MainCurrent],
+                                   samples_[2]))
+
+                csv_writer.writerows(records)
+        else:
+            # global should_pause
+            # should_pause = True
+            if triggered:
+                csv_writer = None
+
+
+def on_click(_event):
+    global should_pause
+    if _event.dblclick:
+        should_pause ^= True
 
 
 if __name__ == "__main__":
@@ -54,10 +82,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--number_of_samples", type=int, default=-1,
                         help="number of power samples per second, default to -1 meaning sample infinitely")
-    parser.add_argument("-m", "--monsoon_model", choices=("lvpm", "hvpm", "l", "h", "black", "white", "b", "w"), default="w",
+    parser.add_argument("-m", "--monsoon_model", choices=("lvpm", "hvpm", "l", "h", "black", "white", "b", "w"),
+                        default="w",
                         help="Monsoon type, either white(w,l,lvpm) or black(b,h,hvpm)")
     parser.add_argument("-s", "--save_file", type=str, default=None,  # 'data/power_samples.csv',
                         help="file to save power samples")
+    parser.add_argument("-t", "--trigger", type=float, default=float("inf"),
+                        help="threshold to trigger sampling, unit is mA")
 
     args = parser.parse_args()
     sample_number = args.number_of_samples if args.number_of_samples > 0 else sampleEngine.triggers.SAMPLECOUNT_INFINITE
@@ -70,11 +101,19 @@ if __name__ == "__main__":
     monsoon.setup_usb()
     print("Monsoon Power Monitor Serial number: {}".format(monsoon.getSerialNumber()))
     engine = sampleEngine.SampleEngine(monsoon)
+    trigger = args.trigger
     if args.save_file:
-        dir_name = os.path.dirname(args.save_file)
-        if not os.path.exists(dir_name):
-            os.makedirs(dir_name)
-        engine.enableCSVOutput(args.save_file)
+        if trigger < float("inf"):  # set trigger
+            engine.disableCSVOutput()
+            csv_writer = csv.writer(open(args.save_file, 'w'))
+            header = ["Time(ms)", "Main(mA)", "Main Voltage(V)"]
+            csv_writer.writerow(header)
+
+        else:
+            dir_name = os.path.dirname(args.save_file)
+            if not os.path.exists(dir_name):
+                os.makedirs(dir_name)
+            engine.enableCSVOutput(args.save_file)
     else:
         engine.disableCSVOutput()
     engine.ConsoleOutput(True)
@@ -91,7 +130,9 @@ if __name__ == "__main__":
         monsoon.stopSampling()
         sys.exit(0)
 
+
     fig.canvas.mpl_connect('close_event', handle_close)
+    fig.canvas.mpl_connect('button_press_event', on_click)
 
     signal.signal(signal.SIGINT, signal_handler)
 
