@@ -477,6 +477,18 @@ class SampleEngine:
             sOut = sOut + "\n"
             self.__f.write(sOut)
 
+    def __outputToCSV2(self, output):
+        """This is intended to be called periodically during sampling.
+        The alternative is to store measurements in an array or queue, which will overflow allocated
+        memory within a few hours depending on system settings.
+        Writes measurements to a CSV file"""
+        for i in range(len(output[0])):
+            sOut = ""
+            for j in range(len(output)):
+                sOut = sOut + repr(output[j][i]) + ","
+            sOut = sOut + "\n"
+            self.__f.write(sOut)
+
     def __arrangeSamples(self, exportAllIndices=False):
         """Arranges output lists so they're a bit easier to process.
         exportAllIndices:  Populates the list with every channel, even if no measurements are stored for that channel.
@@ -587,9 +599,11 @@ class SampleEngine:
                 self.monsoon.stopSampling()
             while not self.__stopTriggerSet:
                 S = self.__sampleLoop(S, Samples, self.bulkProcessRate, legacy_timestamp)
-                if (S >= csvOutThreshold and self.__CSVOutEnable and self.__startTriggerSet):
-                    self.__outputToCSV(output_callback)
-                    csvOutRateLimit = False
+                if S >= csvOutThreshold and self.__startTriggerSet:
+                    output = self.__arrangeSamples()
+                    if self.__CSVOutEnable:
+                        self.__outputToCSV2(output)
+                    output_callback(output)
 
                 if (S == 0):
                     csvOutRateLimit = True

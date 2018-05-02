@@ -43,6 +43,8 @@ def sample_generator(sampler, sample_number_):
 def samples_callback(samples_):
     last_values = samples_[sampleEngine.channels.MainCurrent]
     if last_values:
+        # print(len(last_values))
+        # sys.stdout.flush()
         time_queue.extend(samples_[sampleEngine.channels.timeStamp])
         samples_queue.extend(last_values)
 
