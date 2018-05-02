@@ -4,6 +4,7 @@ import threading
 import time
 from Monsoon import HVPM
 import struct
+from datetime import datetime
 import time
 import math
 from Monsoon.calibrationData import calibrationData
@@ -385,7 +386,8 @@ class SampleEngine:
             sDebug = sDebug + ", Dropped: {:6d}".format(self.dropped)
             sDebug = sDebug + ", Total Sample Count: " + repr(self.__sampleCount)
             if (self.__outputConsoleMeasurements):
-                print(sDebug)
+                time_str = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
+                print(time_str + ' ' + sDebug)
             if not self.__startTriggerSet:
                 self.__ClearOutput()
 
