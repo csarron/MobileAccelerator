@@ -590,6 +590,8 @@ class SampleEngine:
                 if (S >= csvOutThreshold and self.__CSVOutEnable and self.__startTriggerSet):
                     self.__outputToCSV(output_callback)
                     csvOutRateLimit = False
+                else:
+                    output_callback(self.__arrangeSamples())
 
                 if (S == 0):
                     csvOutRateLimit = True

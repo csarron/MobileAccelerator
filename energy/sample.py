@@ -37,7 +37,7 @@ def animate(_):
 
 
 def sample_generator(sampler, sample_number_):
-    sampler.startSampling(sample_number_, granularity=10, output_callback=samples_callback)
+    sampler.startSampling(sample_number_, output_callback=samples_callback)
 
 
 def samples_callback(samples_):
@@ -52,25 +52,29 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--number_of_samples", type=int, default=-1,
                         help="number of power samples per second, default to -1 meaning sample infinitely")
-    parser.add_argument("-t", "--type", choices=("lvpm", "hvpm", "l", "h", "black", "white", "b", "w"), default="w",
+    parser.add_argument("-m", "--monsoon_model", choices=("lvpm", "hvpm", "l", "h", "black", "white", "b", "w"), default="w",
                         help="Monsoon type, either white(w,l,lvpm) or black(b,h,hvpm)")
-    parser.add_argument("-s", "--save_file", type=str, default='data/power_samples.csv',
-                        help="number of power samples per second")
+    parser.add_argument("-s", "--save_file", type=str, default=None,  # 'data/power_samples.csv',
+                        help="file to save power samples")
+
     args = parser.parse_args()
     sample_number = args.number_of_samples if args.number_of_samples > 0 else sampleEngine.triggers.SAMPLECOUNT_INFINITE
-    machine_type = args.type
-    dir_name = os.path.dirname(args.save_file)
-    if not os.path.exists(dir_name):
-        os.makedirs(dir_name)
+    monsoon_model = args.monsoon_model
 
-    if machine_type.startswith('l') or machine_type.startswith('w'):
+    if monsoon_model.startswith('l') or monsoon_model.startswith('w'):
         monsoon = LVPM.Monsoon()  # white
     else:
         monsoon = HVPM.Monsoon()
     monsoon.setup_usb()
     print("Monsoon Power Monitor Serial number: {}".format(monsoon.getSerialNumber()))
     engine = sampleEngine.SampleEngine(monsoon)
-    engine.enableCSVOutput(args.save_file)
+    if args.save_file:
+        dir_name = os.path.dirname(args.save_file)
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+        engine.enableCSVOutput(args.save_file)
+    else:
+        engine.disableCSVOutput()
     engine.ConsoleOutput(True)
 
 
