@@ -38,20 +38,68 @@
             android:id="@+id/bench_sw"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:padding="10dp"
             android:layout_weight="1"
             android:checked="false"
+            android:gravity="center"
+            android:padding="10dp"
             android:text="@string/bench" />
 
 
     </LinearLayout>
 
+    <RadioGroup
+        android:id="@+id/rg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/option_lr"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/dsp_rb"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:onClick="onRadioButtonClicked"
+            android:text="@string/dsp" />
+
+        <RadioButton
+            android:id="@+id/gpu_rb"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:onClick="onRadioButtonClicked"
+            android:text="@string/gpu" />
+
+        <RadioButton
+            android:id="@+id/cpu_rb"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:onClick="onRadioButtonClicked"
+            android:text="@string/cpu" />
+
+        <RadioButton
+            android:id="@+id/gpu_16_rb"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1.5"
+            android:onClick="onRadioButtonClicked"
+            android:text="@string/gpu_16" />
+    </RadioGroup>
+
     <LinearLayout
         android:id="@+id/option_lr2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/option_lr">
+        android:layout_below="@+id/rg">
 
         <Button
             android:id="@+id/run_ncs_btn"
@@ -60,7 +108,7 @@
             android:layout_weight="1"
             android:enabled="false"
             android:gravity="center"
-            android:onClick="runNcsInference"
+            android:onClick="runInference"
             android:padding="10dp"
             android:text="@string/run_ncs"
             android:textAllCaps="false" />
@@ -72,7 +120,7 @@
             android:layout_weight="1"
             android:enabled="false"
             android:gravity="center"
-            android:onClick="runSnpeInference"
+            android:onClick="runInference"
             android:padding="10dp"
             android:text="@string/run_snpe"
             android:textAllCaps="false" />
@@ -84,7 +132,7 @@
             android:layout_weight="1"
             android:enabled="false"
             android:gravity="center"
-            android:onClick="selectImage"
+            android:onClick="runInference"
             android:padding="10dp"
             android:text="@string/run_offload"
             android:textAllCaps="false" />

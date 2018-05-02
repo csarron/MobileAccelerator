@@ -9,6 +9,7 @@ import static com.cscao.apps.ncsdemo.Helper.getStatus;
 import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.CPU;
 import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.DSP;
 import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.GPU;
+import static com.qualcomm.qti.snpe.NeuralNetwork.Runtime.GPU_FLOAT16;
 
 import android.Manifest;
 import android.app.Activity;
@@ -28,6 +29,7 @@ import android.text.SpannableStringBuilder;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -501,35 +503,13 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void runSnpeInference(View view) {
-        addStatus("using snpe model: ", mModelFile, " image: ", mImageFile);
-
-        addStatus("begin doing snpe inference...");
-
-        Observable<String> snpeObservable = Observable.create(
-                emitter -> {
-                    String results = doSnpeInference(mModelFile, mImageFile);
-                    emitter.onNext(results);
-                    emitter.onComplete();
-                });
-
-        Disposable snpeDisposable = snpeObservable.subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> {
-                    addStatus(result);
-                    updateButtonState();
-                });
-        mDisposable.add(snpeDisposable);
-    }
-
     private String doSnpeInference(String modelFile, String imageFile) {
         long startTime = System.currentTimeMillis();
 
         try {
             NeuralNetwork network = mSnpeNetworkBuilder.setModel(new File(modelFile))
-                    .setCpuFallbackEnabled(false)
-                    .setDebugEnabled(false)
                     .build();
+            runOnUiThread(() -> addStatus("running snpe on: " + network.getRuntime().name()));
             long modelInitTime = System.currentTimeMillis();
 
             FloatTensor inputTensor = network.createFloatTensor(
@@ -592,29 +572,6 @@ public class MainActivity extends Activity {
 
 
         return "snpe failed";
-    }
-
-
-    public void runNcsInference(View view) {
-        addStatus("using ncs model: ", mModelFile, " image: ", mImageFile);
-
-        addStatus("begin doing ncs inference...");
-
-        Observable<String> ncsObservable = Observable.create(
-                emitter -> {
-                    String results = doNcsInference(mModelFile, mImageFile);
-                    emitter.onNext(results);
-                    emitter.onComplete();
-                });
-
-        Disposable ncsDisposable = ncsObservable.subscribeOn(Schedulers.computation())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(result -> {
-                    addStatus(result);
-                    updateButtonState();
-                });
-        mDisposable.add(ncsDisposable);
-
     }
 
     public String doNcsInference(String graphFile, String imageFile) {
@@ -687,4 +644,88 @@ public class MainActivity extends Activity {
 
     public native void cleanUpNcs(long graphHandle, long deviceHandle);
 
+    public void onRadioButtonClicked(View view) {
+
+        RadioButton radioButton = (RadioButton) view;
+        switch (view.getId()) {
+            case R.id.dsp_rb:
+                if (mSnpeNetworkBuilder.isRuntimeSupported(DSP)) {
+                    addStatus("selected SNPE on DSP");
+                    mSnpeNetworkBuilder.setRuntimeOrder(DSP);
+                } else {
+                    addStatus("SNPE on DSP is not available");
+                    radioButton.setChecked(false);
+                    radioButton.setEnabled(false);
+                }
+                break;
+            case R.id.gpu_rb:
+                if (mSnpeNetworkBuilder.isRuntimeSupported(GPU)) {
+                    addStatus("selected SNPE on GPU");
+                    mSnpeNetworkBuilder.setRuntimeOrder(GPU);
+                } else {
+                    addStatus("SNPE on GPU is not available");
+                    radioButton.setChecked(false);
+                    radioButton.setEnabled(false);
+                }
+                break;
+            case R.id.gpu_16_rb:
+                if (mSnpeNetworkBuilder.isRuntimeSupported(GPU_FLOAT16)) {
+                    addStatus("selected SNPE on GPU_FLOAT16");
+                    mSnpeNetworkBuilder.setRuntimeOrder(GPU_FLOAT16);
+                } else {
+                    addStatus("SNPE on GPU_FLOAT16 is not available");
+                    radioButton.setChecked(false);
+                    radioButton.setEnabled(false);
+                }
+                break;
+            default:
+                addStatus("selected SNPE on CPU");
+                mSnpeNetworkBuilder.setRuntimeOrder(CPU);
+
+        }
+    }
+
+    public void runInference(View view) {
+        Observable<String> ncsObservable;
+        switch (view.getId()) {
+            case R.id.run_ncs_btn:
+                addStatus("using ncs model: ", mModelFile, " image: ", mImageFile);
+                addStatus("begin doing ncs inference...");
+                ncsObservable = Observable.create(
+                        emitter -> {
+                            String results = doNcsInference(mModelFile, mImageFile);
+                            emitter.onNext(results);
+                            emitter.onComplete();
+                        });
+
+                break;
+            case R.id.run_offload_btn:
+                addStatus("selected offload");
+                ncsObservable = Observable.create(
+                        emitter -> {
+//                            String results = doNcsInference(mModelFile, mImageFile);
+//                            emitter.onNext(results);
+//                            emitter.onComplete();
+                        });
+                break;
+            default:
+                addStatus("using snpe model: ", mModelFile, " image: ", mImageFile);
+                addStatus("begin doing snpe inference...");
+                ncsObservable = Observable.create(
+                        emitter -> {
+                            String results = doSnpeInference(mModelFile, mImageFile);
+                            emitter.onNext(results);
+                            emitter.onComplete();
+                        });
+        }
+
+
+        Disposable ncsDisposable = ncsObservable.subscribeOn(Schedulers.computation())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    addStatus(result);
+                    updateButtonState();
+                });
+        mDisposable.add(ncsDisposable);
+    }
 }
