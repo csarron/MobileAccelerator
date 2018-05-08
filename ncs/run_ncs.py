@@ -110,10 +110,10 @@ if __name__ == '__main__':
             print("Installing package dependencies for Linux...")
             sys.stdout.flush()
 
-            check_cmd = "sudo apt install -qq $(cat '{}/requirements_apt.txt') > /dev/null".format(sdk_path)
+            check_cmd = "sudo apt install -y -qq $(cat '{}/requirements_apt.txt') > /dev/null".format(sdk_path)
             subprocess.call(check_cmd, shell=True)
 
-            check_cmd = "sudo apt install libusb-1.0-0-dev"
+            check_cmd = "sudo apt install -y libusb-1.0-0-dev"
             subprocess.call(check_cmd, shell=True)
 
             # need to set usb permission
