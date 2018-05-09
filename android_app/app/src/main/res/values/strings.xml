@@ -11,10 +11,12 @@
     <string name="not_found">Not Found</string>
     <string name="attached">Attached</string>
     <string name="device_status">NCS Device Status:</string>
-    <string name="run_offload">Run Offload</string>
+    <string name="run_offload">Offload</string>
     <string name="bench">Bench</string>
     <string name="gpu">GPU</string>
     <string name="dsp">DSP</string>
     <string name="cpu">CPU</string>
-    <string name="gpu_16">GPU_16</string>
+    <string name="gpu_16">GPU16</string>
+    <string name="tf_lite">TF</string>
+    <string name="run_tf">Run TF</string>
 </resources>

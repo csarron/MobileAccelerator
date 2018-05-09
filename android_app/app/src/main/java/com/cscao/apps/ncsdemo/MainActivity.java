@@ -44,9 +44,14 @@ import com.qualcomm.qti.snpe.FloatTensor;
 import com.qualcomm.qti.snpe.NeuralNetwork;
 import com.qualcomm.qti.snpe.SNPE;
 
+import org.tensorflow.lite.Interpreter;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -75,6 +80,7 @@ public class MainActivity extends Activity {
 
     private Button mRunNcsButton;
     private Button mRunSnpeButton;
+    private Button mRunTfButton;
     private Button mRunOffloadButton;
 
     private TextView mStatusTextView;
@@ -93,7 +99,7 @@ public class MainActivity extends Activity {
         mRunNcsButton = findViewById(R.id.run_ncs_btn);
         mRunSnpeButton = findViewById(R.id.run_snpe_btn);
         mRunOffloadButton = findViewById(R.id.run_offload_btn);
-
+        mRunTfButton = findViewById(R.id.run_tf_btn);
         mStatusTextView = findViewById(R.id.status_tv);
         mStatusTextView.setMovementMethod(new ScrollingMovementMethod());
 
@@ -182,6 +188,7 @@ public class MainActivity extends Activity {
     private void updateButtonState() {
         mRunNcsButton.setEnabled(mIsNcsAttached && mModelFile.endsWith(".graph"));
         mRunSnpeButton.setEnabled(mModelFile.endsWith(".dlc"));
+        mRunTfButton.setEnabled(mModelFile.endsWith(".tflite"));
     }
 
     public void mayCopyAsset() {
@@ -200,6 +207,10 @@ public class MainActivity extends Activity {
                     emitter.onNext(mModelFile);
 
                     mModelFile = copyAssetFileToSdcardNcsDir("mobilenet_v2_1.0_224.dlc");
+//                    setModelFile(mModelFile);
+                    emitter.onNext(mModelFile);
+
+                    mModelFile = copyAssetFileToSdcardNcsDir("mobilenet_v2_1.0_224.tflite");
                     setModelFile(mModelFile);
                     emitter.onNext(mModelFile);
 
@@ -444,12 +455,12 @@ public class MainActivity extends Activity {
         performFileSelection(IMAGE_REQUEST_CODE);
     }
 
-    public void performFileSelection(int requstCode) {
+    public void performFileSelection(int requestCode) {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
 
-        startActivityForResult(intent, requstCode);
+        startActivityForResult(intent, requestCode);
     }
 
     @Override
@@ -465,14 +476,16 @@ public class MainActivity extends Activity {
                     if (modelFile != null) {
                         mRunNcsButton.setEnabled(false);
                         mRunSnpeButton.setEnabled(false);
+                        mRunTfButton.setEnabled(false);
 
-                        if (modelFile.endsWith(".graph") || modelFile.endsWith(".dlc")) {
+                        if (modelFile.endsWith(".graph") || modelFile.endsWith(".dlc")
+                                || modelFile.endsWith(".tflite")) {
                             mModelFile = modelFile;
                             addStatus("selected model: ", modelFile);
                             updateButtonState();
                         } else {
                             addStatus("selected invalid model: ", modelFile);
-                            addStatus("model should end with either .graph or .dlc !");
+                            addStatus("model should end with either .graph, .tflite or .dlc !");
                         }
                     } else {
                         addStatus("path cannot be resolved, uri is:", uri.toString());
@@ -502,6 +515,50 @@ public class MainActivity extends Activity {
             Logger.w("unknown request code: " + requestCode);
         }
     }
+
+
+    public String doTfInference(String graphFile, String imageFile) {
+        long startTime = System.currentTimeMillis();
+
+        Interpreter tfLite = new Interpreter(new File(graphFile));
+        long modelInitTime = System.currentTimeMillis();
+
+        float[] imageData = getImageFloats(imageFile, 224, 224);
+        ByteBuffer byteBuf = ByteBuffer.allocateDirect(224 * 224 * 3 * Float.BYTES); //4 bytes per float
+        byteBuf.order(ByteOrder.nativeOrder());
+        FloatBuffer buffer = byteBuf.asFloatBuffer();
+        buffer.put(imageData);
+        buffer.position(0);
+        long beginTime = System.currentTimeMillis();
+        float[] predictions = new float[getNumClasses()];
+        float[][] labelProb = new float[1][];
+        labelProb[0] = predictions;
+
+        tfLite.run(byteBuf, labelProb);
+        long endTime = System.currentTimeMillis();
+
+
+        String resultStr = decodePredictions(predictions, 0);
+
+        long cleanTime = System.currentTimeMillis();
+        long finishTime = System.currentTimeMillis();
+
+        long initTime = modelInitTime - startTime;
+        long inputTime = beginTime - modelInitTime;
+        long executeTime = endTime - beginTime;
+        long outputTime = cleanTime - endTime;
+        long cleanUpTime = finishTime - cleanTime;
+
+        String timeStr = " init: " + initTime + " ms"
+                + " input: " + inputTime + " ms"
+                + " infer: " + executeTime + " ms"
+                + " output: " + outputTime + " ms"
+                + " clean: " + cleanUpTime + " ms"
+                + " total: " + (finishTime - startTime) + " ms";
+        return resultStr + timeStr;
+    }
+
+    public native int getNumClasses();
 
     private String doSnpeInference(String modelFile, String imageFile) {
         long startTime = System.currentTimeMillis();
@@ -594,7 +651,7 @@ public class MainActivity extends Activity {
         for (float layerTime : layerTimes) {
             sum += layerTime;
         }
-        System.out.println(sum);
+//        System.out.println(sum);
         String resultStr = decodePredictions(predictions, 0);
 
         long cleanTime = System.currentTimeMillis();
@@ -698,6 +755,15 @@ public class MainActivity extends Activity {
                             emitter.onComplete();
                         });
 
+                break;
+            case R.id.run_tf_btn:
+                addStatus("selected TensorFlow Lite");
+                ncsObservable = Observable.create(
+                        emitter -> {
+                            String results = doTfInference(mModelFile, mImageFile);
+                            emitter.onNext(results);
+                            emitter.onComplete();
+                        });
                 break;
             case R.id.run_offload_btn:
                 addStatus("selected offload");

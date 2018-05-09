@@ -126,6 +126,18 @@
             android:textAllCaps="false" />
 
         <Button
+            android:id="@+id/run_tf_btn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:gravity="center"
+            android:onClick="runInference"
+            android:padding="10dp"
+            android:text="@string/run_tf"
+            android:textAllCaps="false" />
+
+        <Button
             android:id="@+id/run_offload_btn"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

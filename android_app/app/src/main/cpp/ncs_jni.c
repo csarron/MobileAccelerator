@@ -222,6 +222,15 @@ Java_com_cscao_apps_ncsdemo_MainActivity_getNcsLayerTimes(JNIEnv *env, jobject i
 }
 
 
+JNIEXPORT jint JNICALL
+Java_com_cscao_apps_ncsdemo_MainActivity_getNumClasses(JNIEnv *env, jobject instance) {
+
+    jint num = sizeof(imagenet_classes) / sizeof(imagenet_classes[0]);
+    LOGI("classes: %d\n", num);
+    return num;
+
+}
+
 #ifdef __cplusplus
 }
 #endif
