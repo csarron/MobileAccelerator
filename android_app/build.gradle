@@ -67,6 +67,7 @@ ext {
 
     // compute
     tensorflow = "1.7.0"
+    tflite = "0.1.7"
     eigen = "3.3.4"
 
     // app flags
@@ -113,6 +114,7 @@ ext {
             "fastjson"    : "com.alibaba:fastjson:1.1.68.android",
 
             "supersu"     : "eu.chainfire:libsuperuser:${libsupersu}",
+            "tflite"      : "org.tensorflow:tensorflow-lite:${tflite}"
 //            "tensorflow"   : "org.tensorflow:tensorflow-android:${tensorflow}",
     ]
 }
