@@ -5,9 +5,15 @@
 - ***NOTE*** that SNPE only supports Python 2, and NCS profiling only supports Python 3.
 
 it's better to run the code in a Python 2 environment but also prepare a Python 3 environment.
-You can do it via virualenv: `virtualenv -p python3 ~/p3dl`; `virtualenv -p python2 ~/p2dl`; `source ~/p2dl/bin/activate`).
+You can do it via virualenv: 
 
-Then install Python dependencies by `pip install -r requirements.txt` (TensorFlow tested for version 1.7.0)
+- create Python 3 env: `virtualenv -p python3 ~/p3dl`, 
+- activate Python 3 env: `source ~/p3dl/bin/activate`
+- install TensorFlow (1.7.0) by `pip install tensorflow==1.7.0`
+
+- create Python 2 env: `virtualenv -p python2 ~/p2dl`; 
+- activate Python 2 env: `source ~/p2dl/bin/activate`).
+- then install Python dependencies by `pip install -r requirements.txt` (TensorFlow tested for version 1.8.0)
 
 ## Usage
 
