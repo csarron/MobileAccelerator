@@ -4,13 +4,11 @@ from __future__ import print_function
 
 import argparse
 import os
-import sys
 
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'common', 'slim'))
 import tensorflow as tf
 from tensorflow.core.framework import graph_pb2
-from tensorflow.python.training import saver as saver_lib
 from tensorflow.python import pywrap_tensorflow
+from tensorflow.python.training import saver as saver_lib
 
 
 def run(args_):
