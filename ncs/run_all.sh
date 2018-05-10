@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-declare -a models=("inception_v3" "mobilenet_v1_1.0" "mobilenet_v2_1.0"
-                "mobilenet_v2_1.3" "mobilenet_v2_1.4") #  "resnet_v1_50" needs to be handled differently
+declare -a models=("alexnet_v2" "squeezenet" "inception_v3"
+                    "mobilenet_v1_1.0" "mobilenet_v2_1.0" "resnet_v1_50")
 
 for model in "${models[@]}"
 do
@@ -15,7 +15,8 @@ do
         suffix=""
     fi
 
-    python ncs/run_ncs.py -m data/${model}/ncs_${model}${suffix}.meta -p ~/p3dl/bin/python
+    ncs_graph=data/${model}${suffix}/ncs_${model}${suffix}.meta
+    python ncs/run_ncs.py -m ${ncs_graph} -p ~/p3dl/bin/python
 
 done
 

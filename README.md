@@ -84,28 +84,33 @@ See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_im
 
 ## Useful commands for ResNet
 
-- export inference graph for resnet_v1_50: `python common/slim/export_inference_graph.py -m resnet_v1_50 -o data/resnet_v1_50/resnet_v1_50_inf.pb -l 1`
-- freeze resnet_v1_50: `python common/freeze_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50_inf.pb`
+- export inference graph for resnet_v1_50: `python common/slim/export_inference_graph.py -m resnet_v1_50 -o data/resnet_v1_50/resnet_v1_50.inf.pb -l 1`
+- freeze resnet_v1_50: `python common/freeze_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50.inf.pb`
 - (this command will ***fail*** since snpe-1.14.1 does not support resnet!) benchmark resnet_v1_50 using snpe: `python snpe/run_snpe.py -m data/resnet_v1_50/resnet_v1_50.frozen.pb`
-- convert resnet_v1_50 for ncs: `python ncs/convert_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50_inf.pb`
+- convert resnet_v1_50 for ncs: `python ncs/convert_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50.inf.pb`
 - profile resnet_v1_50 on ncs: `python ncs/run_ncs.py -m data/resnet_v1_50/ncs_resnet_v1_50.meta`
 
 ## Generate Models With Fake Weights
 
-example:
- `model=alexnet_v2` or `model=squeezenet`
-`mkdir -p data/$model`
-`python common/slim/export_inference_graph.py -m $model -o data/$model/$model.inf.pb`
-`python common/gen_weights.py -m $model -o data/$model/$model.ckpt`
-`python common/freeze_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb`
-`python ncs/freeze_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb`
+Example: `model=alexnet_v2` or `model=squeezenet`
+ 
+`mkdir -p data/$model;`
 
-Run NCS:
-`python ncs/convert_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb`
-`python ncs/run_ncs.py -m data/$model/ncs_$model.meta -p3 ~/p3dl/bin/python`
+`python common/slim/export_inference_graph.py -m $model -o data/$model/$model.inf.pb;`
 
-Run SNPE:
-`python snpe/run_snpe.py -m data/$model/$model.frozen.pb`
+`python common/gen_weights.py -m $model -o data/$model/$model.ckpt;`
+
+`python common/freeze_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb;`
+
+`python ncs/convert_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb;`
+
+Run NCS: `python ncs/run_ncs.py -m data/$model/ncs_$model.meta -p3 ~/p3dl/bin/python;`
+
+Run SNPE: `python snpe/run_snpe.py -m data/$model/$model.frozen.pb`
+
+## Generate TensorFlow Lite Models
+
+`python tflite/convert_model.py  data/mobilenet_v2_1.0_224/mobilenet_v2_1.0_224.frozen.pb`
 
 ## Useful papers
 

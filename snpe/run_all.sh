@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-declare -a models=("inception_v3" "mobilenet_v1_1.0" "mobilenet_v2_1.0"
-                "mobilenet_v2_1.3" "mobilenet_v2_1.4") #  "resnet_v1_50" needs to be handled differently
+declare -a models=("alexnet_v2" "squeezenet" "inception_v3"
+                    "mobilenet_v1_1.0" "mobilenet_v2_1.0") #  "resnet_v1_50" is not working
 
 for model in "${models[@]}"
 do
@@ -14,8 +14,9 @@ do
     else
         suffix=""
     fi
+    frozen_graph=data/${model}${suffix}/${model}${suffix}.frozen.pb
 
-    python snpe/run_snpe.py --model data/${model}/${model}${suffix}.frozen.pb
+    python snpe/run_snpe.py --model ${frozen_graph}
 
 done
 

@@ -109,8 +109,8 @@ def check_dir(dir_name):
 
 
 if __name__ == '__main__':
-    models = ["inception_v3", "mobilenet_v1_1.0_224", "mobilenet_v2_1.0_224",
-              "mobilenet_v2_1.3_224", "mobilenet_v2_1.4_224", "resnet_v1_50"]  # add alexnet, squeezenet_v1.1, vgg_16
+    models = ["inception_v3", "mobilenet_v1_1.0_224", "mobilenet_v2_1.0_224", "resnet_v1_50"]
+    # ,"mobilenet_v2_1.3_224", "mobilenet_v2_1.4_224",
 
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
