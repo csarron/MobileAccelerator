@@ -238,7 +238,7 @@ def check_processor_arg(processor_str):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-sdk", "--snpe_sdk", type=str, default="data/snpe-1.14.1.zip",
+    parser.add_argument("-sdk", "--snpe_sdk", type=str, default="data/snpe-1.15.0.zip",
                         help="path to snpe sdk zip file")
     parser.add_argument("-p", "--processors", type=check_processor_arg, default="GPU,DSP,CPU",
                         help="processor to use, use GPU,DSP,CPU or any combination of them (separated by comma)")
