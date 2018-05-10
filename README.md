@@ -87,10 +87,11 @@ See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_im
 ## Generate Models With Fake Weights
 
 example:
-`mkdir -p data/alexnet_v2`
-`python common/slim/export_inference_graph.py -m alexnet_v2 -o data/alexnet_v2/alexnet_v2.inf.pb`
-`python common/gen_weights.py -m alexnet_v2 -o data/alexnet_v2/alexnet_v2.ckpt`
-`python common/freeze_model.py -c data/alexnet_v2/alexnet_v2.ckpt -g data/alexnet_v2/alexnet_v2.inf.pb`
+ `model=alexnet_v2` or `model=squeezenet`
+`mkdir -p data/$model`
+`python common/slim/export_inference_graph.py -m $model -o data/$model/$model.inf.pb`
+`python common/gen_weights.py -m $model -o data/$model/$model.ckpt`
+`python common/freeze_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb`
 
 ## Useful papers
 
