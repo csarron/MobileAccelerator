@@ -192,7 +192,7 @@ def prepare_data_images(image_size, snpe_root):
 
 
 # generate bench config json file
-def gen_config(dlc_path, input_list_file, input_data, processors_):
+def gen_config(dlc_path, input_list_file, input_data, processors_, runs):
     name = os.path.splitext(os.path.basename(dlc_path))[0]
     config = OrderedDict()
     config['Name'] = name
@@ -200,7 +200,7 @@ def gen_config(dlc_path, input_list_file, input_data, processors_):
     config['HostResultsDir'] = os.path.join(name, 'results')
     config['DevicePath'] = '/data/local/tmp/snpebm'
     config['Devices'] = ["123"]
-    config['Runs'] = 2
+    config['Runs'] = runs
 
     model = OrderedDict()
     model['Name'] = name
@@ -242,6 +242,8 @@ def parse_args():
                         help="path to snpe sdk zip file")
     parser.add_argument("-p", "--processors", type=check_processor_arg, default="GPU,DSP,CPU",
                         help="processor to use, use GPU,DSP,CPU or any combination of them (separated by comma)")
+    parser.add_argument("-n", "--runs", type=int, default=10,
+                        help="number of times to repeat the run")
     parser.add_argument("-ndk", "--android_ndk", type=str,
                         help="path to android ndk")
     parser.add_argument("-m", "--model", type=str, default="data/mobilenet_v1/mobilenet_v1_1.0_224.frozen.pb",
@@ -340,7 +342,7 @@ if __name__ == '__main__':
 
     print('generating benchmark configuration...')
     sys.stdout.flush()
-    config = gen_config(dlc_file, raw_file_list, data_dir, args.processors)
+    config = gen_config(dlc_file, raw_file_list, data_dir, args.processors, args.runs)
 
     model_name = os.path.splitext(os.path.split(model_file)[1])[0]
 
