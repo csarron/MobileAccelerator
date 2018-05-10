@@ -104,15 +104,23 @@ Example: `model=alexnet_v2` or `model=squeezenet`
 
 `python ncs/convert_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb;`
 
-Run NCS: `python ncs/run_ncs.py -m data/$model/ncs_$model.meta -p3 ~/p3dl/bin/python;`
+Run NCS: `python ncs/run_ncs.py -m data/$model/ncs_$model.meta;`
 
-Run SNPE: `python snpe/run_snpe.py -m data/$model/$model.frozen.pb`
+Run SNPE: `python snpe/run_snpe.py -m data/$model/$model.frozen.pb -p3 ~/p3dl/bin/python`
 
 ## Generate TensorFlow Lite Models
 
 `python tflite/convert_model.py  data/mobilenet_v2_1.0_224/mobilenet_v2_1.0_224.frozen.pb`
 
+macOS: `tflite/macos/label_image -m data/mobilenet_v2_1.0_224/mobilenet_v2_1.0_224.frozen.tflite -i tflite/res/grace_hopper.bmp -l tflite/res/labels.txt`
+
+Android(arm64): `adb push tflite/arm64/label_image data/mobilenet_v2_1.0_224/mobilenet_v2_1.0_224.frozen.tflite tflite/res/* /data/local/tmp`;
+
+`adb shell 'cd /data/local/tmp; ./label_image -m ./mobilenet_v2_1.0_224.frozen.tflite -c 10'`
+
 ## Useful papers
 
 - [Fathom: Reference Workloads for Modern Deep Learning Methods](https://arxiv.org/pdf/1608.06581.pdf)
 - [Latency and Throughput Characterization of Convolutional Neural Networks for Mobile Computer Vision](https://arxiv.org/pdf/1803.09492.pdf)
+
+
