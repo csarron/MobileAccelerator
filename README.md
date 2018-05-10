@@ -84,6 +84,14 @@ See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_im
 - convert resnet_v1_50 for ncs: `python ncs/convert_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50_inf.pb`
 - profile resnet_v1_50 on ncs: `python ncs/run_ncs.py -m data/resnet_v1_50/ncs_resnet_v1_50.meta`
 
+## Generate Models With Fake Weights
+
+example:
+`mkdir -p data/alexnet_v2`
+`python common/slim/export_inference_graph.py -m alexnet_v2 -o data/alexnet_v2/alexnet_v2.inf.pb`
+`python common/gen_weights.py -m alexnet_v2 -o data/alexnet_v2.ckpt`
+`python common/freeze_model.py --checkpoint_file data/alexnet_v2/alexnet_v2.ckpt -g data/alexnet_v2/alexnet_v2.inf.pb`
+
 ## Useful papers
 
 - [Fathom: Reference Workloads for Modern Deep Learning Methods](https://arxiv.org/pdf/1608.06581.pdf)
