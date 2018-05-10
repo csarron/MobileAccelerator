@@ -92,6 +92,14 @@ example:
 `python common/slim/export_inference_graph.py -m $model -o data/$model/$model.inf.pb`
 `python common/gen_weights.py -m $model -o data/$model/$model.ckpt`
 `python common/freeze_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb`
+`python ncs/freeze_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb`
+
+Run NCS:
+`python ncs/convert_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb`
+`python ncs/run_ncs.py -m data/$model/ncs_$model.meta -p3 ~/p3dl/bin/python`
+
+Run SNPE:
+`python snpe/run_snpe.py -m data/$model/$model.frozen.pb`
 
 ## Useful papers
 
