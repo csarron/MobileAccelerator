@@ -89,8 +89,8 @@ See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_im
 example:
 `mkdir -p data/alexnet_v2`
 `python common/slim/export_inference_graph.py -m alexnet_v2 -o data/alexnet_v2/alexnet_v2.inf.pb`
-`python common/gen_weights.py -m alexnet_v2 -o data/alexnet_v2.ckpt`
-`python common/freeze_model.py --checkpoint_file data/alexnet_v2/alexnet_v2.ckpt -g data/alexnet_v2/alexnet_v2.inf.pb`
+`python common/gen_weights.py -m alexnet_v2 -o data/alexnet_v2/alexnet_v2.ckpt`
+`python common/freeze_model.py -c data/alexnet_v2/alexnet_v2.ckpt -g data/alexnet_v2/alexnet_v2.inf.pb`
 
 ## Useful papers
 
