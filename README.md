@@ -104,9 +104,9 @@ Example: `model=alexnet_v2` or `model=squeezenet`
 
 `python ncs/convert_model.py -c data/$model/$model.ckpt -g data/$model/$model.inf.pb;`
 
-Run NCS: `python ncs/run_ncs.py -m data/$model/ncs_$model.meta;`
+Run NCS: `python ncs/run_ncs.py -m data/$model/ncs_$model.meta -p3 ~/p3dl/bin/python;`
 
-Run SNPE: `python snpe/run_snpe.py -m data/$model/$model.frozen.pb -p3 ~/p3dl/bin/python`
+Run SNPE: `python snpe/run_snpe.py -m data/$model/$model.frozen.pb`
 
 ## Generate TensorFlow Lite Models
 
