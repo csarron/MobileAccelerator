@@ -22,6 +22,7 @@ import functools
 import os
 import sys
 import tensorflow as tf
+
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'slim'))
 
 from nets import alexnet
@@ -39,6 +40,7 @@ from nets.nasnet import nasnet
 from nets.nasnet import pnasnet
 from syn_nets import twoalexnet
 from syn_nets import twosqueezenet
+from syn_nets.var_alexnet import alexnet_bs
 
 slim = tf.contrib.slim
 
@@ -157,3 +159,7 @@ def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
         network_fn.default_image_size = func.default_image_size
 
     return network_fn
+
+
+networks_map['alexnet_bs'] = alexnet_bs.alexnet_bs
+arg_scopes_map['alexnet_bs'] = alexnet_bs.alexnet_bs_arg_scope
