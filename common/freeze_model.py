@@ -122,7 +122,7 @@ def convert_weights(inf_graph):
 
 
 def check_inference_graph(inf_graph_file):
-    script = "python common/slim/export_inference_graph.py  --model_name mobilenet_v2_1.0 "
+    script = "python common/export_inference_graph.py  --model_name mobilenet_v2_1.0 "
     params = "--image_size 224 --output_file data/mobilenet_v2_1.0_224/mobilenet_v2_1.0_224.inf.pb"
     usage = script + params
 

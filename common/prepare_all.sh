@@ -21,7 +21,7 @@ do
     inf_graph=data/${model}${suffix}/${model}${suffix}.inf.pb
     frozen_graph=data/${model}${suffix}/${model}${suffix}.frozen.pb
 
-    python common/slim/export_inference_graph.py -m ${model} -o ${inf_graph}
+    python common/export_inference_graph.py -m ${model} -o ${inf_graph}
     python common/visualize_model.py ${inf_graph}
 
     python common/freeze_model.py -c ${checkpoint} -g ${inf_graph}

@@ -37,10 +37,14 @@ from nets import vgg
 from nets.mobilenet import mobilenet_v2
 from nets.nasnet import nasnet
 from nets.nasnet import pnasnet
+from syn_nets import twoalexnet
+from syn_nets import twosqueezenet
 
 slim = tf.contrib.slim
 
 networks_map = {'squeezenet': squeezenet.squeezenet,
+                'two_squeezenet': twosqueezenet.two_squeezenet,
+                'two_alexnet': twoalexnet.two_alexnet,
                 'alexnet_v2': alexnet.alexnet_v2,
                 'cifarnet': cifarnet.cifarnet,
                 'overfeat': overfeat.overfeat,
@@ -73,6 +77,8 @@ networks_map = {'squeezenet': squeezenet.squeezenet,
                 }
 
 arg_scopes_map = {'squeezenet': squeezenet.squeezenet_arg_scope,
+                  'two_squeezenet': twosqueezenet.two_squeezenet_arg_scope,
+                  'two_alexnet': twoalexnet.two_alexnet_arg_scope,
                   'alexnet_v2': alexnet.alexnet_v2_arg_scope,
                   'cifarnet': cifarnet.cifarnet_arg_scope,
                   'overfeat': overfeat.overfeat_arg_scope,

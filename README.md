@@ -23,7 +23,7 @@ You can do it via virualenv:
 - (required) Download model: `python common/download_model.py --model mobilenet_v2_1.0` 
 or download all supported models by `python common/download_model.py -a` 
 
-- (required ) Export model inference graph: `python common/slim/export_inference_graph.py  --model_name mobilenet_v2_1.0 --image_size 224 --output_file data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb`
+- (required ) Export model inference graph: `python common/export_inference_graph.py  --model_name mobilenet_v2_1.0 --image_size 224 --output_file data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb`
 
 - (required for SNPE) Freeze model: `python common/freeze_model.py --checkpoint_file data/mobilenet_v2_1.0/mobilenet_v2_1.0_224.ckpt --inference_graph data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb`
 - (required for NCS) Convert model: `python ncs/convert_model.py --checkpoint_file data/mobilenet_v2_1.0/mobilenet_v2_1.0_224.ckpt --inference_graph data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb`
@@ -84,7 +84,7 @@ See the Nvidia [official examples](https://github.com/NVIDIA-Jetson/tf_to_trt_im
 
 ## Useful commands for ResNet
 
-- export inference graph for resnet_v1_50: `python common/slim/export_inference_graph.py -m resnet_v1_50 -o data/resnet_v1_50/resnet_v1_50.inf.pb -l 1`
+- export inference graph for resnet_v1_50: `python common/export_inference_graph.py -m resnet_v1_50 -o data/resnet_v1_50/resnet_v1_50.inf.pb -l 1`
 - freeze resnet_v1_50: `python common/freeze_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50.inf.pb`
 - (this command will ***fail*** since snpe-1.14.1 does not support resnet!) benchmark resnet_v1_50 using snpe: `python snpe/run_snpe.py -m data/resnet_v1_50/resnet_v1_50.frozen.pb`
 - convert resnet_v1_50 for ncs: `python ncs/convert_model.py -c data/resnet_v1_50/resnet_v1_50.ckpt -g data/resnet_v1_50/resnet_v1_50.inf.pb`
@@ -96,7 +96,7 @@ Example: `model=alexnet_v2` or `model=squeezenet`
  
 `mkdir -p data/$model;`
 
-`python common/slim/export_inference_graph.py -m $model -o data/$model/$model.inf.pb;`
+`python common/export_inference_graph.py -m $model -o data/$model/$model.inf.pb;`
 
 `python common/gen_weights.py -m $model -o data/$model/$model.ckpt;`
 
