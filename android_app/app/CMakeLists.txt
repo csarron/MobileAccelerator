@@ -11,3 +11,7 @@ set_target_properties(libmvnc PROPERTIES IMPORTED_LOCATION ${api_build_DIR}/${AN
 
 add_library(ncs_jni SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/main/cpp/ncs_jni.c)
 target_link_libraries(ncs_jni libmvnc log)
+
+add_library(acc SHARED ${CMAKE_CURRENT_SOURCE_DIR}/src/main/cpp/snpe_jni.cpp)
+target_include_directories(acc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/main/cpp/include/zdl)
+target_link_libraries(acc ncs_jni)

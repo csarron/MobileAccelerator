@@ -71,7 +71,7 @@ public class MainActivity extends Activity {
     SpannableStringBuilder mSpannableBuilder = new SpannableStringBuilder();
 
     static {
-        System.loadLibrary("ncs_jni");
+        System.loadLibrary("acc");
     }
 
     private String mModelFile;
@@ -516,191 +516,6 @@ public class MainActivity extends Activity {
         }
     }
 
-
-    public String doTfInference(String graphFile, String imageFile) {
-        long startTime = System.currentTimeMillis();
-
-        Interpreter tfLite = new Interpreter(new File(graphFile));
-        long modelInitTime = System.currentTimeMillis();
-
-        float[] imageData = getImageFloats(imageFile, 224, 224);
-        ByteBuffer byteBuf = ByteBuffer.allocateDirect(224 * 224 * 3 * Float.BYTES); //4 bytes per float
-        byteBuf.order(ByteOrder.nativeOrder());
-        FloatBuffer buffer = byteBuf.asFloatBuffer();
-        buffer.put(imageData);
-        buffer.position(0);
-        long beginTime = System.currentTimeMillis();
-        float[] predictions = new float[getNumClasses()];
-        float[][] labelProb = new float[1][];
-        labelProb[0] = predictions;
-
-        tfLite.run(byteBuf, labelProb);
-        long endTime = System.currentTimeMillis();
-
-
-        String resultStr = decodePredictions(predictions, 0);
-
-        long cleanTime = System.currentTimeMillis();
-        long finishTime = System.currentTimeMillis();
-
-        long initTime = modelInitTime - startTime;
-        long inputTime = beginTime - modelInitTime;
-        long executeTime = endTime - beginTime;
-        long outputTime = cleanTime - endTime;
-        long cleanUpTime = finishTime - cleanTime;
-
-        String timeStr = " init: " + initTime + " ms"
-                + " input: " + inputTime + " ms"
-                + " infer: " + executeTime + " ms"
-                + " output: " + outputTime + " ms"
-                + " clean: " + cleanUpTime + " ms"
-                + " total: " + (finishTime - startTime) + " ms";
-        return resultStr + timeStr;
-    }
-
-    public native int getNumClasses();
-
-    private String doSnpeInference(String modelFile, String imageFile) {
-        long startTime = System.currentTimeMillis();
-
-        try {
-            NeuralNetwork network = mSnpeNetworkBuilder.setModel(new File(modelFile))
-                    .build();
-            runOnUiThread(() -> addStatus("running snpe on: " + network.getRuntime().name()));
-            long modelInitTime = System.currentTimeMillis();
-
-            FloatTensor inputTensor = network.createFloatTensor(
-                    network.getInputTensorsShapes().get("input:0"));
-
-            int[] dimensions = inputTensor.getShape();
-
-//            Logger.d("input names: " + network.getInputTensorsNames()
-//                    + " dims: " + Arrays.toString(dimensions));
-
-            if (dimensions[0] != dimensions[1]) {
-                Logger.w("image height and width not equal: " + Arrays.toString(dimensions));
-            }
-
-            float[] pixelFloats = getImageFloats(imageFile, dimensions[0], dimensions[1]);
-            inputTensor.write(pixelFloats, 0, pixelFloats.length);
-
-            final Map<String, FloatTensor> inputs = new HashMap<>();
-            inputs.put("input:0", inputTensor);
-
-            long beginTime = System.currentTimeMillis();
-            final Map<String, FloatTensor> outputsMap = network.execute(inputs);
-
-            FloatTensor outputTensor = outputsMap.get("output:0");
-
-            final float[] outputValues = new float[outputTensor.getSize()];
-            outputTensor.read(outputValues, 0, outputValues.length);
-            long endTime = System.currentTimeMillis();
-
-            String resultStr = decodePredictions(outputValues, 0);
-            long cleanTime = System.currentTimeMillis();
-
-            network.release();
-            long finishTime = System.currentTimeMillis();
-
-            long initTime = modelInitTime - startTime;
-            long inputTime = beginTime - modelInitTime;
-            long executeTime = endTime - beginTime;
-            long outputTime = cleanTime - endTime;
-            long cleanUpTime = finishTime - cleanTime;
-
-            String timeStr = " init: " + initTime + " ms"
-                    + " input: " + inputTime + " ms"
-                    + " infer: " + executeTime + " ms"
-                    + " output: " + outputTime + " ms"
-                    + " clean: " + cleanUpTime + " ms"
-                    + " total: " + (finishTime - startTime) + " ms";
-            return resultStr + timeStr;
-//            final List<String> result = new LinkedList<>();
-//            for (Map.Entry<String, FloatTensor> output : outputsMap.entrySet()) {
-//                final FloatTensor tensor = output.getValue();
-//                final float[] values = new float[tensor.getSize()];
-//                tensor.read(values, 0, values.length);
-//                // Process the output ...
-//            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-        return "snpe failed";
-    }
-
-    public String doNcsInference(String graphFile, String imageFile) {
-        long startTime = System.currentTimeMillis();
-
-        long deviceHandle = openNcsDevice(0);
-        long graphHandle = loadNcsModel(graphFile, deviceHandle);
-
-        long modelInitTime = System.currentTimeMillis();
-
-        float[] imageData = getImageFloats(imageFile, 224, 224);
-
-        long beginTime = System.currentTimeMillis();
-
-        float[] predictions = inferOnNcs(graphHandle, imageData);
-        long endTime = System.currentTimeMillis();
-
-        float[] layerTimes = getNcsLayerTimes(graphHandle, 200);
-        float sum = 0;
-        for (float layerTime : layerTimes) {
-            sum += layerTime;
-        }
-//        System.out.println(sum);
-        String resultStr = decodePredictions(predictions, 0);
-
-        long cleanTime = System.currentTimeMillis();
-        cleanUpNcs(graphHandle, deviceHandle);
-        long finishTime = System.currentTimeMillis();
-
-        long initTime = modelInitTime - startTime;
-        long inputTime = beginTime - modelInitTime;
-        long executeTime = endTime - beginTime;
-        long outputTime = cleanTime - endTime;
-        long cleanUpTime = finishTime - cleanTime;
-
-        String timeStr = " init: " + initTime + " ms"
-                + " input: " + inputTime + " ms"
-                + " infer: " + sum + " ms"
-                + " output: " + outputTime + " ms"
-                + " clean: " + cleanUpTime + " ms"
-                + " total: " + (finishTime - startTime) + " ms";
-        return resultStr + timeStr;
-    }
-
-
-    public native float[] getImageFloats(String imageFile, int width, int height);
-
-    public native String decodePredictions(float[] predictions, int labelOffset);
-
-    public native void setCmdFile(String cmdFile);
-
-    public native void setModelFile(String modelFile);
-
-    public native void setImageFile(String imageFile);
-
-//    public native String doNcsInference(String graphFile, String imageFile, int labelOffset);
-
-    public native void setLogLevel(int level);
-
-    // return device handle
-    public native long openNcsDevice(int index);
-
-    // return model graph handle
-    public native long loadNcsModel(String modelFile, long deviceHandle);
-
-    public native float[] inferOnNcs(long graphHandle, float[] imageData);
-
-    public native float[] getNcsLayerTimes(long graphHandle, int maxLayers);
-
-
-    public native void cleanUpNcs(long graphHandle, long deviceHandle);
-
     public void onRadioButtonClicked(View view) {
 
         RadioButton radioButton = (RadioButton) view;
@@ -794,4 +609,181 @@ public class MainActivity extends Activity {
                 });
         mDisposable.add(ncsDisposable);
     }
+
+    public native int getNumClasses();
+    public native float[] getImageFloats(String imageFile, int width, int height);
+    public native String decodePredictions(float[] predictions, int labelOffset);
+
+    public String doTfInference(String graphFile, String imageFile) {
+        long startTime = System.currentTimeMillis();
+
+        Interpreter tfLite = new Interpreter(new File(graphFile));
+        long modelInitTime = System.currentTimeMillis();
+
+        float[] imageData = getImageFloats(imageFile, 224, 224);
+        ByteBuffer byteBuf = ByteBuffer.allocateDirect(224 * 224 * 3 * Float.BYTES);
+        byteBuf.order(ByteOrder.nativeOrder());
+        FloatBuffer buffer = byteBuf.asFloatBuffer();
+        buffer.put(imageData);
+        buffer.position(0);
+        long beginTime = System.currentTimeMillis();
+        float[] predictions = new float[getNumClasses()];
+        float[][] labelProb = new float[1][];
+        labelProb[0] = predictions;
+
+        tfLite.run(byteBuf, labelProb);
+        long endTime = System.currentTimeMillis();
+
+
+        String resultStr = decodePredictions(predictions, 0);
+
+        long cleanTime = System.currentTimeMillis();
+        long finishTime = System.currentTimeMillis();
+
+        long initTime = modelInitTime - startTime;
+        long inputTime = beginTime - modelInitTime;
+        long executeTime = endTime - beginTime;
+        long outputTime = cleanTime - endTime;
+        long cleanUpTime = finishTime - cleanTime;
+
+        String timeStr = " init: " + initTime + " ms"
+                + " input: " + inputTime + " ms"
+                + " infer: " + executeTime + " ms"
+                + " output: " + outputTime + " ms"
+                + " clean: " + cleanUpTime + " ms"
+                + " total: " + (finishTime - startTime) + " ms";
+        return resultStr + timeStr;
+    }
+
+    private String doSnpeInference(String modelFile, String imageFile) {
+        long startTime = System.currentTimeMillis();
+
+        try {
+            NeuralNetwork network = mSnpeNetworkBuilder.setModel(new File(modelFile))
+                    .build();
+            runOnUiThread(() -> addStatus("running snpe on: " + network.getRuntime().name()));
+            long modelInitTime = System.currentTimeMillis();
+
+            FloatTensor inputTensor = network.createFloatTensor(
+                    network.getInputTensorsShapes().get("input:0"));
+
+            int[] dimensions = inputTensor.getShape();
+
+//            Logger.d("input names: " + network.getInputTensorsNames()
+//                    + " dims: " + Arrays.toString(dimensions));
+
+            if (dimensions[0] != dimensions[1]) {
+                Logger.w("image height and width not equal: " + Arrays.toString(dimensions));
+            }
+
+            float[] pixelFloats = getImageFloats(imageFile, dimensions[0], dimensions[1]);
+            inputTensor.write(pixelFloats, 0, pixelFloats.length);
+
+            final Map<String, FloatTensor> inputs = new HashMap<>();
+            inputs.put("input:0", inputTensor);
+
+            long beginTime = System.currentTimeMillis();
+            final Map<String, FloatTensor> outputsMap = network.execute(inputs);
+
+            FloatTensor outputTensor = outputsMap.get("output:0");
+
+            final float[] outputValues = new float[outputTensor.getSize()];
+            outputTensor.read(outputValues, 0, outputValues.length);
+            long endTime = System.currentTimeMillis();
+
+            String resultStr = decodePredictions(outputValues, 0);
+            long cleanTime = System.currentTimeMillis();
+
+            network.release();
+            long finishTime = System.currentTimeMillis();
+
+            long initTime = modelInitTime - startTime;
+            long inputTime = beginTime - modelInitTime;
+            long executeTime = endTime - beginTime;
+            long outputTime = cleanTime - endTime;
+            long cleanUpTime = finishTime - cleanTime;
+
+            String timeStr = " init: " + initTime + " ms"
+                    + " input: " + inputTime + " ms"
+                    + " infer: " + executeTime + " ms"
+                    + " output: " + outputTime + " ms"
+                    + " clean: " + cleanUpTime + " ms"
+                    + " total: " + (finishTime - startTime) + " ms";
+            return resultStr + timeStr;
+//            final List<String> result = new LinkedList<>();
+//            for (Map.Entry<String, FloatTensor> output : outputsMap.entrySet()) {
+//                final FloatTensor tensor = output.getValue();
+//                final float[] values = new float[tensor.getSize()];
+//                tensor.read(values, 0, values.length);
+//                // Process the output ...
+//            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        return "snpe failed";
+    }
+
+    private String doNativeSnpeInference(String modelFile, String imageFile){
+
+        return "snpe failed";
+    }
+
+
+
+    public String doNcsInference(String graphFile, String imageFile) {
+        long startTime = System.currentTimeMillis();
+
+        long deviceHandle = openNcsDevice(0);
+        long graphHandle = loadNcsModel(graphFile, deviceHandle);
+
+        long modelInitTime = System.currentTimeMillis();
+
+        float[] imageData = getImageFloats(imageFile, 224, 224);
+
+        long beginTime = System.currentTimeMillis();
+
+        float[] predictions = inferOnNcs(graphHandle, imageData);
+        long endTime = System.currentTimeMillis();
+
+        float[] layerTimes = getNcsLayerTimes(graphHandle, 200);
+        float sum = 0;
+        for (float layerTime : layerTimes) {
+            sum += layerTime;
+        }
+//        System.out.println(sum);
+        String resultStr = decodePredictions(predictions, 0);
+
+        long cleanTime = System.currentTimeMillis();
+        cleanUpNcs(graphHandle, deviceHandle);
+        long finishTime = System.currentTimeMillis();
+
+        long initTime = modelInitTime - startTime;
+        long inputTime = beginTime - modelInitTime;
+        long executeTime = endTime - beginTime;
+        long outputTime = cleanTime - endTime;
+        long cleanUpTime = finishTime - cleanTime;
+
+        String timeStr = " init: " + initTime + " ms"
+                + " input: " + inputTime + " ms"
+                + " infer: " + sum + " ms"
+                + " output: " + outputTime + " ms"
+                + " clean: " + cleanUpTime + " ms"
+                + " total: " + (finishTime - startTime) + " ms";
+        return resultStr + timeStr;
+    }
+    public native void setCmdFile(String cmdFile);
+    public native void setModelFile(String modelFile);
+    public native void setImageFile(String imageFile);
+    public native void setLogLevel(int level);
+    // return device handle
+    public native long openNcsDevice(int index);
+    // return model graph handle
+    public native long loadNcsModel(String modelFile, long deviceHandle);
+    public native float[] inferOnNcs(long graphHandle, float[] imageData);
+    public native float[] getNcsLayerTimes(long graphHandle, int maxLayers);
+    public native void cleanUpNcs(long graphHandle, long deviceHandle);
+
 }
