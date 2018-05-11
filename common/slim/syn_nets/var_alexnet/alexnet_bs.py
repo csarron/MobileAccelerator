@@ -17,7 +17,7 @@ def alexnet_bs(inputs,
                dropout_keep_prob=0.5,
                spatial_squeeze=True,
                scope='alexnet_bs',
-               global_pool=True):
+               global_pool=False):
     with tf.variable_scope(scope) as sc:
         end_points_collection = sc.original_name_scope + '_end_points'
         # Collect outputs for conv2d, fully_connected and max_pool2d.
