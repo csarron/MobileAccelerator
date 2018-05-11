@@ -4,11 +4,10 @@ import os
 import sys
 
 import tensorflow as tf
-from tensorflow.python.platform import gfile
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'slim'))
 
-from nets import nets_factory
+import nets_factory
 
 slim = tf.contrib.slim
 
