@@ -29,7 +29,7 @@ def two_squeezenet(inputs,
                                                   dropout_keep_prob, spatial_squeeze,
                                                   'net2')
         end_points[sc.name + '/net2'] = net2
-        net = tf.concat([net1, net2], axis=1)
+        net = (net1 + net2) / 2
         end_points[sc.name + '/final'] = net
         return net, end_points
 
