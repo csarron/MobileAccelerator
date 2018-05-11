@@ -1,11 +1,7 @@
 #! /usr/bin/env python3
 import argparse
-import os
-import sys
 
 import tensorflow as tf
-
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'slim'))
 
 import nets_factory
 
