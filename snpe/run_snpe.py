@@ -22,8 +22,8 @@ def convert_to_dlc(script_path, frozen_model_file, snpe_root, input_node='input'
     model_name_ = os.path.splitext(os.path.split(frozen_model_file)[1])[0]
     dlc_path = 'models/{}.dlc'.format(model_name_)
     dlc_full_path = os.path.join(snpe_root, 'benchmarks', dlc_path)
-    if os.path.exists(dlc_full_path):
-        return dlc_path
+    # if os.path.exists(dlc_full_path):
+    #     return dlc_path
 
     if not os.path.exists(os.path.dirname(dlc_full_path)):
         os.makedirs(os.path.dirname(dlc_full_path))
