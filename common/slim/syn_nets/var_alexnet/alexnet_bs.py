@@ -23,7 +23,7 @@ def alexnet_bs(inputs,
         # Collect outputs for conv2d, fully_connected and max_pool2d.
         with slim.arg_scope([slim.conv2d, slim.fully_connected, slim.max_pool2d],
                             outputs_collections=[end_points_collection]):
-            net = slim.conv2d(inputs, 64, [7, 7], 2, scope='conv1')
+            net = slim.conv2d(inputs, 64, [11, 11], 4, padding='VALID', scope='conv1')
             net = slim.max_pool2d(net, [3, 3], 3, scope='pool1')
             net = slim.conv2d(net, 128, [5, 5], scope='conv2')
             net = slim.max_pool2d(net, [2, 2], 2, scope='pool2')
@@ -35,7 +35,7 @@ def alexnet_bs(inputs,
             with slim.arg_scope([slim.conv2d],
                                 weights_initializer=trunc_normal(0.005),
                                 biases_initializer=tf.constant_initializer(0.1)):
-                net = slim.conv2d(net, 4096, [6, 6], padding='VALID', scope='fc6')
+                net = slim.conv2d(net, 4096, [4, 4], padding='VALID', scope='fc6')
                 net = slim.dropout(net, dropout_keep_prob, is_training=is_training,
                                    scope='dropout6')
                 net = slim.conv2d(net, 4096, [1, 1], scope='fc7')
