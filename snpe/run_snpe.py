@@ -367,7 +367,7 @@ if __name__ == '__main__':
     print('benchmark results saved to:', stats_file)
     if args.show_time:
         import csv
-        with open(stats_file, 'r') as f:
+        with open(stats_file, 'r') as f, open('{}.txt'.format(stats_file), 'w') as f2:
             reader = csv.reader(f)
             next(reader)
             for row in reader:
@@ -375,7 +375,11 @@ if __name__ == '__main__':
                     gpu_time = float(row[3])/1000
                     dsp_time = float(row[9])/1000
                     cpu_time = float(row[18])/1000
-                    print('GPU, DSP, CPU')
-                    print('{:4.2f}, {:4.2f}, {:4.2f}'.format(gpu_time, dsp_time, cpu_time))
-
+                    header = 'GPU, DSP, CPU'
+                    print(header)
+                    f2.write(header + '\n')
+                    time_str = '{:4.2f}, {:4.2f}, {:4.2f}'.format(gpu_time, dsp_time, cpu_time)
+                    print(time_str)
+                    f2.write(time_str + '\n')
+                    break
     print('all done.')
