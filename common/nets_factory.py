@@ -44,6 +44,8 @@ from syn_nets.var_alexnet import alexnet_bs
 from syn_nets.var_alexnet import alexnet_bs2
 from syn_nets.var_alexnet import alexnet_fw1
 from syn_nets.var_alexnet import alexnet_fw5
+from syn_nets.var_alexnet import alexnet_fd2
+from syn_nets.var_alexnet import alexnet_fd5
 
 slim = tf.contrib.slim
 
@@ -172,3 +174,7 @@ networks_map['alexnet_fw1'] = alexnet_fw1.alexnet_fw1
 arg_scopes_map['alexnet_fw1'] = alexnet_fw1.alexnet_fw1_arg_scope
 networks_map['alexnet_fw5'] = alexnet_fw5.alexnet_fw5
 arg_scopes_map['alexnet_fw5'] = alexnet_fw5.alexnet_fw5_arg_scope
+networks_map['alexnet_fd2'] = alexnet_fd2.alexnet_fd2
+arg_scopes_map['alexnet_fd2'] = alexnet_fd2.alexnet_fd2_arg_scope
+networks_map['alexnet_fd5'] = alexnet_fd5.alexnet_fd5
+arg_scopes_map['alexnet_fd5'] = alexnet_fd5.alexnet_fd5_arg_scope
