@@ -30,7 +30,7 @@ def alexnet_bs(inputs,
             net = slim.conv2d(net, 256, [3, 3], scope='conv3')
             net = slim.conv2d(net, 256, [3, 3], scope='conv4')
             net = slim.conv2d(net, 256, [3, 3], scope='conv5')
-            net = slim.max_pool2d(net, [3, 3], 3, scope='pool5')
+            net = slim.max_pool2d(net, [3, 3], 2, scope='pool5')
 
             with slim.arg_scope([slim.conv2d],
                                 weights_initializer=trunc_normal(0.005),
