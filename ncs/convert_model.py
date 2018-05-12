@@ -6,6 +6,8 @@ import argparse
 import os
 
 import tensorflow as tf
+from google.protobuf import text_format
+
 from tensorflow.core.framework import graph_pb2
 from tensorflow.python import pywrap_tensorflow
 from tensorflow.python.training import saver as saver_lib
@@ -22,8 +24,12 @@ def run(args_):
     model_name = os.path.splitext(os.path.basename(args_.checkpoint_file))[0]
     with tf.Session() as sess:
         input_graph_def = graph_pb2.GraphDef()
-        with tf.gfile.FastGFile(args_.inference_graph, "rb") as f:
-            input_graph_def.ParseFromString(f.read())
+        mode = "r" if args_.text_graph else "rb"
+        with tf.gfile.FastGFile(args_.inference_graph, mode) as g_f:
+            if args_.text_graph:
+                text_format.Merge(g_f.read(), input_graph_def)
+            else:
+                input_graph_def.ParseFromString(g_f.read())
         _ = tf.import_graph_def(input_graph_def, name="")
 
         var_list = {}
@@ -67,7 +73,8 @@ def get_args():
     parser.add_argument('-g', "--inference_graph", type=check_inference_graph,
                         default="data/mobilenet_v2_1.0/mobilenet_v2_1.0_inf.pb",
                         help="model inference graph")
-
+    parser.add_argument("-t", "--text_graph", action="store_true",
+                        help="inference graph is in text format")
     return parser.parse_args()
 
 
