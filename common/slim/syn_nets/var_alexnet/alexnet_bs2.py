@@ -25,10 +25,10 @@ def alexnet_bs2(inputs,
                             outputs_collections=[end_points_collection]):
             net = slim.conv2d(inputs, 64, [11, 11], 4, padding='VALID', scope='conv1')
             net = slim.max_pool2d(net, [3, 3], 3, scope='pool1')
-            net = slim.conv2d(net, 128, [5, 5], scope='conv2')
+            net = slim.conv2d(net, 192, [5, 5], scope='conv2')
             net = slim.max_pool2d(net, [2, 2], 2, scope='pool2')
-            net = slim.conv2d(net, 256, [3, 3], scope='conv3')
-            net = slim.conv2d(net, 256, [3, 3], scope='conv4')
+            net = slim.conv2d(net, 384, [3, 3], scope='conv3')
+            net = slim.conv2d(net, 384, [3, 3], scope='conv4')
             net = slim.conv2d(net, 256, [3, 3], scope='conv5')
             net = slim.max_pool2d(net, [3, 3], 2, scope='pool5')
 
