@@ -254,6 +254,8 @@ def parse_args():
                         help="input node name in the model")
     parser.add_argument("-o", "--output_node", type=str, default='output',
                         help="output node name in the model")
+    parser.add_argument("-t", "--show_time", action='store_true',
+                        help="show time in csv")
     return parser.parse_args()
 
 
@@ -358,6 +360,22 @@ if __name__ == '__main__':
 
     bench_cmd = ['python', 'snpe_bench.py', '-c', config_path, '-a']
     subprocess.call(bench_cmd, cwd='{}/benchmarks'.format(snpe_sdk_path))
-    print('benchmark results saved to:',
-          '{0}/benchmarks/{1}/results/latest_results/benchmark_stats_{1}.csv'.format(snpe_sdk_path, model_name))
+
+    stats_file = model_file.replace('.pb', '.csv')
+    shutil.copy('{0}/benchmarks/{1}/results/latest_results/benchmark_stats_{1}.csv'.format(snpe_sdk_path, model_name),
+                stats_file)
+    print('benchmark results saved to:', stats_file)
+    if args.show_time:
+        import csv
+        with open(stats_file, 'r') as f:
+            reader = csv.reader(f)
+            next(reader)
+            for row in reader:
+                if 'Total Inference Time' in row:
+                    gpu_time = float(row[3])/1000
+                    dsp_time = float(row[9])/1000
+                    cpu_time = float(row[18])/1000
+                    print('GPU, DSP, CPU')
+                    print('{:4.2f}, {:4.2f}, {:4.2f}'.format(gpu_time, dsp_time, cpu_time))
+
     print('all done.')
