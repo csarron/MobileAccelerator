@@ -46,8 +46,13 @@ from syn_nets.var_alexnet import alexnet_fw1
 from syn_nets.var_alexnet import alexnet_fw5
 from syn_nets.var_alexnet import alexnet_fd2
 from syn_nets.var_alexnet import alexnet_fd5
-from syn_nets.var_alexnet import alexnet_wd5
 from syn_nets.var_alexnet import alexnet_wd8
+from syn_nets.var_alexnet import alexnet_wd11
+from syn_nets.var_alexnet import alexnet_wd13
+from syn_nets.var_alexnet import alexnet_wd18
+from syn_nets.var_alexnet import alexnet_wd25
+from syn_nets.var_alexnet import alexnet_wd38
+
 
 slim = tf.contrib.slim
 
@@ -180,7 +185,16 @@ networks_map['alexnet_fd2'] = alexnet_fd2.alexnet_fd2
 arg_scopes_map['alexnet_fd2'] = alexnet_fd2.alexnet_fd2_arg_scope
 networks_map['alexnet_fd5'] = alexnet_fd5.alexnet_fd5
 arg_scopes_map['alexnet_fd5'] = alexnet_fd5.alexnet_fd5_arg_scope
-networks_map['alexnet_wd5'] = alexnet_wd5.alexnet_wd5
-arg_scopes_map['alexnet_wd5'] = alexnet_wd5.alexnet_wd5_arg_scope
+
 networks_map['alexnet_wd8'] = alexnet_wd8.alexnet_wd8
 arg_scopes_map['alexnet_wd8'] = alexnet_wd8.alexnet_wd8_arg_scope
+networks_map['alexnet_wd11'] = alexnet_wd11.alexnet_wd11
+arg_scopes_map['alexnet_wd11'] = alexnet_wd11.alexnet_wd11_arg_scope
+networks_map['alexnet_wd13'] = alexnet_wd13.alexnet_wd13
+arg_scopes_map['alexnet_wd13'] = alexnet_wd13.alexnet_wd13_arg_scope
+networks_map['alexnet_wd18'] = alexnet_wd18.alexnet_wd18
+arg_scopes_map['alexnet_wd18'] = alexnet_wd18.alexnet_wd18_arg_scope
+networks_map['alexnet_wd25'] = alexnet_wd25.alexnet_wd25
+arg_scopes_map['alexnet_wd25'] = alexnet_wd25.alexnet_wd25_arg_scope
+networks_map['alexnet_wd38'] = alexnet_wd38.alexnet_wd38
+arg_scopes_map['alexnet_wd38'] = alexnet_wd38.alexnet_wd38_arg_scope

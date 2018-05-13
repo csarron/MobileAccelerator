@@ -8,15 +8,15 @@ slim = tf.contrib.slim
 from nets import alexnet
 from nets.alexnet import trunc_normal
 
-alexnet_wd8_arg_scope = alexnet.alexnet_v2_arg_scope
+alexnet_wd11_arg_scope = alexnet.alexnet_v2_arg_scope
 
 
-def alexnet_wd8(inputs,
+def alexnet_wd11(inputs,
                 num_classes=1000,
                 is_training=True,
                 dropout_keep_prob=0.5,
                 spatial_squeeze=True,
-                scope='alexnet_wd8',
+                scope='alexnet_wd11',
                 global_pool=False):
     with tf.variable_scope(scope) as sc:
         end_points_collection = sc.original_name_scope + '_end_points'
@@ -27,9 +27,9 @@ def alexnet_wd8(inputs,
             net = slim.max_pool2d(net, [3, 3], 3, scope='pool1')
             net = slim.conv2d(net, 128, [5, 5], scope='conv2')
             net = slim.max_pool2d(net, [2, 2], 2, scope='pool2')
-            for i in range(5):
-                net = slim.conv2d(net, 160, [3, 3], scope='conv%d' % (i + 3))
-            net = slim.conv2d(net, 256, [3, 3], scope='conv8')
+            for i in range(8):
+                net = slim.conv2d(net, 128, [3, 3], scope='conv%d' % (i + 3))
+            net = slim.conv2d(net, 256, [3, 3], scope='conv11')
             net = slim.max_pool2d(net, [3, 3], 3, scope='pool5')
 
             with slim.arg_scope([slim.conv2d],
@@ -59,4 +59,4 @@ def alexnet_wd8(inputs,
             return net, end_points
 
 
-alexnet_wd8.default_image_size = 224
+alexnet_wd11.default_image_size = 224
