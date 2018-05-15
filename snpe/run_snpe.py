@@ -221,7 +221,7 @@ def write_config(config, save_path):
 
 
 def check_processor_arg(processor_str):
-    default = "GPU,DSP,CPU"
+    default = "GPU,DSP,CPU,GPU_FP16"
     processor_list = default.split(',')
 
     parsed_processors = []
