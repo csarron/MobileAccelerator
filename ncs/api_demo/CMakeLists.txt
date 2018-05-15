@@ -22,8 +22,8 @@ if (ANDROID)
             LIBRARY_OUTPUT_DIRECTORY
             "${CMAKE_CURRENT_BINARY_DIR}/${ANDROID_ABI}")
     add_library(usb1.0 SHARED IMPORTED)
-    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/api/libs/${ANDROID_ABI}/libusb1.0.so DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${ANDROID_ABI})
-    set_target_properties(usb1.0 PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/api/libs/${ANDROID_ABI}/libusb1.0.so)
+    file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_ABI}/libusb1.0.so DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/${ANDROID_ABI})
+    set_target_properties(usb1.0 PROPERTIES IMPORTED_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/libs/${ANDROID_ABI}/libusb1.0.so)
 
     target_link_libraries(mvnc usb1.0 log)
 else ()
