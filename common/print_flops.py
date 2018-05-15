@@ -46,4 +46,6 @@ if __name__ == '__main__':
         opts = tf.profiler.ProfileOptionBuilder.trainable_variables_parameter()
         params = tf.profiler.profile(sess.graph, run_meta=run_meta, cmd='op', options=opts)
 
-        print("{:,} --- {:,}".format(flops.total_float_ops, params.total_parameters))
+        print("\n\n")
+        print("{:5.1f} million FLOPs, {:5.2f} million params".format(flops.total_float_ops/1e6, params.total_parameters/1e6))
+        print("\n\n")
