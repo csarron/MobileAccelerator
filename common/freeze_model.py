@@ -1,9 +1,6 @@
 import argparse
 import os
 import tensorflow as tf
-from tensorflow.core.framework import attr_value_pb2
-from tensorflow.core.framework import graph_pb2
-from tensorflow.core.framework import node_def_pb2
 from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import graph_util
 from tensorflow.python.framework import tensor_util
@@ -38,7 +35,7 @@ def freeze_graph(checkpoint_file_, input_node_names, output_node_names, inferenc
             print("inference graph def:{} not exists".format(inference_graph))
             exit(-1)
 
-        input_graph_def = graph_pb2.GraphDef()
+        input_graph_def = tf.GraphDef()
         with tf.gfile.FastGFile(inference_graph, "rb") as f:
             input_graph_def.ParseFromString(f.read())
         _ = tf.import_graph_def(input_graph_def, name="")
@@ -100,22 +97,17 @@ def save_weights(graph_def_, output_file_):
 
 
 def convert_weights(inf_graph):
-    out_graph_def = graph_pb2.GraphDef()
     how_many_converted = 0
+    out_graph_def = tf.GraphDef()
     for input_node in inf_graph.node:
-        output_node = node_def_pb2.NodeDef()
-        tensor_proto = input_node.attr["value"].tensor
-        if tensor_proto.tensor_content:
-            output_node.op = input_node.op
-            output_node.name = input_node.name
-            dtype = input_node.attr["dtype"]
-            output_node.attr["dtype"].CopyFrom(dtype)
-            np_array = tensor_util.MakeNdarray(tensor_proto)
-            output_node.attr["value"].CopyFrom(attr_value_pb2.AttrValue(s=str(np_array).encode()))
-            how_many_converted += 1
-        else:
-            output_node.CopyFrom(input_node)
-        out_graph_def.node.extend([output_node])
+        output_node = out_graph_def.node.add()
+        output_node.MergeFrom(input_node)
+        if output_node.op == 'Const':
+            tensor_proto = output_node.attr['value'].tensor
+            if tensor_proto.tensor_content:
+                np_array = tensor_util.MakeNdarray(tensor_proto)
+                tensor_proto.tensor_content = str(np_array)
+                how_many_converted += 1
 
     print("set %d weights to numpy format." % how_many_converted)
     return out_graph_def
