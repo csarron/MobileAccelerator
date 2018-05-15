@@ -8,34 +8,34 @@ slim = tf.contrib.slim
 from nets import alexnet
 from nets.alexnet import trunc_normal
 
-alexnet_bs2_arg_scope = alexnet.alexnet_v2_arg_scope
+alexnet_p2_arg_scope = alexnet.alexnet_v2_arg_scope
 
 
-def alexnet_bs2(inputs,
+def alexnet_p2(inputs,
                 num_classes=1000,
                 is_training=True,
                 dropout_keep_prob=0.5,
                 spatial_squeeze=True,
-                scope='alexnet_bs2',
+                scope='alexnet_p2',
                 global_pool=False):
     with tf.variable_scope(scope) as sc:
         end_points_collection = sc.original_name_scope + '_end_points'
         # Collect outputs for conv2d, fully_connected and max_pool2d.
         with slim.arg_scope([slim.conv2d, slim.fully_connected, slim.max_pool2d],
                             outputs_collections=[end_points_collection]):
-            net = slim.conv2d(inputs, 64, [11, 11], 4, padding='VALID', scope='conv1')
+            net = slim.conv2d(inputs, 64, [7, 7], 2, padding='VALID', scope='conv1')
             net = slim.max_pool2d(net, [3, 3], 3, scope='pool1')
-            net = slim.conv2d(net, 192, [5, 5], scope='conv2')
+            net = slim.conv2d(net, 128, [5, 5], scope='conv2')
             net = slim.max_pool2d(net, [2, 2], 2, scope='pool2')
-            net = slim.conv2d(net, 384, [3, 3], scope='conv3')
-            net = slim.conv2d(net, 384, [3, 3], scope='conv4')
+            net = slim.conv2d(net, 256, [3, 3], scope='conv3')
+            net = slim.conv2d(net, 256, [3, 3], scope='conv4')
             net = slim.conv2d(net, 256, [3, 3], scope='conv5')
-            net = slim.max_pool2d(net, [3, 3], 2, scope='pool5')
+            net = slim.max_pool2d(net, [8, 8], 2, scope='pool5')
 
             with slim.arg_scope([slim.conv2d],
                                 weights_initializer=trunc_normal(0.005),
                                 biases_initializer=tf.constant_initializer(0.1)):
-                net = slim.conv2d(net, 4096, [4, 4], padding='VALID', scope='fc6')
+                net = slim.conv2d(net, 4096, [6, 6], padding='VALID', scope='fc6')
                 net = slim.dropout(net, dropout_keep_prob, is_training=is_training,
                                    scope='dropout6')
                 net = slim.conv2d(net, 4096, [1, 1], scope='fc7')
@@ -59,4 +59,4 @@ def alexnet_bs2(inputs,
             return net, end_points
 
 
-alexnet_bs2.default_image_size = 224
+alexnet_p2.default_image_size = 224

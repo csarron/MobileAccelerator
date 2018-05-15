@@ -41,7 +41,7 @@ from nets.nasnet import pnasnet
 from syn_nets import twoalexnet
 from syn_nets import twosqueezenet
 from syn_nets.var_alexnet import alexnet_bs
-from syn_nets.var_alexnet import alexnet_bs2
+from syn_nets.var_alexnet import alexnet_p2
 from syn_nets.var_alexnet import alexnet_fw1
 from syn_nets.var_alexnet import alexnet_fw5
 from syn_nets.var_alexnet import alexnet_fd2
@@ -175,8 +175,8 @@ def get_network_fn(name, num_classes, weight_decay=0.0, is_training=False):
 
 networks_map['alexnet_bs'] = alexnet_bs.alexnet_bs
 arg_scopes_map['alexnet_bs'] = alexnet_bs.alexnet_bs_arg_scope
-networks_map['alexnet_bs2'] = alexnet_bs2.alexnet_bs2
-arg_scopes_map['alexnet_bs2'] = alexnet_bs2.alexnet_bs2_arg_scope
+networks_map['alexnet_p2'] = alexnet_p2.alexnet_p2
+arg_scopes_map['alexnet_p2'] = alexnet_p2.alexnet_p2_arg_scope
 networks_map['alexnet_fw1'] = alexnet_fw1.alexnet_fw1
 arg_scopes_map['alexnet_fw1'] = alexnet_fw1.alexnet_fw1_arg_scope
 networks_map['alexnet_fw5'] = alexnet_fw5.alexnet_fw5
