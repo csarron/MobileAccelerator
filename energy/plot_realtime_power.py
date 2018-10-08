@@ -16,6 +16,9 @@ import signal
 import sys
 
 fig, ax = plt.subplots()
+plt.ylabel('amperage (mA)')
+plt.xlabel('time sequences')
+plt.ylim((0, 2000))
 
 display_range = 50000
 samples_queue = collections.deque(maxlen=display_range)
@@ -26,7 +29,7 @@ samples_queue.extend([0 for _ in range(display_range)])
 line, = ax.plot(time_queue, samples_queue, linewidth=0.5)
 
 should_pause = False
-csv_name = None
+csv_file_handle = None
 csv_writer = None
 trigger_count = 0
 trigger = float("inf")
@@ -54,27 +57,30 @@ def sample_generator(sampler, sample_number_):
 def samples_callback(samples_):
     last_values = samples_[sampleEngine.channels.MainCurrent]
     if last_values:
+        # filter negative values
+        valid_values = [max(v, 0) for v in last_values]
         time_queue.extend(samples_[sampleEngine.channels.timeStamp])
-        samples_queue.extend(last_values)
-        avg = sum(last_values) / len(last_values)
-
+        samples_queue.extend(valid_values)
+        avg = sum(valid_values) / len(valid_values)
+        global triggered
         if avg > trigger:
-            global triggered, csv_writer
-            triggered = True
-            records = list(zip(samples_[sampleEngine.channels.timeStamp],
-                               samples_[sampleEngine.channels.MainCurrent],
-                               samples_[2]))
-            if not csv_writer:
-                global trigger_count
-                csv_writer = csv.writer(open('%s%d%s' % (csv_name, trigger_count, '.csv'), 'w'))
-                csv_writer.writerow(header)
-                trigger_count += 1
-            csv_writer.writerows(records)
+            global csv_file_handle, csv_writer
+            if csv_file_handle:
+                print("recording", avg, len(valid_values))
+
+                records = list(zip(samples_[sampleEngine.channels.timeStamp],
+                                   samples_[sampleEngine.channels.MainCurrent],
+                                   samples_[2]))
+                if not csv_writer:
+                    csv_writer = csv.writer(csv_file_handle)
+                    csv_writer.writerow(header)
+                csv_writer.writerows(records)
+                triggered = True
         else:
-            # global should_pause
-            # should_pause = True
-            if triggered:
-                csv_writer = None
+            if triggered and csv_file_handle:
+                print("stopped trigger")
+                csv_file_handle.close()
+                csv_file_handle = None
 
 
 def on_click(_event):
@@ -109,14 +115,16 @@ if __name__ == "__main__":
     engine = sampleEngine.SampleEngine(monsoon)
     trigger = args.trigger
     if args.save_file:
+        dir_name = os.path.dirname(args.save_file)
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+
         if trigger < float("inf"):  # set trigger
             engine.disableCSVOutput()
             # global csv_name
-            csv_name = os.path.splitext(args.save_file)[0]
+            csv_file = args.save_file
+            csv_file_handle = open(csv_file, 'w')
         else:
-            dir_name = os.path.dirname(args.save_file)
-            if not os.path.exists(dir_name):
-                os.makedirs(dir_name)
             engine.enableCSVOutput(args.save_file)
     else:
         engine.disableCSVOutput()
