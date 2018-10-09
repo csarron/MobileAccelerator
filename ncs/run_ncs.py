@@ -175,7 +175,6 @@ if __name__ == '__main__':
         print(model_file, "not exist!")
         exit(-1)
 
-
     print('Begin profiling', model_file, '...')
 
     bench_cmd = [args.python3, 'mvNCProfile.py', '-s', str(args.shave_cores),
