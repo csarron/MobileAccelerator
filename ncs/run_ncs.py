@@ -175,6 +175,7 @@ if __name__ == '__main__':
         print(model_file, "not exist!")
         exit(-1)
 
+
     print('Begin profiling', model_file, '...')
 
     bench_cmd = [args.python3, 'mvNCProfile.py', '-s', str(args.shave_cores),
@@ -184,7 +185,7 @@ if __name__ == '__main__':
     report_file = model_file.replace('.meta', '_report.html')
     shutil.copy('{}/ncsdk-x86_64/tk/output_report.html'.format(sdk_path), report_file)
 
-    graph_file = model_file.replace('.meta', '.graph')
+    graph_file = model_file.replace('.meta', '.{}.graph'.format(args.shave_cores))
     shutil.copy('{}/ncsdk-x86_64/tk/graph'.format(sdk_path), graph_file)
 
     print('Model graph copied to\033[32m', os.path.abspath(graph_file), '\033[0m')
