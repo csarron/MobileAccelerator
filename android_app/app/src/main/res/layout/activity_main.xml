@@ -58,8 +58,8 @@
             android:id="@+id/dsp_rb"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
             android:onClick="onRadioButtonClicked"
             android:text="@string/dsp" />
@@ -68,8 +68,8 @@
             android:id="@+id/gpu_rb"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
             android:onClick="onRadioButtonClicked"
             android:text="@string/gpu" />
@@ -78,8 +78,8 @@
             android:id="@+id/cpu_rb"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1"
             android:onClick="onRadioButtonClicked"
             android:text="@string/cpu" />
@@ -88,18 +88,35 @@
             android:id="@+id/gpu_16_rb"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="10dp"
             android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
             android:layout_weight="1.5"
             android:onClick="onRadioButtonClicked"
             android:text="@string/gpu_16" />
     </RadioGroup>
 
+    <TextView
+        android:id="@+id/threads_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rg"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="@string/threads"
+        android:textAppearance="?android:textAppearanceMedium" />
+
+    <Spinner
+        android:id="@+id/thread_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/rg"
+        android:layout_toEndOf="@id/threads_tv" />
+
     <LinearLayout
         android:id="@+id/option_lr2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/rg">
+        android:layout_below="@+id/threads_tv">
 
         <Button
             android:id="@+id/run_ncs_btn"
@@ -137,18 +154,6 @@
             android:text="@string/run_tf"
             android:textAllCaps="false" />
 
-        <Button
-            android:id="@+id/run_offload_btn"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:enabled="false"
-            android:gravity="center"
-            android:onClick="runInference"
-            android:padding="10dp"
-            android:text="@string/run_offload"
-            android:textAllCaps="false" />
-
     </LinearLayout>
 
     <TextView
@@ -157,9 +162,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/option_lr2"
         android:gravity="start"
-        android:paddingBottom="10dp"
-        android:paddingEnd="10dp"
         android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="10dp"
         android:text="@string/device_status"
         android:textAppearance="?android:textAppearanceMedium" />
 

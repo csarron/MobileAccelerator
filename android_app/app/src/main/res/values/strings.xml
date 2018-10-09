@@ -11,7 +11,7 @@
     <string name="not_found">Not Found</string>
     <string name="attached">Attached</string>
     <string name="device_status">NCS Device Status:</string>
-    <string name="run_offload">Offload</string>
+    <string name="threads">CPU Threads:</string>
     <string name="bench">Bench</string>
     <string name="gpu">GPU</string>
     <string name="dsp">DSP</string>
@@ -19,4 +19,11 @@
     <string name="gpu_16">GPU16</string>
     <string name="tf_lite">TF</string>
     <string name="run_tf">Run TF</string>
+    <string-array name="threads">
+        <item>1</item>
+        <item>2</item>
+        <item>4</item>
+        <item>6</item>
+        <item>8</item>
+    </string-array>
 </resources>

@@ -28,8 +28,11 @@ import android.support.v4.content.ContextCompat;
 import android.text.SpannableStringBuilder;
 import android.text.method.ScrollingMovementMethod;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RadioButton;
+import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,11 +80,11 @@ public class MainActivity extends Activity {
     private String mModelFile;
     private String mImageFile;
     private String mCmdFile;
+    private int mCpuThreads = 1;
 
     private Button mRunNcsButton;
     private Button mRunSnpeButton;
     private Button mRunTfButton;
-    private Button mRunOffloadButton;
 
     private TextView mStatusTextView;
     private TextView mDeviceTextView;
@@ -98,13 +101,29 @@ public class MainActivity extends Activity {
 
         mRunNcsButton = findViewById(R.id.run_ncs_btn);
         mRunSnpeButton = findViewById(R.id.run_snpe_btn);
-        mRunOffloadButton = findViewById(R.id.run_offload_btn);
+        Spinner threadSpinner = findViewById(R.id.thread_spinner);
         mRunTfButton = findViewById(R.id.run_tf_btn);
         mStatusTextView = findViewById(R.id.status_tv);
         mStatusTextView.setMovementMethod(new ScrollingMovementMethod());
 
         mDeviceTextView = findViewById(R.id.device_status_tv);
 
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.threads, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        threadSpinner.setAdapter(adapter);
+        threadSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String threads = (String) parent.getItemAtPosition(position);
+                mCpuThreads = Integer.parseInt(threads);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                mCpuThreads = 1;
+            }
+        });
         checkPermissions();
 
         FormatStrategy formatStrategy = PrettyFormatStrategy.newBuilder()
@@ -580,15 +599,15 @@ public class MainActivity extends Activity {
                             emitter.onComplete();
                         });
                 break;
-            case R.id.run_offload_btn:
-                addStatus("selected offload");
-                ncsObservable = Observable.create(
-                        emitter -> {
-//                            String results = doNcsInference(mModelFile, mImageFile);
-//                            emitter.onNext(results);
-//                            emitter.onComplete();
-                        });
-                break;
+//            case R.id.run_offload_btn:
+//                addStatus("selected offload");
+//                ncsObservable = Observable.create(
+//                        emitter -> {
+////                            String results = doNcsInference(mModelFile, mImageFile);
+////                            emitter.onNext(results);
+////                            emitter.onComplete();
+//                        });
+//                break;
             default:
                 addStatus("using snpe model: ", mModelFile, " image: ", mImageFile);
                 addStatus("begin doing snpe inference...");
@@ -611,13 +630,15 @@ public class MainActivity extends Activity {
     }
 
     public native int getNumClasses();
+
     public native float[] getImageFloats(String imageFile, int width, int height);
+
     public native String decodePredictions(float[] predictions, int labelOffset);
 
     public String doTfInference(String graphFile, String imageFile) {
         long startTime = System.currentTimeMillis();
 
-        Interpreter tfLite = new Interpreter(new File(graphFile));
+        Interpreter tfLite = new Interpreter(new File(graphFile), mCpuThreads);
         long modelInitTime = System.currentTimeMillis();
 
         float[] imageData = getImageFloats(imageFile, 224, 224);
@@ -726,11 +747,10 @@ public class MainActivity extends Activity {
         return "snpe failed";
     }
 
-    private String doNativeSnpeInference(String modelFile, String imageFile){
+    private String doNativeSnpeInference(String modelFile, String imageFile) {
 
         return "snpe failed";
     }
-
 
 
     public String doNcsInference(String graphFile, String imageFile) {
@@ -774,16 +794,25 @@ public class MainActivity extends Activity {
                 + " total: " + (finishTime - startTime) + " ms";
         return resultStr + timeStr;
     }
+
     public native void setCmdFile(String cmdFile);
+
     public native void setModelFile(String modelFile);
+
     public native void setImageFile(String imageFile);
+
     public native void setLogLevel(int level);
+
     // return device handle
     public native long openNcsDevice(int index);
+
     // return model graph handle
     public native long loadNcsModel(String modelFile, long deviceHandle);
+
     public native float[] inferOnNcs(long graphHandle, float[] imageData);
+
     public native float[] getNcsLayerTimes(long graphHandle, int maxLayers);
+
     public native void cleanUpNcs(long graphHandle, long deviceHandle);
 
 }
