@@ -160,6 +160,15 @@ Java_com_cscao_apps_ncsdemo_MainActivity_inferOnNcs(JNIEnv *env, jobject instanc
     if (retCode != MVNC_OK) {
         LOGE("Could not get result for image\n");
         LOGE(" mvncStatus from mvncGetResult is: %d\n", retCode);
+
+        unsigned int debug_len = 100;
+        char debug_str[debug_len];
+
+        retCode = mvncGetGraphOption(graphHandle, MVNC_DEBUG_INFO, &debug_str, &debug_len);
+
+        LOGE("ncs debug (%d): %s\n", debug_len, *(char **)debug_str);
+        LOGE(" mvncStatus from debug is: %d\n", retCode);
+
         (*env)->ReleaseFloatArrayElements(env, imageData_, imageData, 0);
         return NULL;
     }
