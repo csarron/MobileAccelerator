@@ -1,0 +1,342 @@
+[ INFO ] Loading network files:
+	C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.xml
+	C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.bin
+[ INFO ] Preparing input blobs
+[ WARNING ] Image C:\Users\alexa\Documents\NCS\test_pictures\car.jpg is resized from (1700, 2560) to (224, 224)
+[ INFO ] Batch size is 1
+[ INFO ] Loading model to the plugin
+[ INFO ] Starting inference (1 iterations)
+[ INFO ] Average running time of one iteration: 36.340951919555664 ms
+[ INFO ] Performance counters:
+name                                                                   layer_type      exet_type       status          real_time, us
+<none>                                                                 ReLU            <none>          OPTIMIZED_OUT   0
+alexnet_fw1/conv1/Conv2D@concat-output                                 Convolution     Concat          OPTIMIZED_OUT   0
+alexnet_fw1/conv1/Conv2D@concat-output@input=0@copy-for-concat         Convolution     Copy            EXECUTED        85
+alexnet_fw1/conv1/Conv2D@concat-output@input=1@copy-for-concat         Convolution     Copy            EXECUTED        68
+alexnet_fw1/conv1/Conv2D@concat-output@input=3@copy-for-concat         Convolution     Copy            EXECUTED        19
+alexnet_fw1/conv1/Conv2D@expand-input                                  Convolution     Expand          OPTIMIZED_OUT   0
+alexnet_fw1/conv1/Conv2D@soh=1/4                                       Convolution     MyriadXHwOp     EXECUTED        445
+alexnet_fw1/conv1/Conv2D@soh=2/4                                       Convolution     MyriadXHwOp     EXECUTED        439
+alexnet_fw1/conv1/Conv2D@soh=3/4                                       Convolution     MyriadXHwOp     EXECUTED        438
+alexnet_fw1/conv1/Conv2D@soh=4/4 + injected[alexnet_fw1/conv1/Conv2D@concat-output@input=2@copy-for-concat] Convolution     MyriadXHwOp + injected[Copy] EXECUTED        71
+alexnet_fw1/conv1/Conv2D@split-input                                   Convolution     Split           OPTIMIZED_OUT   0
+alexnet_fw1/conv2/Conv2D                                               Convolution     MyriadXHwOp     EXECUTED        1803
+alexnet_fw1/conv3/Conv2D@concat-output                                 Convolution     Concat          OPTIMIZED_OUT   0
+alexnet_fw1/conv3/Conv2D@concat-output@input=1@copy-for-concat         Convolution     Copy            EXECUTED        107
+alexnet_fw1/conv3/Conv2D@soh=1/2                                       Convolution     MyriadXHwOp     EXECUTED        233
+alexnet_fw1/conv3/Conv2D@soh=2/2 + injected[alexnet_fw1/conv3/Conv2D@concat-output@input=0@copy-for-concat] Convolution     MyriadXHwOp + injected[Copy] EXECUTED        263
+alexnet_fw1/conv3/Conv2D@split-input                                   Convolution     Split           OPTIMIZED_OUT   0
+alexnet_fw1/conv4/Conv2D@concat-output                                 Convolution     Concat          OPTIMIZED_OUT   0
+alexnet_fw1/conv4/Conv2D@concat-output@input=5@copy-for-concat         Convolution     Copy            EXECUTED        46
+alexnet_fw1/conv4/Conv2D@expand-input                                  Convolution     Expand          OPTIMIZED_OUT   0
+alexnet_fw1/conv4/Conv2D@soh=1/6                                       Convolution     MyriadXHwOp     EXECUTED        877
+alexnet_fw1/conv4/Conv2D@soh=2/6 + injected[alexnet_fw1/conv4/Conv2D@concat-output@input=0@copy-for-concat] Convolution     MyriadXHwOp + injected[Copy] EXECUTED        927
+alexnet_fw1/conv4/Conv2D@soh=3/6 + injected[alexnet_fw1/conv4/Conv2D@concat-output@input=1@copy-for-concat] Convolution     MyriadXHwOp + injected[Copy] EXECUTED        926
+alexnet_fw1/conv4/Conv2D@soh=4/6 + injected[alexnet_fw1/conv4/Conv2D@concat-output@input=2@copy-for-concat] Convolution     MyriadXHwOp + injected[Copy] EXECUTED        928
+alexnet_fw1/conv4/Conv2D@soh=5/6 + injected[alexnet_fw1/conv4/Conv2D@concat-output@input=3@copy-for-concat] Convolution     MyriadXHwOp + injected[Copy] EXECUTED        926
+alexnet_fw1/conv4/Conv2D@soh=6/6 + injected[alexnet_fw1/conv4/Conv2D@concat-output@input=4@copy-for-concat] Convolution     MyriadXHwOp + injected[Copy] EXECUTED        928
+alexnet_fw1/conv4/Conv2D@split-input                                   Convolution     Split           OPTIMIZED_OUT   0
+alexnet_fw1/conv5/Conv2D@expand-input                                  Convolution     Expand          OPTIMIZED_OUT   0
+alexnet_fw1/conv5/Conv2D@soc=1/2                                       Convolution     MyriadXHwOp     EXECUTED        2853
+alexnet_fw1/conv5/Conv2D@soc=2/2                                       Convolution     MyriadXHwOp     EXECUTED        2813
+alexnet_fw1/conv5/Conv2D@soc=2/2@ReLU                                  Convolution     Relu            EXECUTED        101
+alexnet_fw1/conv5/Conv2D@soc=2/2@accum                                 Convolution     Sum             EXECUTED        165
+alexnet_fw1/conv5/Conv2D@split-input                                   Convolution     Split           OPTIMIZED_OUT   0
+alexnet_fw1/fc6/Conv2D@expand-input                                    Convolution     Expand          OPTIMIZED_OUT   0
+alexnet_fw1/fc6/Conv2D@soc=1/5                                         Convolution     MyriadXHwOp     EXECUTED        1685
+alexnet_fw1/fc6/Conv2D@soc=2/5                                         Convolution     MyriadXHwOp     EXECUTED        1670
+alexnet_fw1/fc6/Conv2D@soc=3/5 + injected[alexnet_fw1/fc6/Conv2D@soc=2/5@accum] Convolution     MyriadXHwOp + injected[Sum] EXECUTED        1694
+alexnet_fw1/fc6/Conv2D@soc=4/5 + injected[alexnet_fw1/fc6/Conv2D@soc=3/5@accum] Convolution     MyriadXHwOp + injected[Sum] EXECUTED        1695
+alexnet_fw1/fc6/Conv2D@soc=5/5 + injected[alexnet_fw1/fc6/Conv2D@soc=4/5@accum] Convolution     MyriadXHwOp + injected[Sum] EXECUTED        1697
+alexnet_fw1/fc6/Conv2D@soc=5/5@ReLU                                    Convolution     Relu            EXECUTED        40
+alexnet_fw1/fc6/Conv2D@soc=5/5@accum                                   Convolution     Sum             EXECUTED        42
+alexnet_fw1/fc6/Conv2D@split-input                                     Convolution     Split           OPTIMIZED_OUT   0
+alexnet_fw1/fc7/Conv2D@soc=1/2                                         Convolution     MyriadXHwOp     EXECUTED        1715
+alexnet_fw1/fc7/Conv2D@soc=2/2                                         Convolution     MyriadXHwOp     EXECUTED        1697
+alexnet_fw1/fc7/Conv2D@soc=2/2@ReLU                                    Convolution     Relu            EXECUTED        40
+alexnet_fw1/fc7/Conv2D@soc=2/2@accum                                   Convolution     Sum             EXECUTED        45
+alexnet_fw1/fc7/Conv2D@split-input                                     Convolution     Split           OPTIMIZED_OUT   0
+alexnet_fw1/fc8/Conv2D/Permute_                                        Permute         Permute         EXECUTED        18
+alexnet_fw1/fc8/Conv2D@soc=1/2                                         Convolution     MyriadXHwOp     EXECUTED        428
+alexnet_fw1/fc8/Conv2D@soc=2/2                                         Convolution     MyriadXHwOp     EXECUTED        424
+alexnet_fw1/fc8/Conv2D@soc=2/2@accum                                   Convolution     Sum             EXECUTED        36
+alexnet_fw1/fc8/Conv2D@split-input                                     Convolution     Split           OPTIMIZED_OUT   0
+alexnet_fw1/fc8/squeezed                                               Reshape         Reshape         OPTIMIZED_OUT   0
+alexnet_fw1/pool1/MaxPool                                              Pooling         MyriadXHwOp     EXECUTED        229
+alexnet_fw1/pool1/MaxPool@padding                                      Pooling         Pad             EXECUTED        898
+alexnet_fw1/pool2/MaxPool                                              Pooling         MyriadXHwOp     EXECUTED        64
+alexnet_fw1/pool5/MaxPool                                              Pooling         MyriadXHwOp     EXECUTED        35
+input@FP16                                                             <Extra>         Convert_f32f16  EXECUTED        324
+output                                                                 SoftMax         SoftMax         EXECUTED        83
+output@FP16                                                            <Extra>         Convert_f16f32  EXECUTED        44
+[ INFO ] Processing output blob
+[ INFO ] Top 10 results:
+Image C:\Users\alexa\Documents\NCS\test_pictures\car.jpg
+
+classid probability
+------- -----------
+ goose   0.0014582
+spaniel  0.0014372
+flamingo  0.0014143
+garden cart, lawn cart, wheelbarrow0.0013800
+Loafer   0.0013666
+   T     0.0013561
+pandean pipe, syrinx0.0013561
+ towel   0.0013475
+beetle, longicorn, longicorn beetle0.0013399
+ meter   0.0013390
+
+
+Python 3.6.5
+ECHO is off.
+PYTHONPATH=C:\Program Files (x86)\IntelSWTools\openvino\python\python3.6;
+[setupvars.bat] OpenVINO environment initialized
+
+C:\Users\alexa\Documents\NCS
+λ python classification_sample.py --model C:\Users\alexa\Documents\NCS\alexnet_ir\alexnet_fw1.frozen.xml --input C:\Users\alexa\Documents\NCS\test_pictures\car.jpg --device MYRIAD --perf_counts
+python: can't open file 'classification_sample.py': [Errno 2] No such file or directory
+
+C:\Users\alexa\Documents\NCS
+λ python classification_sample.py --model C:\Users\alexa\Documents\NCS\alexnet_ir\alexnet_fw1.frozen.xml --input C:\Users\alexa\Documents\NCS\test_pictures\car.jpg --device MYRIAD --perf_counts
+C:\Users\alexa\Documents\NCS
+λ python "C:\Program Files (x86)\IntelSWTools\openvino_2019.1.148\deployment_tools\inference_engine\samples\python_samples\classification_sample\classification_sample.py" --model C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.xml --input C:\Users\alexa\Documents\NCS\test_pictures\car.jpg --device MYRIAD --perf_counts --labels C:\Users\alexa\Documents\NCS\ir\squeezenet1.1.labels
+[ INFO ] Loading network files:
+        C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.xml
+        C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.bin
+[ INFO ] Preparing input blobs
+[ WARNING ] Image C:\Users\alexa\Documents\NCS\test_pictures\car.jpg is resized from (1700, 2560) to (224, 224)
+[ INFO ] Batch size is 1
+[ INFO ] Loading model to the plugin
+[ INFO ] Starting inference (1 iterations)
+[ INFO ] Average running time of one iteration: 186.74635887145996 ms
+[ INFO ] Performance counters:
+name                                                                   layer_type      exet_type       status          real_time, us
+alexnet_fw1/conv1/Conv2D                                               Convolution     Conv            EXECUTED        7901
+
+alexnet_fw1/conv1/Relu                                                 ReLU            BiasRelu        EXECUTED        778
+
+alexnet_fw1/conv2/Conv2D                                               Convolution     Im2ColConvolution EXECUTED        15146
+alexnet_fw1/conv2/Relu                                                 ReLU            BiasRelu        EXECUTED        200
+
+alexnet_fw1/conv3/Conv2D                                               Convolution     Conv            EXECUTED        5462
+
+alexnet_fw1/conv3/Relu                                                 ReLU            BiasRelu        EXECUTED        323
+
+alexnet_fw1/conv4/Conv2D                                               Convolution     Conv            EXECUTED        18546
+
+alexnet_fw1/conv4/Relu                                                 ReLU            BiasRelu        EXECUTED        320
+
+alexnet_fw1/conv5/Conv2D                                               Convolution     Conv            EXECUTED        96661
+
+alexnet_fw1/conv5/Relu                                                 ReLU            BiasRelu        EXECUTED        118
+
+alexnet_fw1/fc6/Conv2D                                                 Convolution     Im2ColConvolution EXECUTED        22453
+alexnet_fw1/fc6/Relu                                                   ReLU            BiasRelu        EXECUTED        72
+
+alexnet_fw1/fc7/Conv2D                                                 Convolution     FC              EXECUTED        9621
+
+alexnet_fw1/fc7/Relu                                                   ReLU            BiasRelu        EXECUTED        70
+
+alexnet_fw1/fc8/Conv2D                                                 Convolution     FC              EXECUTED        2520
+
+alexnet_fw1/fc8/Conv2D/Permute_                                        Permute         Permute         EXECUTED        25
+
+alexnet_fw1/fc8/Conv2D@biases                                          Convolution     Bias            EXECUTED        37
+
+alexnet_fw1/fc8/squeezed                                               Reshape         Reshape         OPTIMIZED_OUT   0
+
+alexnet_fw1/fc8/squeezed@input=0@reorder=NCHW                          Reshape         Permute         EXECUTED        18
+
+alexnet_fw1/pool1/MaxPool                                              Pooling         MaxPool         EXECUTED        500
+
+alexnet_fw1/pool2/MaxPool                                              Pooling         MaxPool         EXECUTED        149
+
+alexnet_fw1/pool5/MaxPool                                              Pooling         MaxPool         EXECUTED        91
+
+input@FP16                                                             <Extra>         Convert_f32f16  EXECUTED        300
+
+output                                                                 SoftMax         SoftMax         EXECUTED        46
+
+output@FP16                                                            <Extra>         Convert_f16f32  EXECUTED        39
+
+[ INFO ] Processing output blob
+[ INFO ] Top 10 results:
+Image C:\Users\alexa\Documents\NCS\test_pictures\car.jpg
+
+classid probability
+------- -----------
+ goose   0.0014648
+spaniel  0.0014400
+flamingo  0.0014191
+garden cart, lawn cart, wheelbarrow0.0013828
+Loafer   0.0013704
+pandean pipe, syrinx0.0013590
+   T     0.0013580
+ towel   0.0013523
+ meter   0.0013418
+beetle, longicorn, longicorn beetle0.0013409
+
+
+
+C:\Users\alexa\Documents\NCS
+λ python "C:\Program Files (x86)\IntelSWTools\openvino_2019.1.148\deployment_tools\inference_engine\samples\python_samples\classification_sample\classification_sample.py" --model C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.xml --input C:\Users\alexa\Documents\NCS\test_pictures\car.jpg --device MYRIAD --perf_counts --labels C:\Users\alexa\Documents\NCS\ir\squeezenet1.1.labels
+[ INFO ] Loading network files:
+        C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.xml
+        C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.bin
+[ INFO ] Preparing input blobs
+[ WARNING ] Image C:\Users\alexa\Documents\NCS\test_pictures\car.jpg is resized from (1700, 2560) to (224, 224)
+[ INFO ] Batch size is 1
+[ INFO ] Loading model to the plugin
+[ INFO ] Starting inference (1 iterations)
+[ INFO ] Average running time of one iteration: 186.79237365722656 ms
+[ INFO ] Performance counters:
+name                                                                   layer_type      exet_type       status          real_time, us
+alexnet_fw1/conv1/Conv2D                                               Convolution     Conv            EXECUTED        7902
+
+alexnet_fw1/conv1/Relu                                                 ReLU            BiasRelu        EXECUTED        774
+
+alexnet_fw1/conv2/Conv2D                                               Convolution     Im2ColConvolution EXECUTED        15147
+alexnet_fw1/conv2/Relu                                                 ReLU            BiasRelu        EXECUTED        199
+
+alexnet_fw1/conv3/Conv2D                                               Convolution     Conv            EXECUTED        5462
+
+alexnet_fw1/conv3/Relu                                                 ReLU            BiasRelu        EXECUTED        321
+
+alexnet_fw1/conv4/Conv2D                                               Convolution     Conv            EXECUTED        18541
+
+alexnet_fw1/conv4/Relu                                                 ReLU            BiasRelu        EXECUTED        319
+
+alexnet_fw1/conv5/Conv2D                                               Convolution     Conv            EXECUTED        96648
+
+alexnet_fw1/conv5/Relu                                                 ReLU            BiasRelu        EXECUTED        116
+
+alexnet_fw1/fc6/Conv2D                                                 Convolution     Im2ColConvolution EXECUTED        22448
+alexnet_fw1/fc6/Relu                                                   ReLU            BiasRelu        EXECUTED        72
+
+alexnet_fw1/fc7/Conv2D                                                 Convolution     FC              EXECUTED        9622
+
+alexnet_fw1/fc7/Relu                                                   ReLU            BiasRelu        EXECUTED        70
+
+alexnet_fw1/fc8/Conv2D                                                 Convolution     FC              EXECUTED        2516
+
+alexnet_fw1/fc8/Conv2D/Permute_                                        Permute         Permute         EXECUTED        24
+
+alexnet_fw1/fc8/Conv2D@biases                                          Convolution     Bias            EXECUTED        37
+
+alexnet_fw1/fc8/squeezed                                               Reshape         Reshape         OPTIMIZED_OUT   0
+
+alexnet_fw1/fc8/squeezed@input=0@reorder=NCHW                          Reshape         Permute         EXECUTED        18
+
+alexnet_fw1/pool1/MaxPool                                              Pooling         MaxPool         EXECUTED        498
+
+alexnet_fw1/pool2/MaxPool                                              Pooling         MaxPool         EXECUTED        151
+
+alexnet_fw1/pool5/MaxPool                                              Pooling         MaxPool         EXECUTED        92
+
+input@FP16                                                             <Extra>         Convert_f32f16  EXECUTED        303
+
+output                                                                 SoftMax         SoftMax         EXECUTED        46
+
+output@FP16                                                            <Extra>         Convert_f16f32  EXECUTED        39
+
+[ INFO ] Processing output blob
+[ INFO ] Top 10 results:
+Image C:\Users\alexa\Documents\NCS\test_pictures\car.jpg
+
+classid probability
+------- -----------
+ goose   0.0014648
+spaniel  0.0014400
+flamingo  0.0014191
+garden cart, lawn cart, wheelbarrow0.0013828
+Loafer   0.0013704
+pandean pipe, syrinx0.0013590
+   T     0.0013580
+ towel   0.0013523
+ meter   0.0013418
+beetle, longicorn, longicorn beetle0.0013409
+
+
+
+C:\Users\alexa\Documents\NCS
+λ python "C:\Program Files (x86)\IntelSWTools\openvino_2019.1.148\deployment_tools\inference_engine\samples\python_samples\classification_sample\classification_sample.py" --model C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.xml --input C:\Users\alexa\Documents\NCS\test_pictures\car.jpg --device MYRIAD --perf_counts --labels C:\Users\alexa\Documents\NCS\ir\squeezenet1.1.labels
+[ INFO ] Loading network files:
+        C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.xml
+        C:\Users\alexa\Documents\NCS\ir\alexnet_fw1.frozen.bin
+[ INFO ] Preparing input blobs
+[ WARNING ] Image C:\Users\alexa\Documents\NCS\test_pictures\car.jpg is resized from (1700, 2560) to (224, 224)
+[ INFO ] Batch size is 1
+[ INFO ] Loading model to the plugin
+[ INFO ] Starting inference (1 iterations)
+[ INFO ] Average running time of one iteration: 186.64097785949707 ms
+[ INFO ] Performance counters:
+name                                                                   layer_type      exet_type       status          real_time, us
+alexnet_fw1/conv1/Conv2D                                               Convolution     Conv            EXECUTED        7895
+
+alexnet_fw1/conv1/Relu                                                 ReLU            BiasRelu        EXECUTED        775
+
+alexnet_fw1/conv2/Conv2D                                               Convolution     Im2ColConvolution EXECUTED        15146
+alexnet_fw1/conv2/Relu                                                 ReLU            BiasRelu        EXECUTED        198
+
+alexnet_fw1/conv3/Conv2D                                               Convolution     Conv            EXECUTED        5462
+
+alexnet_fw1/conv3/Relu                                                 ReLU            BiasRelu        EXECUTED        322
+
+alexnet_fw1/conv4/Conv2D                                               Convolution     Conv            EXECUTED        18551
+
+alexnet_fw1/conv4/Relu                                                 ReLU            BiasRelu        EXECUTED        322
+
+alexnet_fw1/conv5/Conv2D                                               Convolution     Conv            EXECUTED        96638
+
+alexnet_fw1/conv5/Relu                                                 ReLU            BiasRelu        EXECUTED        117
+
+alexnet_fw1/fc6/Conv2D                                                 Convolution     Im2ColConvolution EXECUTED        22468
+alexnet_fw1/fc6/Relu                                                   ReLU            BiasRelu        EXECUTED        72
+
+alexnet_fw1/fc7/Conv2D                                                 Convolution     FC              EXECUTED        9621
+
+alexnet_fw1/fc7/Relu                                                   ReLU            BiasRelu        EXECUTED        70
+
+alexnet_fw1/fc8/Conv2D                                                 Convolution     FC              EXECUTED        2516
+
+alexnet_fw1/fc8/Conv2D/Permute_                                        Permute         Permute         EXECUTED        25
+
+alexnet_fw1/fc8/Conv2D@biases                                          Convolution     Bias            EXECUTED        36
+
+alexnet_fw1/fc8/squeezed                                               Reshape         Reshape         OPTIMIZED_OUT   0
+
+alexnet_fw1/fc8/squeezed@input=0@reorder=NCHW                          Reshape         Permute         EXECUTED        19
+
+alexnet_fw1/pool1/MaxPool                                              Pooling         MaxPool         EXECUTED        499
+
+alexnet_fw1/pool2/MaxPool                                              Pooling         MaxPool         EXECUTED        151
+
+alexnet_fw1/pool5/MaxPool                                              Pooling         MaxPool         EXECUTED        92
+
+input@FP16                                                             <Extra>         Convert_f32f16  EXECUTED        302
+
+output                                                                 SoftMax         SoftMax         EXECUTED        47
+
+output@FP16                                                            <Extra>         Convert_f16f32  EXECUTED        38
+
+[ INFO ] Processing output blob
+[ INFO ] Top 10 results:
+Image C:\Users\alexa\Documents\NCS\test_pictures\car.jpg
+
+classid probability
+------- -----------
+ goose   0.0014648
+spaniel  0.0014400
+flamingo  0.0014191
+garden cart, lawn cart, wheelbarrow0.0013828
+Loafer   0.0013704
+pandean pipe, syrinx0.0013590
+   T     0.0013580
+ towel   0.0013523
+ meter   0.0013418
+beetle, longicorn, longicorn beetle0.0013409
+
+
+
+C:\Users\alexa\Documents\NCS
+λ
