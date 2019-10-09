@@ -10,3 +10,5 @@ common/labels.txt
 .vscode/
 *.inf.pb
 .env
+checkpoint
+*.ckpt.*
