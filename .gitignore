@@ -9,3 +9,4 @@ common/labels.txt
 *build*/
 .vscode/
 *.inf.pb
+.env
