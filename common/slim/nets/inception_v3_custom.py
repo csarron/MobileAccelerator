@@ -214,7 +214,7 @@ def inception_v3_custom_base(inputs,
       end_point = 'Mixed_6a'
       with tf.variable_scope(end_point):
         with tf.variable_scope('Branch_0'):
-          print('Custom argument received: ' + str(cust_arg_1))
+          print('############### Custom argument received: ' + str(cust_arg_1))
           branch_0 = slim.conv2d(net, depth(cust_arg_1), [3, 3], stride=2,
                                  padding='VALID', scope='Conv2d_1a_1x1')
         with tf.variable_scope('Branch_1'):

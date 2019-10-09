@@ -13,6 +13,7 @@ def generateModels(min, max, step):
         ckpt_file = file_name_stem + '.ckpt'
         frozen_file = file_name_stem + '.frozen.pb'
         cust_arg = '--cust_arg_1 ' + str(i)
+        executeCommand('rm checkpoint')
 
         command = 'python ../common/export_inference_graph.py --model_name inception_v3_custom --output_file ' + inference_graph_file + ' ' + cust_arg
         executeCommand(command)
@@ -34,8 +35,5 @@ def executeModels(min, max, step):
         command = 'echo NCS2:%TIME% & python classification_sample.py --model ' + xml_file + ' --input car.jpg --device MYRIAD --perf_counts'
         executeCommand(command)
 
-min = 0
-max = 384
-step = 8
-generateModels(min, max, step)
-executeModels(min, max, step)
+generateModels(256, 256+3*8, 8)
+# executeModels(min, max, step)
