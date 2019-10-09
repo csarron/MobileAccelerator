@@ -14,4 +14,4 @@ def executeModels(min, max, step):
         command = 'echo NCS2:%TIME% & python classification_sample.py --model ' + xml_file + ' --input car.jpg --device MYRIAD --perf_counts --number_iter 5'
         executeCommand(command)
 
-executeModels(4, 232, 4)
+executeModels(4, 384, 4)
