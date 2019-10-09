@@ -2,18 +2,40 @@ import os
 import sys
 sys.path.append('../')
 
-# from export_inference_graph import export_inference_graph
+def executeCommand(command):
+    print(command)
+    #os.system(command)
 
-# export_inference_graph.export_inference_graph(model_name="inception_v3",
-#                         output_file="inception_v3_77.inf.pb",
-#                         cust_arg_1=128)
+def generateModels(min, max, step):
+    for i in range(min, max, step):
+        file_name_stem = 'inception_v3_' + str(i)
+        inference_graph_file = file_name_stem + '.inf.pb'
+        ckpt_file = file_name_stem + '.ckpt'
+        frozen_file = file_name_stem + '.frozen.pb'
+        cust_arg = '--cust_arg_1 ' + str(i)
 
-for i in range(0, 128, 64):
-    file_name_stem = 'inception_v3_' + str(i)
-    cust_arg_stem = '--cust_arg_1 ' + str(i)
+        command = 'python ../common/export_inference_graph.py --model_name inception_v3_custom --output_file ' + inference_graph_file + ' ' + cust_arg
+        executeCommand(command)
 
-    command = 'python ..\common\export_inference_graph.py --model_name inception_v3_custom --output_file ' + file_name_stem + '.inf.pb ' + cust_arg_stem
-    os.system(command)
-    command = 'python ..\common\gen_weights.py --model_name inception_v3_custom --output_file '+ file_name_stem + '.ckpt ' + cust_arg_stem
-    os.system(command)
-    # Freeze model
+        command = 'python ../common/gen_weights.py --model_name inception_v3_custom --output_file '+ ckpt_file + ' ' + cust_arg
+        executeCommand(command)
+
+        command = 'python ../common/freeze_model.py --checkpoint_file ' + ckpt_file + ' --inference_graph ' + inference_graph_file
+        executeCommand(command)
+
+        command = 'python "C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\model_optimizer\mo_tf.py" --input_model ' + frozen_file + ' --output_dir ./ --data_type FP16 --input_shape (1,224,224,3)'
+        executeCommand(command)
+
+def executeModels(min, max, step):
+    for i in range(min, max, step):
+        file_name_stem = 'inception_v3_' + str(i)
+        xml_file = file_name_stem + '.frozen.xml'
+
+        command = 'echo NCS2:%TIME% & python classification_sample.py --model ' + xml_file + ' --input car.jpg --device MYRIAD --perf_counts --labels sueezenet1.1.labels'
+        executeCommand(command)
+
+min = 0
+max = 64
+step = 64
+generateModels(min, max, step)
+executeModels(min, max, step)
