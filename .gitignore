@@ -12,3 +12,4 @@ common/labels.txt
 .env
 checkpoint
 *.ckpt.*
+*.frozen.*

@@ -4,7 +4,7 @@ sys.path.append('../')
 
 def executeCommand(command):
     print(command)
-    #os.system(command)
+    os.system(command)
 
 def generateModels(min, max, step):
     for i in range(min, max, step):
@@ -31,11 +31,11 @@ def executeModels(min, max, step):
         file_name_stem = 'inception_v3_' + str(i)
         xml_file = file_name_stem + '.frozen.xml'
 
-        command = 'echo NCS2:%TIME% & python classification_sample.py --model ' + xml_file + ' --input car.jpg --device MYRIAD --perf_counts --labels sueezenet1.1.labels'
+        command = 'echo NCS2:%TIME% & python classification_sample.py --model ' + xml_file + ' --input car.jpg --device MYRIAD --perf_counts'
         executeCommand(command)
 
 min = 0
-max = 64
-step = 64
+max = 384
+step = 8
 generateModels(min, max, step)
 executeModels(min, max, step)
