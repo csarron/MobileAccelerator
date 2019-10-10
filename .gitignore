@@ -13,3 +13,4 @@ common/labels.txt
 checkpoint
 *.ckpt.*
 *.frozen.*
+*.txt
