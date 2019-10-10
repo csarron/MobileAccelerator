@@ -24,6 +24,8 @@ def get_args():
                              " background class for the ImageNet dataset.")
     parser.add_argument("-1", "--cust_arg_1", type=int, default=0,
                         help="Custom argument")
+    parser.add_argument("-2", "--cust_arg_2", type=int, default=0,
+                        help="Custom argument 2")
     return parser.parse_args()
 
 
@@ -35,7 +37,8 @@ if __name__ == '__main__':
         network_fn = nets_factory.get_network_fn(model_name,
                                                  num_classes=(args.num_classes - args.labels_offset),
                                                  is_training=False,
-                                                 cust_arg_1=args.cust_arg_1)
+                                                 cust_arg_1=args.cust_arg_1,
+                                                 cust_arg_2=args.cust_arg_2)
         image_size = args.image_size or network_fn.default_image_size
         placeholder = tf.placeholder(name='input', dtype=tf.float32,
                                      shape=[None, image_size, image_size, 3])

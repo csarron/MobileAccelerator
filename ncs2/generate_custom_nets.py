@@ -2,13 +2,17 @@ import os
 import sys
 sys.path.append('../')
 
+outputDir = "./large_filters"
+
 def executeCommand(command):
     print(command)
     os.system(command)
 
 def generateModels(min, max, step):
     for i in range(min, max, step):
-        file_name_stem = 'inception_v3_' + str(i)
+        # index = str(i).zfill(6)
+        # file_name_stem = outputDir + '/inception_v3_' + index
+        file_name_stem = outputDir + '/inception_v3_' + str(i)
         inference_graph_file = file_name_stem + '.inf.pb'
         ckpt_file = file_name_stem + '.ckpt'
         frozen_file = file_name_stem + '.frozen.pb'
@@ -24,16 +28,8 @@ def generateModels(min, max, step):
         command = 'python ../common/freeze_model.py --checkpoint_file ' + ckpt_file + ' --inference_graph ' + inference_graph_file
         executeCommand(command)
 
-        command = 'python "C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\model_optimizer\mo_tf.py" --input_model ' + frozen_file + ' --output_dir ./ --data_type FP16 --input_shape (1,224,224,3)'
+        command = 'python "C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\model_optimizer\mo_tf.py" --input_model ' + frozen_file + ' --output_dir ' + outputDir + ' --data_type FP16 --input_shape (1,224,224,3)'
         executeCommand(command)
 
-def executeModels(min, max, step):
-    for i in range(min, max, step):
-        file_name_stem = 'inception_v3_' + str(i)
-        xml_file = file_name_stem + '.frozen.xml'
-
-        command = 'echo NCS2:%TIME% & python classification_sample.py --model ' + xml_file + ' --input car.jpg --device MYRIAD --perf_counts'
-        executeCommand(command)
-
-generateModels(4, 384, 4)
-executeModels(4, 384, 4)
+generateModels(384 + 256, 4096, 256)
+# generateModels(4096-256, 4096, 256)

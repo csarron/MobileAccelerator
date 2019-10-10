@@ -31,7 +31,8 @@ def inception_v3_custom_base(inputs,
                       min_depth=16,
                       depth_multiplier=1.0,
                       scope=None,
-                      cust_arg_1=384):
+                      cust_arg_1=384,
+                      cust_arg_2=3):
   """Inception model from http://arxiv.org/abs/1512.00567.
 
   Constructs an Inception v3 network from inputs to the given final endpoint.
@@ -214,8 +215,8 @@ def inception_v3_custom_base(inputs,
       end_point = 'Mixed_6a'
       with tf.variable_scope(end_point):
         with tf.variable_scope('Branch_0'):
-          print('############### Custom argument received: ' + str(cust_arg_1))
-          branch_0 = slim.conv2d(net, depth(cust_arg_1), [3, 3], stride=2,
+          print('############### Custom arguments: cust_arg_1: ' + str(cust_arg_1) + ', cust_arg_2: ' + str(cust_arg_2))
+          branch_0 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2,
                                  padding='VALID', scope='Conv2d_1a_1x1')
         with tf.variable_scope('Branch_1'):
           branch_1 = slim.conv2d(net, depth(64), [1, 1], scope='Conv2d_0a_1x1')
@@ -430,7 +431,8 @@ def inception_v3_custom(inputs,
                  create_aux_logits=True,
                  scope='InceptionV3',
                  global_pool=False,
-                 cust_arg_1=384):
+                 cust_arg_1=384,
+                 cust_arg_2=3):
   """Inception model from http://arxiv.org/abs/1512.00567.
 
   "Rethinking the Inception Architecture for Computer Vision"
@@ -490,7 +492,7 @@ def inception_v3_custom(inputs,
                         is_training=is_training):
       net, end_points = inception_v3_custom_base(
           inputs, scope=scope, min_depth=min_depth,
-          depth_multiplier=depth_multiplier, cust_arg_1=cust_arg_1)
+          depth_multiplier=depth_multiplier, cust_arg_1=cust_arg_1, cust_arg_2=cust_arg_2)
 
       # Auxiliary Head logits
       if create_aux_logits and num_classes:
