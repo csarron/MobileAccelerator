@@ -33,8 +33,6 @@ slim = tf.contrib.slim
 
 #     return model
 
-output_dir = "small_nets"
-
 def generate_models(min, max, step):
     for kernel_size in range(min, max, step):
         model_name = 'model_input' + str(28) + 'x' + str(28) \
@@ -49,11 +47,25 @@ def generate_models(min, max, step):
              for out in model.outputs])
         tf.train.write_graph(frozen_graph, output_dir, model_name, as_text=False)
 
+def generate_model1():
+    model = tf.keras.models.Sequential()
+    model.add(layers.Conv2D(256, (3, 3), input_shape=(224, 224, 3)))
+
+    model.compile(optimizer=tf.keras.optimizers.Adam(),
+        loss=tf.keras.losses.sparse_categorical_crossentropy, metrics=['accuracy'])
+
+    frozen_graph = freeze_session(K.get_session(), output_names=[out.op.name
+            for out in model.outputs])
+
+    tf.train.write_graph(frozen_graph, 'small_nets', 'model1.pb', as_text=False)
+    convert_model('small_nets/model1.pb')
+
 def main():
     # log.getLogger().setLevel(log.INFO)
     # log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     # args = build_argparser().parse_args()
-    generate_models(2, 3, 1)
+    # generate_models(2, 3, 1)
+    generate_model1()
 
 if __name__ == '__main__':
     sys.exit(main() or 0)
