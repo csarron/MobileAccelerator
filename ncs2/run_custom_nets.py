@@ -26,7 +26,7 @@ def executeModels(min, max, step):
         executeCommand(command)
 
 def main():
-    executeModels(1024 + 256, 2048, 64)
+    executeModels(16, 3504 + 1, 16)
 
 if __name__ == '__main__':
     args = build_argparser().parse_args()

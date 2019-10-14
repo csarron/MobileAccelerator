@@ -216,17 +216,13 @@ def inception_v3_custom_base(inputs,
       with tf.variable_scope(end_point):
         with tf.variable_scope('Branch_0'):
           print('############### Custom arguments: cust_arg_1: ' + str(cust_arg_1) + ', cust_arg_2: ' + str(cust_arg_2))
-          branch_0 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2,
-                                 padding='VALID', scope='Conv2d_1a_1x1')
+          branch_0 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID',scope='Conv2d_1a_1x1')
         with tf.variable_scope('Branch_1'):
           branch_1 = slim.conv2d(net, depth(64), [1, 1], scope='Conv2d_0a_1x1')
-          branch_1 = slim.conv2d(branch_1, depth(96), [3, 3],
-                                 scope='Conv2d_0b_3x3')
-          branch_1 = slim.conv2d(branch_1, depth(96), [3, 3], stride=2,
-                                 padding='VALID', scope='Conv2d_1a_1x1')
+          branch_1 = slim.conv2d(branch_1, depth(96), [cust_arg_2, cust_arg_2], scope='Conv2d_0b_3x3')
+          branch_1 = slim.conv2d(branch_1, depth(96), [cust_arg_2, cust_arg_2], stride=2, padding='VALID', scope='Conv2d_1a_1x1')
         with tf.variable_scope('Branch_2'):
-          branch_2 = slim.max_pool2d(net, [3, 3], stride=2, padding='VALID',
-                                     scope='MaxPool_1a_3x3')
+          branch_2 = slim.max_pool2d(net, [cust_arg_2, cust_arg_2], stride=2, padding='VALID', scope='MaxPool_1a_3x3')
         net = tf.concat(axis=3, values=[branch_0, branch_1, branch_2])
       end_points[end_point] = net
       if end_point == final_endpoint: return net, end_points
