@@ -60,8 +60,12 @@ def build_argparser():
 
 
 def main():
-    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
+    # log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO, stream=sys.stdout)
     args = build_argparser().parse_args()
+
+    log.basicConfig(format="[ %(levelname)s ] %(message)s", level=log.INFO,
+        filename=args.output_file + '.log')
+
     model_xml = args.model
     model_bin = os.path.splitext(model_xml)[0] + ".bin"
 
@@ -122,20 +126,22 @@ def main():
         output_file = open(args.output_file, 'a+')
         output_file_log = open(args.output_file + '.log', 'a+')
         total_layer_time = 0
+        partial_layer_time = 0
         # output_file.write('depth\ttime\n')
         for layer, stats in perf_counts.items():
             log_content = "{:<70} {:<15} {:<15} {:<15} {:<10}".format(layer, stats['layer_type'],
                 stats['exec_type'], stats['status'], stats['real_time'])
             print(log_content)
-            output_file_log.write('#########################################\n')
-            output_file_log.write(lstr(args.cust_arg_1) + '\n')
-            output_file_log.write(log_content + '\n')
+            log.info(log_content)
 
             if 'Mixed_6a/Branch_0/Conv2d_1a_1x1' in layer:
                 # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
                 total_layer_time += stats['real_time']
 
-        output_file.write(str(args.cust_arg_1) +'\t' + str(total_layer_time) + '\n')
+                if 'injected' not in layer:
+                    partial_layer_time += stats['real_time']
+
+        output_file.write(str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\n')
 
     # Processing output blob
     log.info("Processing output blob")
