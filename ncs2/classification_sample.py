@@ -49,6 +49,12 @@ def build_argparser():
     args.add_argument("-ni", "--number_iter", help="Optional. Number of inference iterations", default=1, type=int)
     args.add_argument("-pc", "--perf_counts", help="Optional. Report performance counters", default=False,
                       action="store_true")
+    parser.add_argument("-of", "--output_file", type=str, default=0,
+                        help="Output file for results")
+    parser.add_argument("-1", "--cust_arg_1", type=int, default=0,
+                        help="Custom argument 1")
+    parser.add_argument("-2", "--cust_arg_2", type=int, default=0,
+                        help="Custom argument 2")
 
     return parser
 
@@ -113,9 +119,23 @@ def main():
         perf_counts = exec_net.requests[0].get_perf_counts()
         log.info("Performance counters:")
         print("{:<70} {:<15} {:<15} {:<15} {:<10}".format('name', 'layer_type', 'exet_type', 'status', 'real_time, us'))
+        output_file = open(args.output_file, 'a+')
+        output_file_log = open(args.output_file + '.log', 'a+')
+        total_layer_time = 0
+        # output_file.write('depth\ttime\n')
         for layer, stats in perf_counts.items():
-            print("{:<70} {:<15} {:<15} {:<15} {:<10}".format(layer, stats['layer_type'], stats['exec_type'],
-                                                              stats['status'], stats['real_time']))
+            log_content = "{:<70} {:<15} {:<15} {:<15} {:<10}".format(layer, stats['layer_type'],
+                stats['exec_type'], stats['status'], stats['real_time'])
+            print(log_content)
+            output_file_log.write('#########################################\n')
+            output_file_log.write(lstr(args.cust_arg_1) + '\n')
+            output_file_log.write(log_content + '\n')
+
+            if 'Mixed_6a/Branch_0/Conv2d_1a_1x1' in layer:
+                # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
+                total_layer_time += stats['real_time']
+
+        output_file.write(str(args.cust_arg_1) +'\t' + str(total_layer_time) + '\n')
 
     # Processing output blob
     log.info("Processing output blob")
