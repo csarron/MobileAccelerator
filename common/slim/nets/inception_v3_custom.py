@@ -101,9 +101,16 @@ def inception_v3_custom_base(inputs,
   with tf.variable_scope(scope, 'InceptionV3', [inputs]):
     with slim.arg_scope([slim.conv2d, slim.max_pool2d, slim.avg_pool2d],
                         stride=1, padding='VALID'):
+      print('########Custom arguments: cust_arg_1: ' + str(cust_arg_1) + ', cust_arg_2: ' + str(cust_arg_2))
 
-      end_point = 'AlexandruIrimiea'
-      net = slim.conv2d(inputs, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, scope=end_point)
+      end_point = 'Conv2d_1a_3x3'
+      net = slim.conv2d(inputs, depth(32), [3, 3], stride=2, scope=end_point)
+      end_points[end_point] = net
+
+      end_point = 'AlexandruIrimiea2'
+      with tf.variable_scope(end_point):
+        net1 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID')
+        net = net1
       end_points[end_point] = net
       return net, end_points
 

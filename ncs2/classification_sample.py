@@ -118,7 +118,9 @@ def main():
         t0 = time()
         res = exec_net.infer(inputs={input_blob: images})
         infer_time.append((time() - t0) * 1000)
-    log.info("Average running time of one iteration: {} ms".format(np.average(np.asarray(infer_time))))
+
+    average_total_time = np.average(np.asarray(infer_time))
+    log.info("Average running time of one iteration: {} ms".format(average_total_time))
     if args.perf_counts:
         perf_counts = exec_net.requests[0].get_perf_counts()
         log.info("Performance counters:")
@@ -127,21 +129,21 @@ def main():
         output_file_log = open(args.output_file + '.log', 'a+')
         total_layer_time = 0
         partial_layer_time = 0
-        # output_file.write('depth\ttime\n')
+        # output_file.write('kernel_size\tdepth\ttotal_time(us)\ttime_without_injected(us)\taverage_total_time(ms)\n')
         for layer, stats in perf_counts.items():
             log_content = "{:<70} {:<15} {:<15} {:<15} {:<10}".format(layer, stats['layer_type'],
                 stats['exec_type'], stats['status'], stats['real_time'])
             print(log_content)
             log.info(log_content)
 
-            if 'AlexandruIrimiea' in layer:
+            if 'AlexandruIrimiea2/Conv/Conv2D' in layer:
                 # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
                 total_layer_time += stats['real_time']
 
                 if 'injected' not in layer:
                     partial_layer_time += stats['real_time']
 
-        output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\n')
+        output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\t' + str(average_total_time) + '\n')
 
     # Processing output blob
     log.info("Processing output blob")

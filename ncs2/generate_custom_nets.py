@@ -1,8 +1,13 @@
 from net_values import *
+import threading
 
-def main():
+def generate_models(depth_begin_local, depth_offset_local):
+    depth_end_local = depth_begin_local + depth_offset_local
     for kernel_size in range(kernel_size_begin, kernel_size_end):
-        for depth in range(depth_begin, depth_end, depth_step):
+        for depth in range(depth_begin_local, depth_begin_local + depth_offset_local, depth_step):
+            # if depth % 64 == 0:
+            #     continue
+            # print('threading.get_ident():' + str(threading.get_ident()) + ': depth_begin_local: ' + str(depth_begin_local) + ', depth_end_local:' + str(depth_end_local))
             file_name_stem = get_model_file_name(kernel_size, depth)
             inference_graph_file = file_name_stem + '.inf.pb'
             ckpt_file = file_name_stem + '.ckpt'
@@ -23,6 +28,23 @@ def main():
 
             command = 'python "C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\model_optimizer\mo_tf.py" --input_model ' + frozen_file + ' --output_dir ' + experiments_dir + ' --data_type FP16 --input_shape (1,224,224,3)'
             execute_command(command)
+
+def main():
+    generate_models(depth_begin, depth_offset)
+    # thread_count = 1
+    # work_chunks = int(depth_offset/thread_count)
+
+    # threads = []
+
+    # for ti in range (0, thread_count):
+    #     # generate_models(depth_begin + t, depth_end)
+    #     threads.append(threading.Thread(target = generate_models, args = (depth_begin + ti * work_chunks, work_chunks)))
+
+    # for x in threads:
+    #     x.start()
+
+    # for x in threads:
+    #     x.join()
 
 if __name__ == '__main__':
     sys.exit(main() or 0)

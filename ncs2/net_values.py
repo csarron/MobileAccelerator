@@ -4,12 +4,13 @@ import sys
 sys.path.append('../')
 
 kernel_size_begin = 3
-kernel_size_end = 6
-depth_begin = 256
-depth_end = 257
-depth_step = 1
+kernel_size_end = 4
 
-experiments_dir = './generated'
+depth_begin = 0
+depth_offset = 4096
+depth_step = 32
+
+experiments_dir = './generated_memory'
 # experiments_dir = experiments_dir + '_kernel' + str(kernel_size) + '_depthstep' + str(depth_step)
 os.makedirs(experiments_dir, exist_ok=True)
 
