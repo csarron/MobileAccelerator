@@ -134,14 +134,14 @@ def main():
             print(log_content)
             log.info(log_content)
 
-            if 'Mixed_6a/Branch_0/Conv2d_1a_1x1' in layer:
+            if 'AlexandruIrimiea' in layer:
                 # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
                 total_layer_time += stats['real_time']
 
                 if 'injected' not in layer:
                     partial_layer_time += stats['real_time']
 
-        output_file.write(str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\n')
+        output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\n')
 
     # Processing output blob
     log.info("Processing output blob")
