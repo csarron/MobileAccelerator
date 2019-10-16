@@ -55,6 +55,8 @@ def build_argparser():
                         help="Custom argument 1")
     parser.add_argument("-2", "--cust_arg_2", type=int, default=0,
                         help="Custom argument 2")
+    parser.add_argument("-384", "--new_384_depth", type=int, default=0,
+                        help="new_384_depth")
 
     return parser
 
@@ -143,7 +145,8 @@ def main():
                 if 'injected' not in layer:
                     partial_layer_time += stats['real_time']
 
-        output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\t' + str(average_total_time) + '\n')
+        #output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\t' + str(average_total_time) + '\n')
+        output_file.write(str(args.new_384_depth) +'\t' + str(average_total_time) + '\n')
 
     # Processing output blob
     log.info("Processing output blob")

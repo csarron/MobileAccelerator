@@ -32,7 +32,8 @@ def inception_v3_custom_base(inputs,
                       depth_multiplier=1.0,
                       scope=None,
                       cust_arg_1=384,
-                      cust_arg_2=3):
+                      cust_arg_2=3,
+                      new_384_depth=384):
   """Inception model from http://arxiv.org/abs/1512.00567.
 
   Constructs an Inception v3 network from inputs to the given final endpoint.
@@ -101,18 +102,19 @@ def inception_v3_custom_base(inputs,
   with tf.variable_scope(scope, 'InceptionV3', [inputs]):
     with slim.arg_scope([slim.conv2d, slim.max_pool2d, slim.avg_pool2d],
                         stride=1, padding='VALID'):
-      print('########Custom arguments: cust_arg_1: ' + str(cust_arg_1) + ', cust_arg_2: ' + str(cust_arg_2))
+      print('########Custom arguments: cust_arg_1: ' + str(cust_arg_1) \
+        + ', cust_arg_2: ' + str(cust_arg_2) + ', new_384_depth: ' + str(new_384_depth))
 
-      end_point = 'Conv2d_1a_3x3'
-      net = slim.conv2d(inputs, depth(32), [3, 3], stride=2, scope=end_point)
-      end_points[end_point] = net
+      # end_point = 'Conv2d_1a_3x3'
+      # net = slim.conv2d(inputs, depth(32), [3, 3], stride=2, scope=end_point)
+      # end_points[end_point] = net
 
-      end_point = 'AlexandruIrimiea2'
-      with tf.variable_scope(end_point):
-        net1 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID')
-        net = net1
-      end_points[end_point] = net
-      return net, end_points
+      # end_point = 'AlexandruIrimiea2'
+      # with tf.variable_scope(end_point):
+      #   net1 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID')
+      #   net = net1
+      # end_points[end_point] = net
+      # return net, end_points
 
       # 299 x 299 x 3
       end_point = 'Conv2d_1a_3x3'
@@ -224,18 +226,37 @@ def inception_v3_custom_base(inputs,
       end_points[end_point] = net
       if end_point == final_endpoint: return net, end_points
 
+      # # mixed_3: 17 x 17 x 768.
+      # end_point = 'Mixed_6a'
+      # with tf.variable_scope(end_point):
+      #   with tf.variable_scope('Branch_0'):
+      #     print('############### Custom arguments: cust_arg_1: ' + str(cust_arg_1) + ', cust_arg_2: ' + str(cust_arg_2))
+      #     branch_0 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID',scope='Conv2d_1a_1x1')
+      #   with tf.variable_scope('Branch_1'):
+      #     branch_1 = slim.conv2d(net, depth(64), [1, 1], scope='Conv2d_0a_1x1')
+      #     branch_1 = slim.conv2d(branch_1, depth(96), [cust_arg_2, cust_arg_2], scope='Conv2d_0b_3x3')
+      #     branch_1 = slim.conv2d(branch_1, depth(96), [cust_arg_2, cust_arg_2], stride=2, padding='VALID', scope='Conv2d_1a_1x1')
+      #   with tf.variable_scope('Branch_2'):
+      #     branch_2 = slim.max_pool2d(net, [cust_arg_2, cust_arg_2], stride=2, padding='VALID', scope='MaxPool_1a_3x3')
+      #   net = tf.concat(axis=3, values=[branch_0, branch_1, branch_2])
+      # end_points[end_point] = net
+      # if end_point == final_endpoint: return net, end_points
+
       # mixed_3: 17 x 17 x 768.
       end_point = 'Mixed_6a'
       with tf.variable_scope(end_point):
         with tf.variable_scope('Branch_0'):
-          print('############### Custom arguments: cust_arg_1: ' + str(cust_arg_1) + ', cust_arg_2: ' + str(cust_arg_2))
-          branch_0 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID',scope='Conv2d_1a_1x1')
+          branch_0 = slim.conv2d(net, depth(new_384_depth), [3, 3], stride=2,
+                                 padding='VALID', scope='Conv2d_1a_1x1')
         with tf.variable_scope('Branch_1'):
           branch_1 = slim.conv2d(net, depth(64), [1, 1], scope='Conv2d_0a_1x1')
-          branch_1 = slim.conv2d(branch_1, depth(96), [cust_arg_2, cust_arg_2], scope='Conv2d_0b_3x3')
-          branch_1 = slim.conv2d(branch_1, depth(96), [cust_arg_2, cust_arg_2], stride=2, padding='VALID', scope='Conv2d_1a_1x1')
+          branch_1 = slim.conv2d(branch_1, depth(96), [3, 3],
+                                 scope='Conv2d_0b_3x3')
+          branch_1 = slim.conv2d(branch_1, depth(96), [3, 3], stride=2,
+                                 padding='VALID', scope='Conv2d_1a_1x1')
         with tf.variable_scope('Branch_2'):
-          branch_2 = slim.max_pool2d(net, [cust_arg_2, cust_arg_2], stride=2, padding='VALID', scope='MaxPool_1a_3x3')
+          branch_2 = slim.max_pool2d(net, [3, 3], stride=2, padding='VALID',
+                                     scope='MaxPool_1a_3x3')
         net = tf.concat(axis=3, values=[branch_0, branch_1, branch_2])
       end_points[end_point] = net
       if end_point == final_endpoint: return net, end_points
@@ -382,17 +403,17 @@ def inception_v3_custom_base(inputs,
         with tf.variable_scope('Branch_0'):
           branch_0 = slim.conv2d(net, depth(320), [1, 1], scope='Conv2d_0a_1x1')
         with tf.variable_scope('Branch_1'):
-          branch_1 = slim.conv2d(net, depth(384), [1, 1], scope='Conv2d_0a_1x1')
+          branch_1 = slim.conv2d(net, depth(new_384_depth), [1, 1], scope='Conv2d_0a_1x1')
           branch_1 = tf.concat(axis=3, values=[
-              slim.conv2d(branch_1, depth(384), [1, 3], scope='Conv2d_0b_1x3'),
-              slim.conv2d(branch_1, depth(384), [3, 1], scope='Conv2d_0b_3x1')])
+              slim.conv2d(branch_1, depth(new_384_depth), [1, 3], scope='Conv2d_0b_1x3'),
+              slim.conv2d(branch_1, depth(new_384_depth), [3, 1], scope='Conv2d_0b_3x1')])
         with tf.variable_scope('Branch_2'):
           branch_2 = slim.conv2d(net, depth(448), [1, 1], scope='Conv2d_0a_1x1')
           branch_2 = slim.conv2d(
-              branch_2, depth(384), [3, 3], scope='Conv2d_0b_3x3')
+              branch_2, depth(new_384_depth), [3, 3], scope='Conv2d_0b_3x3')
           branch_2 = tf.concat(axis=3, values=[
-              slim.conv2d(branch_2, depth(384), [1, 3], scope='Conv2d_0c_1x3'),
-              slim.conv2d(branch_2, depth(384), [3, 1], scope='Conv2d_0d_3x1')])
+              slim.conv2d(branch_2, depth(new_384_depth), [1, 3], scope='Conv2d_0c_1x3'),
+              slim.conv2d(branch_2, depth(new_384_depth), [3, 1], scope='Conv2d_0d_3x1')])
         with tf.variable_scope('Branch_3'):
           branch_3 = slim.avg_pool2d(net, [3, 3], scope='AvgPool_0a_3x3')
           branch_3 = slim.conv2d(
@@ -407,17 +428,17 @@ def inception_v3_custom_base(inputs,
         with tf.variable_scope('Branch_0'):
           branch_0 = slim.conv2d(net, depth(320), [1, 1], scope='Conv2d_0a_1x1')
         with tf.variable_scope('Branch_1'):
-          branch_1 = slim.conv2d(net, depth(384), [1, 1], scope='Conv2d_0a_1x1')
+          branch_1 = slim.conv2d(net, depth(new_384_depth), [1, 1], scope='Conv2d_0a_1x1')
           branch_1 = tf.concat(axis=3, values=[
-              slim.conv2d(branch_1, depth(384), [1, 3], scope='Conv2d_0b_1x3'),
-              slim.conv2d(branch_1, depth(384), [3, 1], scope='Conv2d_0c_3x1')])
+              slim.conv2d(branch_1, depth(new_384_depth), [1, 3], scope='Conv2d_0b_1x3'),
+              slim.conv2d(branch_1, depth(new_384_depth), [3, 1], scope='Conv2d_0c_3x1')])
         with tf.variable_scope('Branch_2'):
           branch_2 = slim.conv2d(net, depth(448), [1, 1], scope='Conv2d_0a_1x1')
           branch_2 = slim.conv2d(
-              branch_2, depth(384), [3, 3], scope='Conv2d_0b_3x3')
+              branch_2, depth(new_384_depth), [3, 3], scope='Conv2d_0b_3x3')
           branch_2 = tf.concat(axis=3, values=[
-              slim.conv2d(branch_2, depth(384), [1, 3], scope='Conv2d_0c_1x3'),
-              slim.conv2d(branch_2, depth(384), [3, 1], scope='Conv2d_0d_3x1')])
+              slim.conv2d(branch_2, depth(new_384_depth), [1, 3], scope='Conv2d_0c_1x3'),
+              slim.conv2d(branch_2, depth(new_384_depth), [3, 1], scope='Conv2d_0d_3x1')])
         with tf.variable_scope('Branch_3'):
           branch_3 = slim.avg_pool2d(net, [3, 3], scope='AvgPool_0a_3x3')
           branch_3 = slim.conv2d(
@@ -427,6 +448,21 @@ def inception_v3_custom_base(inputs,
       if end_point == final_endpoint: return net, end_points
     raise ValueError('Unknown final endpoint %s' % final_endpoint)
 
+# def inception_v3_custom(inputs,
+#                  num_classes=1000,
+#                  is_training=True,
+#                  dropout_keep_prob=0.8,
+#                  min_depth=16,
+#                  depth_multiplier=1.0,
+#                  prediction_fn=slim.softmax,
+#                  spatial_squeeze=False,
+#                  reuse=None,
+#                  create_aux_logits=False,
+#                  scope='InceptionV3',
+#                  global_pool=False,
+#                  cust_arg_1=384,
+#                  cust_arg_2=3,
+#                  new_384_depth=384):
 
 def inception_v3_custom(inputs,
                  num_classes=1000,
@@ -435,13 +471,14 @@ def inception_v3_custom(inputs,
                  min_depth=16,
                  depth_multiplier=1.0,
                  prediction_fn=slim.softmax,
-                 spatial_squeeze=False,
+                 spatial_squeeze=True,
                  reuse=None,
-                 create_aux_logits=False,
+                 create_aux_logits=True,
                  scope='InceptionV3',
                  global_pool=False,
                  cust_arg_1=384,
-                 cust_arg_2=3):
+                 cust_arg_2=3,
+                 new_384_depth=384):
   """Inception model from http://arxiv.org/abs/1512.00567.
 
   "Rethinking the Inception Architecture for Computer Vision"
@@ -501,7 +538,7 @@ def inception_v3_custom(inputs,
                         is_training=is_training):
       net, end_points = inception_v3_custom_base(
           inputs, scope=scope, min_depth=min_depth,
-          depth_multiplier=depth_multiplier, cust_arg_1=cust_arg_1, cust_arg_2=cust_arg_2)
+          depth_multiplier=depth_multiplier, cust_arg_1=cust_arg_1, cust_arg_2=cust_arg_2, new_384_depth=new_384_depth)
 
       # Auxiliary Head logits
       if create_aux_logits and num_classes:

@@ -22,12 +22,13 @@ def generate_models(depth_begin_local, depth_offset_local):
 
             cust_arg_1 = '--cust_arg_1 ' + str(depth)
             cust_arg_2 = '--cust_arg_2 ' + str(kernel_size)
+            new_384_depth = '--new_384_depth ' + str(depth)
             # execute_command('rm  ' + experiments_dir + '/checkpoint')
 
-            command = 'python ../common/export_inference_graph.py --model_name inception_v3_custom --output_file ' + inference_graph_file + ' ' + cust_arg_1 + ' ' + cust_arg_2
+            command = 'python ../common/export_inference_graph.py --model_name inception_v3_custom --output_file ' + inference_graph_file + ' ' + cust_arg_1 + ' ' + cust_arg_2 + ' ' + new_384_depth
             execute_command(command)
 
-            command = 'python ../common/gen_weights.py --model_name inception_v3_custom --output_file '+ ckpt_file + ' ' + cust_arg_1 + ' ' + cust_arg_2
+            command = 'python ../common/gen_weights.py --model_name inception_v3_custom --output_file '+ ckpt_file + ' ' + cust_arg_1 + ' ' + cust_arg_2 + ' ' + new_384_depth
             execute_command(command)
 
             command = 'python ../common/freeze_model.py --checkpoint_file ' + ckpt_file + ' --inference_graph ' + inference_graph_file

@@ -27,6 +27,8 @@ def get_args():
                         help="Custom argument")
     parser.add_argument("-2", "--cust_arg_2", type=int, default=0,
                         help="Custom argument 2")
+    parser.add_argument("-384", "--new_384_depth", type=int, default=0,
+                        help="new_384_depth")
     return parser.parse_args()
 
 
@@ -39,7 +41,8 @@ if __name__ == '__main__':
                                                  num_classes=(args.num_classes - args.labels_offset),
                                                  is_training=False,
                                                  cust_arg_1=args.cust_arg_1,
-                                                 cust_arg_2=args.cust_arg_2)
+                                                 cust_arg_2=args.cust_arg_2,
+                                                 new_384_depth=args.new_384_depth)
         image_size = args.image_size or network_fn.default_image_size
         placeholder = tf.placeholder(name='input', dtype=tf.float32,
                                      shape=[None, image_size, image_size, 3])
