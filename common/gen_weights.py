@@ -7,6 +7,7 @@ import nets_factory
 
 slim = tf.contrib.slim
 
+import ntpath
 
 def get_args():
     parser = argparse.ArgumentParser()
@@ -48,7 +49,7 @@ if __name__ == '__main__':
         sess.run(tf.global_variables_initializer())
 
         saver = tf.train.Saver()
-        saver.save(sess, args.output_file)
+        saver.save(sess, args.output_file, latest_filename=ntpath.basename(args.output_file) + '.latest')
         # graph_def = graph.as_graph_def()
         # inf_graph_def = tf.graph_util.extract_sub_graph(graph_def, ['output'])
         # with gfile.GFile(args.output_file, 'wb') as f:
