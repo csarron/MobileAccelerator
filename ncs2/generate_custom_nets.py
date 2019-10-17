@@ -76,8 +76,9 @@ def signal_handler(sig, frame):
 
 def main():
     signal.signal(signal.SIGINT, signal_handler)
-    # run_normally(depth_begin, depth_offset)
-    run_multithreaded(depth_begin, depth_offset)
+    #run_multithreaded(depth_begin, depth_offset)
+
+    run_normally(depth_begin, depth_offset)
 
 if __name__ == '__main__':
     sys.exit(main() or 0)

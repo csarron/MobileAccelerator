@@ -10,11 +10,11 @@ kernel_size_end = 4
 # depth_offset = 1344 - 1312
 # depth_begin = 120
 # depth_offset = 16
-depth_begin = 128 - 8
-depth_offset = 16
+depth_begin = 1
+depth_offset = 1
 depth_step = 1
 
-experiments_dir = 'custom_inception_v3_around_128_depth_2'
+experiments_dir = 'custom_inception_v3_decrease_16_filters'
 model_file_pattern = experiments_dir + '/inception_v3_custom'
 
 # experiments_dir = experiments_dir + '_kernel' + str(kernel_size) + '_depthstep' + str(depth_step)

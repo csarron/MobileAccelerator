@@ -123,34 +123,39 @@ def main():
 
     average_total_time = np.average(np.asarray(infer_time))
     log.info("Average running time of one iteration: {} ms".format(average_total_time))
-    calculated_total_time = 0
+
     total_layer_time = 0
     partial_layer_time = 0
+    total_execution_time = 0
 
     if args.perf_counts:
+        output_file = open(args.output_file, 'a+')
         perf_counts = exec_net.requests[0].get_perf_counts()
         log.info("Performance counters:")
         print("{:<70} {:<15} {:<15} {:<15} {:<10}".format('name', 'layer_type', 'exet_type', 'status', 'real_time, us'))
 
         for layer, stats in perf_counts.items():
-            log_content = "{:<70} {:<15} {:<15} {:<15} {:<10}".format(layer, stats['layer_type'],
+            # log_content = "{:<70} {:<15} {:<15} {:<15} {:<10}".format(layer, stats['layer_type'],
+            #     stats['exec_type'], stats['status'], stats['real_time'])
+            log_content = "{}\t{}\t{}\t{}\t{}".format(layer, stats['layer_type'],
                 stats['exec_type'], stats['status'], stats['real_time'])
             print(log_content)
             log.info(log_content)
 
-            layer_time = stats['real_time']
-            calculated_total_time += layer_time
+            #if stats['layer_type'] == 'Convolution' and stats['exec_type'] == 'MyriadXHwOp':
+            total_execution_time += stats['real_time']
+            output_file.write(layer + '\t' + str(stats['real_time']) + '\n')
 
-            if 'AlexandruIrimiea2/Conv/Conv2D' in layer:
-                # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
-                total_layer_time += layer_time
+            # if 'AlexandruIrimiea2/Conv/Conv2D' in layer:
+            #     # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
+            #     total_layer_time += layer_time
 
-                if 'injected' not in layer:
-                    partial_layer_time += layer_time
+            #     if 'injected' not in layer:
+            #         partial_layer_time += layer_time
 
-    output_file = open(args.output_file, 'a+')
+    output_file.write('Total_layer_execution_time_alex\t' + str(total_execution_time) + '\n')
     #output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\t' + str(average_total_time) + '\n')
-    output_file.write(str(args.new_384_depth) + '\t' + str(calculated_total_time/1000) +'\t' + str(average_total_time) + '\n')
+    #output_file.write(str(args.new_384_depth) + '\t' + str(total_execution_time/1000) +'\t' + str(average_total_time) + '\n')
 
     # # Processing output blob
     # log.info("Processing output blob")
