@@ -123,58 +123,62 @@ def main():
 
     average_total_time = np.average(np.asarray(infer_time))
     log.info("Average running time of one iteration: {} ms".format(average_total_time))
+    calculated_total_time = 0
+    total_layer_time = 0
+    partial_layer_time = 0
+
     if args.perf_counts:
         perf_counts = exec_net.requests[0].get_perf_counts()
         log.info("Performance counters:")
         print("{:<70} {:<15} {:<15} {:<15} {:<10}".format('name', 'layer_type', 'exet_type', 'status', 'real_time, us'))
-        output_file = open(args.output_file, 'a+')
-        output_file_log = open(args.output_file + '.log', 'a+')
-        total_layer_time = 0
-        partial_layer_time = 0
-        # output_file.write('kernel_size\tdepth\ttotal_time(us)\ttime_without_injected(us)\taverage_total_time(ms)\n')
+
         for layer, stats in perf_counts.items():
             log_content = "{:<70} {:<15} {:<15} {:<15} {:<10}".format(layer, stats['layer_type'],
                 stats['exec_type'], stats['status'], stats['real_time'])
             print(log_content)
             log.info(log_content)
 
+            layer_time = stats['real_time']
+            calculated_total_time += layer_time
+
             if 'AlexandruIrimiea2/Conv/Conv2D' in layer:
                 # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
-                total_layer_time += stats['real_time']
+                total_layer_time += layer_time
 
                 if 'injected' not in layer:
-                    partial_layer_time += stats['real_time']
+                    partial_layer_time += layer_time
 
-        #output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\t' + str(average_total_time) + '\n')
-        output_file.write(str(args.new_384_depth) +'\t' + str(average_total_time) + '\n')
+    output_file = open(args.output_file, 'a+')
+    #output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\t' + str(average_total_time) + '\n')
+    output_file.write(str(args.new_384_depth) + '\t' + str(calculated_total_time) +'\t' + str(average_total_time) + '\n')
 
-    # Processing output blob
-    log.info("Processing output blob")
-    res = res[out_blob]
-    log.info("Top {} results: ".format(args.number_top))
-    if args.labels:
-        with open(args.labels, 'r') as f:
-            labels_map = [x.split(sep=' ', maxsplit=1)[-1].strip() for x in f]
-    else:
-        labels_map = None
-    classid_str = "classid"
-    probability_str = "probability"
-    for i, probs in enumerate(res):
-        probs = np.squeeze(probs)
-        top_ind = np.argsort(probs)[-args.number_top:][::-1]
-        print("Image {}\n".format(args.input[i]))
-        print(classid_str, probability_str)
-        print("{} {}".format('-' * len(classid_str), '-' * len(probability_str)))
-        for id in top_ind:
-            det_label = labels_map[id] if labels_map else "{}".format(id)
-            label_length = len(det_label)
-            space_num_before = (len(classid_str) - label_length) // 2
-            space_num_after = len(classid_str) - (space_num_before + label_length) + 2
-            space_num_before_prob = (len(probability_str) - len(str(probs[id]))) // 2
-            print("{}{}{}{}{:.7f}".format(' ' * space_num_before, det_label,
-                                          ' ' * space_num_after, ' ' * space_num_before_prob,
-                                          probs[id]))
-        print("\n")
+    # # Processing output blob
+    # log.info("Processing output blob")
+    # res = res[out_blob]
+    # log.info("Top {} results: ".format(args.number_top))
+    # if args.labels:
+    #     with open(args.labels, 'r') as f:
+    #         labels_map = [x.split(sep=' ', maxsplit=1)[-1].strip() for x in f]
+    # else:
+    #     labels_map = None
+    # classid_str = "classid"
+    # probability_str = "probability"
+    # for i, probs in enumerate(res):
+    #     probs = np.squeeze(probs)
+    #     top_ind = np.argsort(probs)[-args.number_top:][::-1]
+    #     print("Image {}\n".format(args.input[i]))
+    #     print(classid_str, probability_str)
+    #     print("{} {}".format('-' * len(classid_str), '-' * len(probability_str)))
+    #     for id in top_ind:
+    #         det_label = labels_map[id] if labels_map else "{}".format(id)
+    #         label_length = len(det_label)
+    #         space_num_before = (len(classid_str) - label_length) // 2
+    #         space_num_after = len(classid_str) - (space_num_before + label_length) + 2
+    #         space_num_before_prob = (len(probability_str) - len(str(probs[id]))) // 2
+    #         print("{}{}{}{}{:.7f}".format(' ' * space_num_before, det_label,
+    #                                       ' ' * space_num_after, ' ' * space_num_before_prob,
+    #                                       probs[id]))
+    #     print("\n")
 
 
 if __name__ == '__main__':
