@@ -3,18 +3,14 @@ from datetime import datetime
 import sys
 sys.path.append('../')
 
-kernel_size_begin = 3
-kernel_size_end = 4
+kernel_size_begin = 5
+kernel_size_end = 6
 
-# depth_begin = 1312
-# depth_offset = 1344 - 1312
-# depth_begin = 120
-# depth_offset = 16
-depth_begin = 1
+depth_begin = 0
 depth_offset = 1
 depth_step = 1
 
-experiments_dir = 'custom_inception_v3_decrease_16_filters'
+experiments_dir = 'inception_v3_custom_close_to_power_two'
 model_file_pattern = experiments_dir + '/inception_v3_custom'
 
 # experiments_dir = experiments_dir + '_kernel' + str(kernel_size) + '_depthstep' + str(depth_step)

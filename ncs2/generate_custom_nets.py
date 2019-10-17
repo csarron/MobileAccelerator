@@ -50,7 +50,7 @@ def run_normally(depth_begin_local, depth_offset_local):
     generate_models(depth_begin_local, depth_offset_local)
 
 def run_multithreaded(depth_begin_local, depth_offset_local):
-    thread_count = 4
+    thread_count = 8
     progress = 0
 
     while progress < depth_offset_local:

@@ -104,6 +104,17 @@ def inception_v3_custom_base(inputs,
                         stride=1, padding='VALID'):
       print('######## Custom arguments: cust_arg_1: ' + str(cust_arg_1) + ', cust_arg_2: ' + str(cust_arg_2))
 
+      ## Code for generating a model with a single inner convolution layer
+      # end_point = 'Conv2d_1a_3x3'
+      # net = slim.conv2d(inputs,  depth(32), [3, 3], stride=2, scope=end_point)
+      # end_points[end_point] = net
+      # end_point = 'AlexandruIrimiea3'
+      # with tf.variable_scope(end_point):
+      #   net1 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID')
+      #   net = net1
+      # end_points[end_point] = net
+      # return net, end_points
+
       ## Biggest jumps
       # 384=256+128
       # 256
@@ -127,18 +138,31 @@ def inception_v3_custom_base(inputs,
       # new_384_depth = 384
       # new_448_depth = 448
 
-      ## New mapping
+      ## Close to power of two
       new_32_depth = 32
-      new_48_depth = 48 - 16
-      new_64_depth = 64 - 16
-      new_80_depth = 80 - 32
-      new_96_depth = 96 - 32
-      new_128_depth = 128 - 32
-      new_160_depth = 160 - 32
-      new_192_depth = 192 - 64
-      new_320_depth = 320 - 64
-      new_384_depth = 384 - 128
-      new_448_depth = 448 - 128
+      new_48_depth = 32
+      new_64_depth = 64
+      new_80_depth = 64
+      new_96_depth = 64
+      new_128_depth = 128
+      new_160_depth = 128
+      new_192_depth = 128
+      new_320_depth = 256
+      new_384_depth = 256
+      new_448_depth = 256
+
+      # ## New mapping
+      # new_32_depth = 32
+      # new_48_depth = 48 - 16
+      # new_64_depth = 64 - 16
+      # new_80_depth = 80 - 32
+      # new_96_depth = 96 - 32
+      # new_128_depth = 128 - 32
+      # new_160_depth = 160 - 32
+      # new_192_depth = 192 - 64
+      # new_320_depth = 320 - 64
+      # new_384_depth = 384 - 128
+      # new_448_depth = 448 - 128
 
       # ## Decrease with 5 filters
       # new_32_depth = 32 - 5
@@ -165,17 +189,6 @@ def inception_v3_custom_base(inputs,
       # new_320_depth = 320 - 16
       # new_384_depth = 384 - 16
       # new_448_depth = 448 - 16
-
-      # end_point = 'Conv2d_1a_3x3'
-      # net = slim.conv2d(inputs,  depth(new_32_depth), [3, 3], stride=2, scope=end_point)
-      # end_points[end_point] = net
-
-      # end_point = 'AlexandruIrimiea2'
-      # with tf.variable_scope(end_point):
-      #   net1 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID')
-      #   net = net1
-      # end_points[end_point] = net
-      # return net, end_points
 
       # 299 x 299 x 3
       end_point = 'Conv2d_1a_3x3'
@@ -509,6 +522,8 @@ def inception_v3_custom_base(inputs,
       if end_point == final_endpoint: return net, end_points
     raise ValueError('Unknown final endpoint %s' % final_endpoint)
 
+
+## Code for generating a model with a single inner convolution layer
 # def inception_v3_custom(inputs,
 #                  num_classes=1000,
 #                  is_training=True,

@@ -3,7 +3,7 @@ from net_values import *
 def main():
     output_file_name = experiments_dir + '_' + get_timestamp() + '.txt'
     output_file = open(output_file_name, 'w+')
-    # output_file.write('kernel_size\tdepth\ttotal_time(us)\ttime_without_injected(us)\taverage_total_time(ms)\n')
+    # output_file.write('kernel_size\tdepth\tspecific_layer_time(us)\ttime_without_injected(us)\tinference_total_time(ms)\ttotal_layer_time\n')
     # output_file.write('depth\tcalculated_total_time\taverage_total_time(ms)\n')
     output_file.write('layer\tlatency\n')
     output_file.close()

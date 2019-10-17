@@ -124,7 +124,7 @@ def main():
     average_total_time = np.average(np.asarray(infer_time))
     log.info("Average running time of one iteration: {} ms".format(average_total_time))
 
-    total_layer_time = 0
+    specific_layer_time = 0
     partial_layer_time = 0
     total_execution_time = 0
 
@@ -146,16 +146,17 @@ def main():
             total_execution_time += stats['real_time']
             output_file.write(layer + '\t' + str(stats['real_time']) + '\n')
 
-            # if 'AlexandruIrimiea2/Conv/Conv2D' in layer:
-            #     # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
-            #     total_layer_time += layer_time
+            if 'AlexandruIrimiea3/Conv/Conv2D' in layer:
+                # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
+                specific_layer_time += stats['real_time']
 
-            #     if 'injected' not in layer:
-            #         partial_layer_time += layer_time
+                if 'injected' not in layer:
+                    partial_layer_time += stats['real_time']
 
     output_file.write('Total_layer_execution_time_alex\t' + str(total_execution_time) + '\n')
-    #output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\t' + str(average_total_time) + '\n')
-    #output_file.write(str(args.new_384_depth) + '\t' + str(total_execution_time/1000) +'\t' + str(average_total_time) + '\n')
+
+    # output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(specific_layer_time/1000.0) +'\t' + str(partial_layer_time/1000.0) + '\t' + str(average_total_time) + '\t' + str(total_execution_time/1000.0) + '\n')
+    # output_file.write(str(args.new_384_depth) + '\t' + str(total_execution_time/1000) +'\t' + str(average_total_time) + '\n')
 
     # # Processing output blob
     # log.info("Processing output blob")
