@@ -150,7 +150,7 @@ def main():
 
     output_file = open(args.output_file, 'a+')
     #output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(total_layer_time) +'\t' + str(partial_layer_time) + '\t' + str(average_total_time) + '\n')
-    output_file.write(str(args.new_384_depth) + '\t' + str(calculated_total_time) +'\t' + str(average_total_time) + '\n')
+    output_file.write(str(args.new_384_depth) + '\t' + str(calculated_total_time/1000) +'\t' + str(average_total_time) + '\n')
 
     # # Processing output blob
     # log.info("Processing output blob")
