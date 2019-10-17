@@ -5,23 +5,18 @@ import sys
 
 running = True
 
-def remove_file(file_name):
-    print('Removing file: ' + file_name)
-    try:
-        os.remove(file_name)
-    except OSError:
-        pass
-
 def generate_models(depth_begin_local, depth_offset_local):
     if depth_offset_local == 0:
         return
+
     depth_end_local = depth_begin_local + depth_offset_local
-    # print('threading.get_ident():' + str(threading.get_ident()) + ': depth_begin_local: ' + str(depth_begin_local) + ', depth_end_local:' + str(depth_end_local))
+    print('threading.get_ident():' + str(threading.get_ident()) + ': depth_begin_local: ' + str(depth_begin_local) + ', depth_end_local:' + str(depth_end_local))
+
     for kernel_size in range(kernel_size_begin, kernel_size_end):
         for depth in range(depth_begin_local, depth_begin_local + depth_offset_local, depth_step):
-            # if running==False:
-            #     print('##### Exiting #####')
-            #     return
+            if running==False:
+                print('##### Exiting #####')
+                return
             file_name_stem = get_model_file_name(kernel_size, depth)
             inference_graph_file = file_name_stem + '.inf.pb'
             ckpt_file = file_name_stem + '.ckpt'
@@ -43,6 +38,7 @@ def generate_models(depth_begin_local, depth_offset_local):
             command = 'python "C:\Program Files (x86)\IntelSWTools\openvino\deployment_tools\model_optimizer\mo_tf.py" --input_model ' + frozen_file + ' --output_dir ' + experiments_dir + ' --data_type FP16 --input_shape (1,224,224,3)'
             execute_command(command)
 
+            # Otherwise we run out of disk space pretty quickly
             remove_file(inference_graph_file)
             remove_file(ckpt_file + '.data-00000-of-00001')
             remove_file(ckpt_file + '.latest')
@@ -50,47 +46,38 @@ def generate_models(depth_begin_local, depth_offset_local):
             remove_file(ckpt_file + '.meta')
             remove_file(frozen_file)
 
+def run_normally(depth_begin_local, depth_offset_local):
+    generate_models(depth_begin_local, depth_offset_local)
 
-# depth_begin = 0
-# depth_offset = 1
+def run_multithreaded(depth_begin_local, depth_offset_local):
+    thread_count = 4
+    progress = 0
 
-def run_normally():
-    generate_models(depth_begin, depth_offset)
+    while progress < depth_offset_local:
+        threads = []
 
-def run_multithreaded():
-    thread_count = 8
-    work_chunks = int(depth_offset/thread_count)
+        for thread_idx in range (0, thread_count):
+            if progress >= depth_offset_local:
+                return
+            threads.append(threading.Thread(target = generate_models, \
+                args = (depth_begin_local + progress, 1)))
+            progress += 1
 
-    threads = []
+        for x in threads:
+            x.start()
 
-    for thread_idx in range (0, thread_count):
-        threads.append(threading.Thread(target = generate_models, \
-            args = (depth_begin + thread_idx * work_chunks, work_chunks)))
-
-    remaining_chunk = depth_offset - work_chunks * thread_count
-
-    if remaining_chunk > 0:
-        threads.append(threading.Thread(target = generate_models, \
-            args = (depth_begin + depth_offset - remaining_chunk, remaining_chunk)))
-
-    for x in threads:
-        x.start()
-
-    for x in threads:
-        x.join()
+        for x in threads:
+            x.join()
 
 def signal_handler(sig, frame):
     print('You pressed Ctrl+C!')
     running = False
     sys.exit(0)
 
-# print('Press Ctrl+C')
-# signal.pause()
-
 def main():
     signal.signal(signal.SIGINT, signal_handler)
-    # run_normally()
-    run_multithreaded()
+    # run_normally(depth_begin, depth_offset)
+    run_multithreaded(depth_begin, depth_offset)
 
 if __name__ == '__main__':
     sys.exit(main() or 0)

@@ -10,15 +10,15 @@ kernel_size_end = 4
 # depth_offset = 1344 - 1312
 # depth_begin = 120
 # depth_offset = 16
-depth_begin = 120
+depth_begin = 128 - 8
 depth_offset = 16
 depth_step = 1
 
-experiments_dir = './custom_inception_v3_new_384_depth'
+experiments_dir = 'custom_inception_v3_around_128_depth_2'
+model_file_pattern = experiments_dir + '/inception_v3_custom'
+
 # experiments_dir = experiments_dir + '_kernel' + str(kernel_size) + '_depthstep' + str(depth_step)
 os.makedirs(experiments_dir, exist_ok=True)
-
-model_file_pattern = experiments_dir + '/inception_v3_new_384_depth'
 
 def get_timestamp():
     return datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
@@ -29,3 +29,10 @@ def execute_command(command):
 
 def get_model_file_name(kernel_size, depth):
     return model_file_pattern + '_k' + str(kernel_size) + '_d' + str(depth).zfill(6)
+
+def remove_file(file_name):
+    print('Removing file: ' + file_name)
+    try:
+        os.remove(file_name)
+    except OSError:
+        pass
