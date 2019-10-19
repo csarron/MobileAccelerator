@@ -73,21 +73,9 @@ def main():
 
     # Plugin initialization for specified device and load extensions library if specified
     plugin = IEPlugin(device=args.device, plugin_dirs=args.plugin_dir)
-    if args.cpu_extension and 'CPU' in args.device:
-        plugin.add_cpu_extension(args.cpu_extension)
     # Read IR
     log.info("Loading network files:\n\t{}\n\t{}".format(model_xml, model_bin))
     net = IENetwork(model=model_xml, weights=model_bin)
-
-    if plugin.device == "CPU":
-        supported_layers = plugin.get_supported_layers(net)
-        not_supported_layers = [l for l in net.layers.keys() if l not in supported_layers]
-        if len(not_supported_layers) != 0:
-            log.error("Following layers are not supported by the plugin for specified device {}:\n {}".
-                      format(plugin.device, ', '.join(not_supported_layers)))
-            log.error("Please try to specify cpu extensions library path in sample's command line parameters using -l "
-                      "or --cpu_extension command line argument")
-            sys.exit(1)
 
     assert len(net.inputs.keys()) == 1, "Sample supports only single input topologies"
     assert len(net.outputs) == 1, "Sample supports only single output topologies"
@@ -144,48 +132,20 @@ def main():
 
             #if stats['layer_type'] == 'Convolution' and stats['exec_type'] == 'MyriadXHwOp':
             total_execution_time += stats['real_time']
-            output_file.write(layer + '\t' + str(stats['real_time']) + '\n')
+            # output_file.write(layer + '\t' + str(stats['real_time']) + '\n')
 
-            if 'AlexandruIrimiea3/Conv/Conv2D' in layer:
+            if 'AlexandruIrimiea2/Conv/Conv2D' in layer or 'AlexandruIrimiea3/Conv/Conv2D' in layer:
                 # result1 = str(args.cust_arg_1) + '= ' + str(stats['real_time']) + '\n'
                 specific_layer_time += stats['real_time']
 
                 if 'injected' not in layer:
                     partial_layer_time += stats['real_time']
 
-    output_file.write('Total_layer_execution_time_alex\t' + str(total_execution_time) + '\n')
+    # output_file.write('Total_layer_execution_time_alex\t' + str(total_execution_time) + '\n')
 
-    # output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(specific_layer_time/1000.0) +'\t' + str(partial_layer_time/1000.0) + '\t' + str(average_total_time) + '\t' + str(total_execution_time/1000.0) + '\n')
-    # output_file.write(str(args.new_384_depth) + '\t' + str(total_execution_time/1000) +'\t' + str(average_total_time) + '\n')
+    output_file.write(str(args.cust_arg_2) + '\t' + str(args.cust_arg_1) +'\t' + str(specific_layer_time/1000.0) +'\t' + str(partial_layer_time/1000.0) + '\t' + str(average_total_time) + '\t' + str(total_execution_time/1000.0) + '\n')
 
-    # # Processing output blob
-    # log.info("Processing output blob")
-    # res = res[out_blob]
-    # log.info("Top {} results: ".format(args.number_top))
-    # if args.labels:
-    #     with open(args.labels, 'r') as f:
-    #         labels_map = [x.split(sep=' ', maxsplit=1)[-1].strip() for x in f]
-    # else:
-    #     labels_map = None
-    # classid_str = "classid"
-    # probability_str = "probability"
-    # for i, probs in enumerate(res):
-    #     probs = np.squeeze(probs)
-    #     top_ind = np.argsort(probs)[-args.number_top:][::-1]
-    #     print("Image {}\n".format(args.input[i]))
-    #     print(classid_str, probability_str)
-    #     print("{} {}".format('-' * len(classid_str), '-' * len(probability_str)))
-    #     for id in top_ind:
-    #         det_label = labels_map[id] if labels_map else "{}".format(id)
-    #         label_length = len(det_label)
-    #         space_num_before = (len(classid_str) - label_length) // 2
-    #         space_num_after = len(classid_str) - (space_num_before + label_length) + 2
-    #         space_num_before_prob = (len(probability_str) - len(str(probs[id]))) // 2
-    #         print("{}{}{}{}{:.7f}".format(' ' * space_num_before, det_label,
-    #                                       ' ' * space_num_after, ' ' * space_num_before_prob,
-    #                                       probs[id]))
-    #     print("\n")
-
+    #output_file.write(str(args.new_384_depth) + '\t' + str(total_execution_time/1000) +'\t' + str(average_total_time) + '\n')
 
 if __name__ == '__main__':
     sys.exit(main() or 0)
