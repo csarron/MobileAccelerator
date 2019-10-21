@@ -29,7 +29,7 @@ def convert_to_dlc(script_path, frozen_model_file, snpe_root, input_node='input'
         os.makedirs(os.path.dirname(dlc_full_path))
     cmd = [script_path,
            '--graph', os.path.abspath(frozen_model_file),
-           '--input_dim', input_node, '{0},{0},3'.format(image_size),
+           '--input_dim', input_node, '1,{0},{0},3'.format(image_size),
            '--out_node', output_node,
            '--allow_unconsumed_nodes',
            '--dlc', dlc_full_path]
@@ -235,6 +235,18 @@ def check_processor_arg(processor_str):
 
     return parsed_processors
 
+"""
+caution1: rename data/snpe-1.31.0.522 to data/snpe-1.31.0
+
+caution2: manually change executable permission on the phone through adb:
+
+adb shell "chmod a+x /data/local/tmp/snpebm/artifacts/arm-android-clang6.0/bin/snpe*"
+
+python snpe/run_snpe.py --model data/resnet_v1_50/resnet_v1_50.frozen.pb --snpe_sdk data/snpe-1.31.0.zip 2>&1 | tee run_resnet50.log
+
+(test for pip install tensorflow=1.14)
+
+"""
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -293,16 +305,16 @@ if __name__ == '__main__':
 
     # may install pkg deps
     if not os.path.exists('/tmp/{}_deps_checked'.format(snpe_name)):
-        print("copying libs from ndk to snpe sdk...")
-
-        shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/libgnustl_shared.so'.format(ndk_path),
-                    '{}/lib/aarch64-linux-gcc4.9'.format(snpe_sdk_path))
-
-        shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/libgnustl_shared.so'.format(ndk_path),
-                    '{}/lib/arm-android-gcc4.9'.format(snpe_sdk_path))
-        print("gcc libs copied.")
-        print()
-        sys.stdout.flush()
+        # print("copying libs from ndk to snpe sdk...")
+        #
+        # shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/arm64-v8a/libgnustl_shared.so'.format(ndk_path),
+        #             '{}/lib/aarch64-linux-gcc4.9'.format(snpe_sdk_path))
+        #
+        # shutil.copy('{}/sources/cxx-stl/gnu-libstdc++/4.9/libs/armeabi-v7a/libgnustl_shared.so'.format(ndk_path),
+        #             '{}/lib/arm-android-gcc4.9'.format(snpe_sdk_path))
+        # print("gcc libs copied.")
+        # print()
+        # sys.stdout.flush()
 
         print("checking package dependencies...")
         check_cmd = 'yes | bash {}/bin/dependencies.sh'.format(snpe_sdk_path)
@@ -312,8 +324,11 @@ if __name__ == '__main__':
         check_cmd = 'yes | bash {}/bin/check_python_depends.sh'.format(snpe_sdk_path)
         subprocess.call(check_cmd, shell=True)
 
-        for os_type in ["arm-android-gcc4.9", "x86_64-linux-clang"]:
-            for bin_file in os.listdir("{}/bin/{}".format(snpe_sdk_path, os_type)):
+        for os_type in ["arm-android-gcc4.9", "arm-android-clang6.0", "x86_64-linux-clang"]:
+            bin_dir = "{}/bin/{}".format(snpe_sdk_path, os_type)
+            if not os.path.exists(bin_dir):
+                continue
+            for bin_file in os.listdir(bin_dir):
                 script_file_path = os.path.join("{}/bin/{}".format(snpe_sdk_path, os_type), bin_file)
                 print('set script:', script_file_path, ' to executable')
                 sys.stdout.flush()
