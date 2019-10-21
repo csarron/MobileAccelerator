@@ -5,35 +5,39 @@ import sys
 from argparse import ArgumentParser, SUPPRESS
 
 running_ = True
-thread_count_ = 4
-kernel_sizes_ = [1]#[2, 4, 5, 6, 7]
-depth_begin_ = 1831
-depth_offset_ = 2048 - 1831 + 1
+thread_count_ = 8
+kernel_sizes_ = [1, 2, 3, 4, 5, 6, 7]
+depth_begin_ = 0
+depth_offset_ = 1 + 1
 depth_step_ = 1
-experiments_dir_ = 'one_layer_depth_' + str(depth_begin_) + '_' + str(depth_offset_) + '_step_' + str(depth_step_)
-log_dir_ = 'outputs'
+# experiments_dir_ = 'one_layer_depth_' + str(depth_begin_) + '_' + str(depth_offset_) + '_step_' + str(depth_step_)
+experiments_dir_ = 'all_one_layer_models'
+log_dir_ = 'outputs_NCS1'
 
 def build_argparser():
     parser = ArgumentParser(add_help=False)
     args = parser.add_argument_group('Options')
     args.add_argument('-h', '--help', action='help', default=SUPPRESS, help='Show this help message and exit.')
-    args.add_argument("-r", "--run_models", help="Run models", default=False, action='store_true')
+    args.add_argument('-k', '--kernel_sizes', nargs='+', type=int)
+    args.add_argument("-db", "--depth_begin", type=int, default=0, help="Depth begin")
+    args.add_argument("-do", "--depth_offset", type=int, default = 2048, help="Depth offset (starting with depth_begin)")
+    args.add_argument("-ds", "--depth_step", type=int, default = 1, help="Depth step (e.g: 1, 32, etc.)")
+    args.add_argument('-r', '--run_models', help='Run models', default=False, action='store_true')
+    args.add_argument('-t', '--thread_count', type=int, default=8, help='Number of threads used for model generation')
 
-	# p = argparse.ArgumentParser()
-
-	# # accept two lists of arguments
-	# # like -a 1 2 3 4 -b 1 2 3
-	# p.add_argument('-a', nargs="+", type=int)
-	# p.add_argument('-b', nargs="+", type=int)
-	# args = p.parse_args()
-
-	# # check if input is valid
-	# set_a = set(args.a)
-	# set_b = set(args.b)
     return parser
+
+def execute_command(command):
+    print('\n############################################\n' + command)
+    os.system(command)
 
 def run_model(experiments_dir, output_log_name, kernel_size, depth):
     xml_file = experiments_dir + '/' + get_model_file_name(kernel_size, depth) + '.frozen.xml'
+
+    if file_exists(xml_file) is False:
+        print('##### Model ' + xml_file + ' doesn\'t exist!')
+        return
+
     command = 'python classification_sample.py --model ' + xml_file \
         + ' --input car.jpg --device MYRIAD --perf_counts --number_iter 1' \
         + ' --output_file ' + output_log_name \
@@ -42,7 +46,7 @@ def run_model(experiments_dir, output_log_name, kernel_size, depth):
         + ' --new_384_depth ' + str(depth)
     execute_command(command)
 
-def run_models(experiments_dir, depth_begin, depth_offset, depth_step):
+def run_models(experiments_dir, kernel_sizes, depth_begin, depth_offset, depth_step):
     print('Run models from ' + experiments_dir + '\n')
     # return
     create_dir(log_dir_)
@@ -61,7 +65,7 @@ def run_models(experiments_dir, depth_begin, depth_offset, depth_step):
     # output_file.write('layer\tlatency\n')
     output_log.close()
 
-    for kernel_size in kernel_sizes_:
+    for kernel_size in kernel_sizes:
         curr_depth = depth_begin
         depth_end = depth_begin + depth_offset
 
@@ -106,9 +110,9 @@ def generate_model(experiments_dir, kernel_size, depth):
     remove_file(ckpt_file + '.meta')
     remove_file(frozen_file)
 
-def generate_models(experiments_dir, depth_begin, depth_offset, depth_step):
+def generate_models(experiments_dir, kernel_sizes, depth_begin, depth_offset, depth_step):
     print('Generate models\n')
-    for kernel_size in kernel_sizes_:
+    for kernel_size in kernel_sizes:
         curr_depth = depth_begin
         depth_end = depth_begin + depth_offset
 
@@ -132,10 +136,16 @@ def main():
     create_dir(experiments_dir_)
     signal.signal(signal.SIGINT, signal_handler)
 
+    kernel_sizes_ = list(set(args.kernel_sizes))
+    depth_begin_ = (args.depth_begin)
+    depth_offset_ = (args.depth_offset)
+    depth_step_ = (args.depth_step)
+    thread_count_ = (args.thread_count)
+
     if args.run_models:
-        run_models(experiments_dir_, depth_begin_, depth_offset_, depth_step_)
+        run_models(experiments_dir_, kernel_sizes_, depth_begin_, depth_offset_, depth_step_)
     else:
-        generate_models(experiments_dir_, depth_begin_, depth_offset_, depth_step_)
+        generate_models(experiments_dir_, kernel_sizes_, depth_begin_, depth_offset_, depth_step_)
 
 def signal_handler(sig, frame):
     print('You pressed Ctrl+C!')

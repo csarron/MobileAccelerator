@@ -9,10 +9,6 @@ sys.path.append('../')
 def get_timestamp():
     return datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
 
-def execute_command(command):
-    print('\n############################################\n' + command)
-    os.system(command)
-
 def get_model_file_name(kernel_size, depth):
     return 'model_k' + str(kernel_size) + '_d' + str(depth).zfill(6)
 
@@ -25,6 +21,9 @@ def remove_file(file_name):
 
 def create_dir(dir_name):
     os.makedirs(dir_name, exist_ok=True)
+
+def file_exists(name):
+    return os.path.exists(name)
 
 def freeze_session(session, keep_var_names=None, output_names=None, clear_devices=True):
     graph = session.graph
