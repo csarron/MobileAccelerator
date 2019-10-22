@@ -104,16 +104,16 @@ def inception_v3_custom_base(inputs,
                         stride=1, padding='VALID'):
       print('######## Custom arguments: cust_arg_1: ' + str(cust_arg_1) + ', cust_arg_2: ' + str(cust_arg_2))
 
-      ## Code for generating a model with a single inner convolution layer
-      end_point = 'Conv2d_1a_3x3'
-      net = slim.conv2d(inputs,  depth(32), [3, 3], stride=2, scope=end_point)
-      end_points[end_point] = net
-      end_point = 'AlexandruIrimiea3'
-      with tf.variable_scope(end_point):
-        net1 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID')
-        net = net1
-      end_points[end_point] = net
-      return net, end_points
+      # ## Code for generating a model with a single inner convolution layer
+      # end_point = 'Conv2d_1a_3x3'
+      # net = slim.conv2d(inputs,  depth(32), [3, 3], stride=2, scope=end_point)
+      # end_points[end_point] = net
+      # end_point = 'AlexandruIrimiea3'
+      # with tf.variable_scope(end_point):
+      #   net1 = slim.conv2d(net, depth(cust_arg_1), [cust_arg_2, cust_arg_2], stride=2, padding='VALID')
+      #   net = net1
+      # end_points[end_point] = net
+      # return net, end_points
 
       ## Biggest jumps
       # 384=256+128
@@ -523,23 +523,7 @@ def inception_v3_custom_base(inputs,
     raise ValueError('Unknown final endpoint %s' % final_endpoint)
 
 
-## Code for generating a model with a single inner convolution layer
-def inception_v3_custom(inputs,
-                 num_classes=1000,
-                 is_training=True,
-                 dropout_keep_prob=0.8,
-                 min_depth=16,
-                 depth_multiplier=1.0,
-                 prediction_fn=slim.softmax,
-                 spatial_squeeze=False,
-                 reuse=None,
-                 create_aux_logits=False,
-                 scope='InceptionV3',
-                 global_pool=False,
-                 cust_arg_1=384,
-                 cust_arg_2=3,
-                 new_384_depth=384):
-
+# ## Code for generating a model with a single inner convolution layer
 # def inception_v3_custom(inputs,
 #                  num_classes=1000,
 #                  is_training=True,
@@ -547,14 +531,30 @@ def inception_v3_custom(inputs,
 #                  min_depth=16,
 #                  depth_multiplier=1.0,
 #                  prediction_fn=slim.softmax,
-#                  spatial_squeeze=True,
+#                  spatial_squeeze=False,
 #                  reuse=None,
-#                  create_aux_logits=True,
+#                  create_aux_logits=False,
 #                  scope='InceptionV3',
 #                  global_pool=False,
 #                  cust_arg_1=384,
 #                  cust_arg_2=3,
 #                  new_384_depth=384):
+
+def inception_v3_custom(inputs,
+                 num_classes=1000,
+                 is_training=True,
+                 dropout_keep_prob=0.8,
+                 min_depth=16,
+                 depth_multiplier=1.0,
+                 prediction_fn=slim.softmax,
+                 spatial_squeeze=True,
+                 reuse=None,
+                 create_aux_logits=True,
+                 scope='InceptionV3',
+                 global_pool=False,
+                 cust_arg_1=384,
+                 cust_arg_2=3,
+                 new_384_depth=384):
   """Inception model from http://arxiv.org/abs/1512.00567.
 
   "Rethinking the Inception Architecture for Computer Vision"
