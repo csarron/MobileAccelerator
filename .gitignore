@@ -7,3 +7,4 @@
 *data/
 common/labels.txt
 *build*/
+.env/
