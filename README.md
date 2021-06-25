@@ -1,4 +1,29 @@
-# AcceleratorProject
+# MobileAccelerator
+
+See https://awk.ai/#ncs for the paper, slides and presentation.
+
+If you find our work useful to your research, please consider using the following citation:
+
+````bib
+@inproceedings{10.1145/3469116.3470011,
+author = {Cao, Qingqing and Irimiea, Alexandru E. and Abdelfattah, Mohamed and Balasubramanian, Aruna and Lane, Nicholas D.},
+title = {Are Mobile DNN Accelerators Accelerating DNNs?},
+year = {2021},
+isbn = {9781450385978},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3469116.3470011},
+doi = {10.1145/3469116.3470011},
+abstract = {Deep neural networks (DNNs) are running on many mobile and embedded devices with the goal of energy efficiency and highest possible performance. However, DNN workloads are getting more computationally intensive, and simultaneously their deployment is ever-increasing. This has led to the creation of many purpose-built low-power neural accelerators to replace or augment traditional mobile CPUs and GPUs. In this work, we provide an in-depth study of one set of commercially-available mobile accelerators, the Intel Neural Compute Sticks (NCS). We perform a systematic measurement study of the latency and energy of this accelerator under a variety of DNNs including convolutional neural networks (CNNs) for vision tasks and attention-based Transformer models for NLP tasks. We compare to the mobile processors (CPU, GPU, and DSP) on a smartphone and a mobile board. Our study shows commercial mobile accelerators like NCS are not ready yet to provide the performance as claimed. We also point out directions in optimizing the model architectures to better suit these accelerators.},
+booktitle = {Proceedings of the 5th International Workshop on Embedded and Mobile Deep Learning},
+pages = {7–12},
+numpages = {6},
+location = {Virtual, WI, USA},
+series = {EMDL'21}
+}
+````
+
+You may also find the NCS repo useful, https://github.com/csarron/ncs
 
 ## Requirements
 
